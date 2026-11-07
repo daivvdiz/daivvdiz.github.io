@@ -17,7 +17,7 @@ async function cliente() {
 }
 
 // ---------- Modo demo (localStorage) ----------
-const DEMO_KEY = "sb-demo-v1";
+const DEMO_KEY = "sb-demo-v2";
 const memDocs = {}; // seccion -> [{name, size, url, created_at}]
 
 function hoyMenos(dias) {
@@ -43,11 +43,13 @@ function semilla() {
   [["Press banca", 40], ["Sentadilla", 50], ["Peso muerto", 60]].forEach(([e, base]) => {
     for (let i = 0; i < 10; i++)
       add({
-        categoria: "gimnasio", titulo: e, unidad: "kg",
+        categoria: "fitness", titulo: e, unidad: "kg",
         valor: base + i * 2.5 + (i % 3 === 0 ? 0 : 1.25),
         extra: { series: 4, reps: 8 }, fecha: hoyMenos((9 - i) * 7),
       });
   });
+  for (let i = 0; i < 8; i++)
+    add({ categoria: "fitness", titulo: "Running", unidad: "tiempo", valor: 1500 + i * 150 + (i % 2) * 40, fecha: hoyMenos((7 - i) * 6 + 1) });
   return { registros: r, ajustes: { apartamento_total: 120000000, moneda: "$" }, nextId: id };
 }
 
