@@ -223,3 +223,39 @@ h2 small { font-weight: 500; }
   .grid.three .card { padding: 12px 10px; }
   .grid.three .stat-v { font-size: 16px; font-variant-numeric: tabular-nums; }
 }
+
+/* ---------- Explorador de documentos ---------- */
+.migas { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; margin-bottom: 12px; }
+.miga { border: 0; background: none; font: inherit; color: var(--accent); font-weight: 600; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+.miga.actual { color: var(--text); }
+.migas .sep { color: var(--muted); }
+.toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.items { list-style: none; margin: 0; padding: 0; }
+.item { display: flex; align-items: center; gap: 4px; border-radius: 12px; border: 1px solid transparent; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.item + .item { margin-top: 2px; }
+.item-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; border: 0; background: none; color: var(--text); font: inherit; text-align: left; padding: 12px 10px; border-radius: 12px; cursor: pointer; }
+.item-main:hover { background: var(--surface-2); }
+.carpeta .ico { color: var(--accent); }
+.item-nombre { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 550; }
+.mas { border: 0; background: none; color: var(--muted); font-size: 20px; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; flex: none; }
+.mas:hover { background: var(--surface-2); color: var(--text); }
+.item.arrastrando { opacity: 0.4; }
+.destino-on { background: var(--accent-soft) !important; border-color: var(--accent) !important; }
+.miga.destino-on { outline: 2px solid var(--accent); }
+.fantasma { position: fixed; left: 0; top: 0; z-index: 100; pointer-events: none; display: flex; align-items: center; gap: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--accent); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); padding: 8px 12px; border-radius: 12px; font-weight: 600; max-width: 240px; }
+.fantasma span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.explorer.soltando { outline: 2px dashed var(--accent); outline-offset: -6px; }
+.pista { color: var(--muted); font-size: 12.5px; margin: 14px 0 0; }
+.items .vacio { padding: 12px 10px; }
+
+.hoja { display: flex; flex-direction: column; gap: 8px; }
+.hoja h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 6px; }
+.hoja .btn { width: 100%; padding: 12px; }
+.btn.peligro { color: var(--danger); }
+.destinos { list-style: none; margin: 0 0 6px; padding: 0; max-height: 55dvh; overflow-y: auto; }
+.destino { width: 100%; display: flex; align-items: center; gap: 10px; border: 0; background: none; color: var(--text); font: inherit; padding: 10px 12px; border-radius: 10px; cursor: pointer; text-align: left; }
+.destino:hover:not(:disabled) { background: var(--surface-2); }
+.destino:disabled { opacity: 0.5; cursor: default; }
+.destino .ico { color: var(--accent); }
+.destino small { margin-left: auto; }
+label.btn { flex-direction: row; margin: 0; color: #fff; font-size: 15px; font-weight: 600; }

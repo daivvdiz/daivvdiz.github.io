@@ -1,7 +1,7 @@
 // Service worker: guarda la "carcasa" de la app para que abra rápido y sin conexión.
 // Los datos (Supabase) nunca se guardan en caché.
-const CACHE = "cerebro-v2";
-const SHELL = ["./", "index.html", "css/app.css", "js/app.js", "js/data.js", "js/charts.js", "js/config.js", "manifest.webmanifest", "icons/icon.svg"];
+const CACHE = "cerebro-v3";
+const SHELL = ["./", "index.html", "css/app.css", "js/app.js", "js/data.js", "js/charts.js", "js/docs.js", "js/config.js", "manifest.webmanifest", "icons/icon.svg"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
