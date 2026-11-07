@@ -18,7 +18,6 @@ async function cliente() {
 
 // ---------- Modo demo (localStorage) ----------
 const DEMO_KEY = "sb-demo-v2";
-const memDocs = {}; // seccion -> [{name, size, url, created_at}]
 
 function hoyMenos(dias) {
   const d = new Date();
@@ -143,56 +142,175 @@ export async function guardarAjuste(clave, valor) {
 }
 
 // ---------- Documentos ----------
-async function prefijo() {
-  const c = await cliente();
-  const { data } = await c.auth.getUser();
-  return data.user.id;
-}
+// Las rutas son relativas a la carpeta del usuario: "Universidad/Semestre 1/nota.pdf".
+// Supabase no tiene carpetas reales: una carpeta existe si contiene algún archivo,
+// por eso las carpetas vacías guardan un archivo oculto PLACEHOLDER.
+export const PLACEHOLDER = ".emptyFolderPlaceholder";
+const BUCKET = "documentos";
+const unir = (...p) => p.filter(Boolean).join("/");
+export const padreDe = (ruta) => ruta.split("/").slice(0, -1).join("/");
+export const nombreDe = (ruta) => ruta.split("/").pop();
 
-const limpiarNombre = (n) => n.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.\- ]+/g, "_");
+// Supabase solo acepta nombres "seguros": quitamos tildes y símbolos raros.
+export const limpiarNombre = (n) =>
+  n.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.\-() ]+/g, "_").replace(/\s+/g, " ").trim();
 
-export async function listarDocs(seccion) {
-  if (MODO === "demo") return memDocs[seccion] ?? [];
-  const c = await cliente();
-  const { data, error } = await c.storage
-    .from("documentos")
-    .list(`${await prefijo()}/${seccion}`, { sortBy: { column: "name", order: "asc" } });
-  if (error) throw error;
-  return data
-    .filter((f) => f.name !== ".emptyFolderPlaceholder")
-    .map((f) => ({ name: f.name, size: f.metadata?.size ?? 0, created_at: f.created_at }));
-}
+// --- Operaciones básicas por modo ---
+const demoObjs = new Map(); // ruta -> {size, blob, created_at}
+let demoSembrado = false;
 
-export async function subirDoc(seccion, archivo) {
-  if (MODO === "demo") {
-    (memDocs[seccion] ??= []).push({
-      name: archivo.name, size: archivo.size, url: URL.createObjectURL(archivo),
-      created_at: new Date().toISOString(),
-    });
-    return;
+const ops = {
+  demo: {
+    async listarNivel(ruta) {
+      const pre = ruta ? ruta + "/" : "";
+      const carpetas = new Set(), archivos = [];
+      for (const [k, v] of demoObjs) {
+        if (!k.startsWith(pre)) continue;
+        const resto = k.slice(pre.length).split("/");
+        if (resto.length > 1) carpetas.add(resto[0]);
+        else archivos.push({ name: resto[0], size: v.size, created_at: v.created_at });
+      }
+      return { carpetas: [...carpetas], archivos };
+    },
+    async subir(ruta, blob) {
+      demoObjs.set(ruta, { size: blob.size ?? 0, blob, created_at: new Date().toISOString() });
+    },
+    async borrar(rutas) { rutas.forEach((r) => demoObjs.delete(r)); },
+    async mover(de, a) {
+      if (demoObjs.has(a)) throw new Error("Ya existe un elemento con ese nombre en el destino");
+      demoObjs.set(a, demoObjs.get(de));
+      demoObjs.delete(de);
+    },
+    async url(ruta) {
+      const o = demoObjs.get(ruta);
+      return o ? URL.createObjectURL(o.blob) : null;
+    },
+  },
+  supabase: {
+    async listarNivel(ruta) {
+      const c = await cliente();
+      const { data, error } = await c.storage.from(BUCKET).list(unir(await uid(), ruta), {
+        limit: 1000, sortBy: { column: "name", order: "asc" },
+      });
+      if (error) throw error;
+      return {
+        carpetas: data.filter((f) => f.id === null).map((f) => f.name),
+        archivos: data.filter((f) => f.id !== null).map((f) => ({ name: f.name, size: f.metadata?.size ?? 0, created_at: f.created_at })),
+      };
+    },
+    async subir(ruta, blob) {
+      const c = await cliente();
+      const { error } = await c.storage.from(BUCKET).upload(unir(await uid(), ruta), blob, { upsert: true });
+      if (error) throw error;
+    },
+    async borrar(rutas) {
+      if (!rutas.length) return;
+      const c = await cliente();
+      const u = await uid();
+      const { error } = await c.storage.from(BUCKET).remove(rutas.map((r) => unir(u, r)));
+      if (error) throw error;
+    },
+    async mover(de, a) {
+      const c = await cliente();
+      const u = await uid();
+      const { error } = await c.storage.from(BUCKET).move(unir(u, de), unir(u, a));
+      if (error) throw new Error(/exist/i.test(error.message) ? "Ya existe un elemento con ese nombre en el destino" : error.message);
+    },
+    async url(ruta) {
+      const c = await cliente();
+      const { data, error } = await c.storage.from(BUCKET).createSignedUrl(unir(await uid(), ruta), 300);
+      if (error) throw error;
+      return data.signedUrl;
+    },
+  },
+};
+const op = () => ops[MODO];
+
+let _uid = null;
+async function uid() {
+  if (!_uid) {
+    const c = await cliente();
+    const { data } = await c.auth.getUser();
+    _uid = data.user.id;
   }
-  const c = await cliente();
-  const ruta = `${await prefijo()}/${seccion}/${limpiarNombre(archivo.name)}`;
-  const { error } = await c.storage.from("documentos").upload(ruta, archivo, { upsert: true });
-  if (error) throw error;
+  return _uid;
 }
 
-export async function urlDoc(seccion, nombre) {
-  if (MODO === "demo") return memDocs[seccion]?.find((d) => d.name === nombre)?.url;
-  const c = await cliente();
-  const { data, error } = await c.storage
-    .from("documentos")
-    .createSignedUrl(`${await prefijo()}/${seccion}/${nombre}`, 300);
-  if (error) throw error;
-  return data.signedUrl;
+// --- API de documentos ---
+export async function listarCarpeta(ruta) {
+  const { carpetas, archivos } = await op().listarNivel(ruta);
+  const cmp = (a, b) => a.localeCompare(b, "es", { sensitivity: "base", numeric: true });
+  return {
+    carpetas: carpetas.sort(cmp),
+    archivos: archivos.filter((a) => a.name !== PLACEHOLDER).sort((a, b) => cmp(a.name, b.name)),
+  };
 }
 
-export async function borrarDoc(seccion, nombre) {
-  if (MODO === "demo") {
-    memDocs[seccion] = (memDocs[seccion] ?? []).filter((d) => d.name !== nombre);
-    return;
+// Crea las secciones iniciales solo si no hay nada todavía.
+export async function asegurarRaices(secciones) {
+  if (MODO === "demo" && !demoSembrado) {
+    demoSembrado = true;
+    const txt = (t) => new Blob([t], { type: "text/plain" });
+    await ops.demo.subir("Universidad/Semestre 1/Notas finales.txt", txt("Ejemplo"));
+    await ops.demo.subir("Universidad/Semestre 2/" + PLACEHOLDER, txt(""));
+    await ops.demo.subir("Universidad/Diploma.txt", txt("Ejemplo"));
+    await ops.demo.subir("Personales/Pasaporte.txt", txt("Ejemplo"));
   }
-  const c = await cliente();
-  const { error } = await c.storage.from("documentos").remove([`${await prefijo()}/${seccion}/${nombre}`]);
-  if (error) throw error;
+  const { carpetas, archivos } = await op().listarNivel("");
+  if (carpetas.length || archivos.length) return;
+  for (const s of secciones) await crearCarpeta(limpiarNombre(s));
+}
+
+export async function crearCarpeta(ruta) {
+  const { carpetas } = await op().listarNivel(padreDe(ruta));
+  if (carpetas.includes(nombreDe(ruta))) throw new Error("Ya existe una carpeta con ese nombre");
+  await op().subir(unir(ruta, PLACEHOLDER), new Blob([""], { type: "text/plain" }));
+}
+
+export async function subirArchivo(carpeta, archivo) {
+  await op().subir(unir(carpeta, limpiarNombre(archivo.name)), archivo);
+}
+
+export const urlArchivo = (ruta) => op().url(ruta);
+
+// Todas las rutas de archivo (incluidos los ocultos) dentro de una carpeta.
+async function archivosBajo(ruta) {
+  const { carpetas, archivos } = await op().listarNivel(ruta);
+  const hijos = await Promise.all(carpetas.map((c) => archivosBajo(unir(ruta, c))));
+  return [...archivos.map((a) => unir(ruta, a.name)), ...hijos.flat()];
+}
+
+// Todas las carpetas (para el diálogo "Mover a…").
+export async function todasLasCarpetas(ruta = "") {
+  const { carpetas } = await op().listarNivel(ruta);
+  const sub = await Promise.all(carpetas.map((c) => todasLasCarpetas(unir(ruta, c))));
+  return carpetas.flatMap((c, i) => [unir(ruta, c), ...sub[i]]);
+}
+
+async function nombreLibre(destino, nombre) {
+  const { carpetas, archivos } = await op().listarNivel(destino);
+  if (carpetas.includes(nombre) || archivos.some((a) => a.name === nombre))
+    throw new Error(`Ya existe "${nombre}" en el destino`);
+}
+
+// Mueve (o renombra) un archivo o carpeta. "nuevaRuta" es la ruta completa final.
+export async function moverElemento(ruta, esCarpeta, nuevaRuta) {
+  if (ruta === nuevaRuta) return;
+  if (esCarpeta && (nuevaRuta + "/").startsWith(ruta + "/"))
+    throw new Error("No puedes mover una carpeta dentro de sí misma");
+  await nombreLibre(padreDe(nuevaRuta), nombreDe(nuevaRuta));
+  if (!esCarpeta) return op().mover(ruta, nuevaRuta);
+  const rutas = await archivosBajo(ruta);
+  for (const r of rutas) await op().mover(r, nuevaRuta + r.slice(ruta.length));
+}
+
+export async function borrarElemento(ruta, esCarpeta) {
+  await op().borrar(esCarpeta ? await archivosBajo(ruta) : [ruta]);
+}
+
+// Si al borrar/mover se vació la carpeta padre, la mantenemos con un placeholder.
+export async function conservarCarpeta(ruta) {
+  if (!ruta) return;
+  const { carpetas, archivos } = await op().listarNivel(ruta);
+  if (!carpetas.length && !archivos.length) await op().subir(unir(ruta, PLACEHOLDER), new Blob([""], { type: "text/plain" }));
 }

@@ -1,6 +1,6 @@
 import * as db from "./data.js";
 import { lineChart, sparkline, ring } from "./charts.js";
-import { SECCIONES_DOCS } from "./config.js";
+import * as docs from "./docs.js";
 
 // ---------- Utilidades ----------
 const $ = (s, el = document) => el.querySelector(s);
@@ -41,9 +41,11 @@ const VISTAS = ["inicio", "apartamento", "trabajo", "skills", "fitness", "docume
 const NOMBRES = { inicio: "Inicio", documentos: "Documentos", ...Object.fromEntries(Object.entries(CATS).map(([k, v]) => [k, v.nombre])) };
 
 // ---------- Estado ----------
-const estado = { registros: [], ajustes: {}, gymSel: null, docSec: SECCIONES_DOCS[0] };
+const estado = { registros: [], ajustes: {}, gymSel: null };
 const deCat = (c) => estado.registros.filter((r) => r.categoria === c);
 const dinero = (n) => `${estado.ajustes.moneda ?? "$"}${fNum(n)}`;
+
+docs.configurar({ toast: (m, e) => toast(m, e) });
 
 function toast(msg, error = false) {
   const t = $("#toast");
@@ -229,47 +231,15 @@ const VISTAS_RENDER = {
       <section class="card"><h2>Sesiones</h2>${listaRegistros([...rs].reverse())}</section>`;
   },
 
-  documentos() {
-    setTimeout(cargarDocs);
-    return `
-      <div class="chips" role="tablist">${SECCIONES_DOCS.map(
-        (s) => `<button role="tab" class="chip ${s === estado.docSec ? "on" : ""}" data-doc="${esc(s)}" aria-selected="${s === estado.docSec}">${esc(s)}</button>`,
-      ).join("")}</div>
-      <section class="card">
-        <div class="row-between">
-          <h2>${esc(estado.docSec)}</h2>
-          <label class="btn">Subir archivo<input type="file" id="subir" multiple hidden></label>
-        </div>
-        ${db.MODO === "demo" ? `<p class="aviso">Modo demo: los archivos solo viven en esta pestaña. Conecta Supabase para guardarlos de forma privada.</p>` : ""}
-        <div id="docs"><p class="vacio">Cargando…</p></div>
-      </section>`;
-  },
+  documentos: () => docs.vista(),
 };
-
-async function cargarDocs() {
-  const cont = $("#docs");
-  if (!cont) return;
-  try {
-    const docs = await db.listarDocs(estado.docSec);
-    cont.innerHTML = docs.length
-      ? `<ul class="lista">${docs
-          .map((d) => `<li>
-            <div class="li-main"><strong>${esc(d.name)}</strong><small>${fBytes(d.size)}${d.created_at ? " · " + new Date(d.created_at).toLocaleDateString("es") : ""}</small></div>
-            <button class="btn ghost" data-abrir="${esc(d.name)}">Abrir</button>
-            <button class="borrar" data-borrar-doc="${esc(d.name)}" aria-label="Borrar archivo">×</button>
-          </li>`)
-          .join("")}</ul>`
-      : `<p class="vacio">No hay archivos en esta sección.</p>`;
-  } catch (e) {
-    cont.innerHTML = `<p class="vacio">No se pudieron cargar: ${esc(e.message)}</p>`;
-  }
-}
 
 // ---------- Formulario de registro ----------
 function abrirFormulario() {
   const v = vistaActual();
   const cat = CATS[v] ? v : "fitness";
   const dlg = $("#dlg");
+  dlg.onclick = null;
   dlg.innerHTML = `<form method="dialog" id="form-reg">
     <h2>Nuevo registro</h2>
     <label>Categoría<select name="categoria">${Object.entries(CATS)
@@ -379,7 +349,8 @@ function abrirFormulario() {
 
 // ---------- Eventos globales ----------
 document.addEventListener("click", async (e) => {
-  const t = e.target.closest("button, [data-gym], [data-doc]");
+  if (e.target.closest("#explorador")) return; // lo gestiona docs.js
+  const t = e.target.closest("button, [data-gym]");
   if (!t) return;
   if (t.id === "fab") return abrirFormulario();
   if (t.id === "salir") {
@@ -406,38 +377,6 @@ document.addEventListener("click", async (e) => {
     estado.gymSel = t.dataset.gym;
     return render();
   }
-  if (t.dataset.doc) {
-    estado.docSec = t.dataset.doc;
-    return render();
-  }
-  if (t.dataset.abrir) {
-    try {
-      const url = await db.urlDoc(estado.docSec, t.dataset.abrir);
-      window.open(url, "_blank", "noopener");
-    } catch (err) {
-      toast("No se pudo abrir: " + err.message, true);
-    }
-    return;
-  }
-  if (t.dataset.borrarDoc) {
-    if (!confirm(`¿Borrar "${t.dataset.borrarDoc}"?`)) return;
-    await db.borrarDoc(estado.docSec, t.dataset.borrarDoc);
-    return cargarDocs();
-  }
-});
-
-document.addEventListener("change", async (e) => {
-  if (e.target.id !== "subir") return;
-  const files = [...e.target.files];
-  if (!files.length) return;
-  toast(`Subiendo ${files.length} archivo(s)…`);
-  try {
-    for (const f of files) await db.subirDoc(estado.docSec, f);
-    toast("Subido ✓");
-  } catch (err) {
-    toast("Error al subir: " + err.message, true);
-  }
-  cargarDocs();
 });
 
 window.addEventListener("hashchange", render);
