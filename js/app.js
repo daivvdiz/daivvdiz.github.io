@@ -9,6 +9,16 @@ const hoy = () => new Date().toLocaleDateString("sv"); // YYYY-MM-DD local
 const fFecha = (f) => new Date(f + "T12:00:00").toLocaleDateString("es", { day: "numeric", month: "short", year: "numeric" });
 const fNum = (n, dec = 0) => Number(n).toLocaleString("es", { maximumFractionDigits: dec });
 const agrupar = (arr, k) => arr.reduce((m, x) => ((m[x[k]] ??= []).push(x), m), {});
+// Medidas de Fitness: "kg" (1 decimal) o "tiempo" (segundos, se muestra hh:mm:ss).
+const fTiempo = (seg) => {
+  const t = Math.round(Math.abs(Number(seg)));
+  const p2 = (n) => String(n).padStart(2, "0");
+  return `${p2(Math.floor(t / 3600))}:${p2(Math.floor((t % 3600) / 60))}:${p2(t % 60)}`;
+};
+const fPeso = (v) => Number(v).toLocaleString("es", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const esTiempo = (u) => u === "tiempo";
+const fMedida = (v, u) => (esTiempo(u) ? fTiempo(v) : u === "kg" ? `${fPeso(v)} kg` : `${fNum(v, 2)}${u ? " " + u : ""}`);
+const fDelta = (d, u) => `${d < 0 ? "−" : "+"}${esTiempo(u) ? fTiempo(d) : fMedida(Math.abs(d), u)}`;
 const fBytes = (b) => (b > 1e6 ? `${(b / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1e3))} KB`);
 
 const ICON = {
@@ -16,7 +26,7 @@ const ICON = {
   apartamento: '<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 9h4a1 1 0 0 1 1 1v11M3 21h18M8 8h3M8 12h3M8 16h3"/>',
   trabajo: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
   skills: '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>',
-  gimnasio: '<path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/>',
+  fitness: '<path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/>',
   documentos: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
 };
 const icon = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
@@ -25,9 +35,9 @@ const CATS = {
   apartamento: { nombre: "Apartamento", titulo: "Concepto", tituloDef: "Cuota mensual", valor: "Monto pagado", unidad: "" },
   trabajo: { nombre: "Trabajo", titulo: "Puesto o logro", valor: "Salario (opcional)", nota: "Empresa / detalles", unidad: "" },
   skills: { nombre: "Skills", titulo: "Skill", valor: "Nivel (1 a 10)", unidad: "" },
-  gimnasio: { nombre: "Gimnasio", titulo: "Ejercicio", valor: "Peso", unidad: "kg", series: true },
+  fitness: { nombre: "Fitness", titulo: "Ejercicio", medida: true, series: true },
 };
-const VISTAS = ["inicio", "apartamento", "trabajo", "skills", "gimnasio", "documentos"];
+const VISTAS = ["inicio", "apartamento", "trabajo", "skills", "fitness", "documentos"];
 const NOMBRES = { inicio: "Inicio", documentos: "Documentos", ...Object.fromEntries(Object.entries(CATS).map(([k, v]) => [k, v.nombre])) };
 
 // ---------- Estado ----------
@@ -46,6 +56,7 @@ function toast(msg, error = false) {
 // ---------- Navegación ----------
 function vistaActual() {
   const v = location.hash.slice(1);
+  if (v === "gimnasio") return "fitness"; // enlaces antiguos
   return VISTAS.includes(v) ? v : "inicio";
 }
 
@@ -72,7 +83,7 @@ function listaRegistros(rows, { mostrarCat = false, formato } = {}) {
   return `<ul class="lista">${rows
     .map((r) => {
       const ex = r.extra && (r.extra.series || r.extra.reps) ? ` · ${r.extra.series ?? "?"}×${r.extra.reps ?? "?"}` : "";
-      const val = r.valor != null ? (formato ? formato(r) : `${fNum(r.valor, 2)}${r.unidad ? " " + esc(r.unidad) : ""}`) : "";
+      const val = r.valor != null ? (formato ? formato(r) : esc(fMedida(r.valor, r.unidad))) : "";
       return `<li>
         <div class="li-main">
           <strong>${esc(r.titulo || NOMBRES[r.categoria] || r.categoria)}</strong>
@@ -103,7 +114,7 @@ const VISTAS_RENDER = {
     const puesto = [...trab].reverse().find((r) => r.valor != null) ?? trab.at(-1);
     const skills = ultimoPorTitulo(deCat("skills"));
     const prom = skills.length ? skills.reduce((s, x) => s + Number(x.ult.valor), 0) / skills.length : 0;
-    const gym = deCat("gimnasio");
+    const gym = deCat("fitness");
     const hace30 = new Date(Date.now() - 30 * 864e5).toLocaleDateString("sv");
     const sesiones = new Set(gym.filter((r) => r.fecha >= hace30).map((r) => r.fecha)).size;
     const recientes = [...estado.registros].sort((x, y) => y.fecha.localeCompare(x.fecha) || y.id - x.id).slice(0, 8);
@@ -125,8 +136,8 @@ const VISTAS_RENDER = {
           <span class="stat-v">${skills.length}</span>
           <span class="stat-s">${skills.length ? `Nivel medio ${prom.toFixed(1)}/10` : "Sin skills aún"}</span>
         </a>
-        <a class="card stat" href="#gimnasio">
-          <span class="stat-k">${icon("gimnasio")} Gimnasio</span>
+        <a class="card stat" href="#fitness">
+          <span class="stat-k">${icon("fitness")} Fitness</span>
           <span class="stat-v">${sesiones}</span>
           <span class="stat-s">sesiones en 30 días</span>
         </a>
@@ -195,24 +206,26 @@ const VISTAS_RENDER = {
       .join("")}</ul></section>`;
   },
 
-  gimnasio() {
-    const g = agrupar(deCat("gimnasio"), "titulo");
+  fitness() {
+    const g = agrupar(deCat("fitness"), "titulo");
     const ejercicios = Object.keys(g).sort();
     if (!ejercicios.length) return `<section class="card"><p class="vacio">Registra tu primer ejercicio con el botón +.</p></section>`;
     if (!g[estado.gymSel]) estado.gymSel = ejercicios[0];
-    const rs = g[estado.gymSel];
+    // Si un ejercicio tiene registros en varias unidades, se muestra la del más reciente.
+    const unidad = g[estado.gymSel].at(-1).unidad ?? "kg";
+    const rs = g[estado.gymSel].filter((r) => (r.unidad ?? "kg") === unidad);
     const vals = rs.map((r) => Number(r.valor));
-    const unidad = rs.at(-1).unidad ?? "kg";
+    const fmt = (v) => fMedida(v, unidad);
     return `
       <div class="chips" role="tablist">${ejercicios
         .map((e) => `<button role="tab" class="chip ${e === estado.gymSel ? "on" : ""}" data-gym="${esc(e)}" aria-selected="${e === estado.gymSel}">${esc(e)}</button>`)
         .join("")}</div>
       <section class="grid three">
-        <div class="card stat"><span class="stat-k">Último</span><span class="stat-v">${fNum(vals.at(-1), 2)} <small>${esc(unidad)}</small></span></div>
-        <div class="card stat"><span class="stat-k">Récord</span><span class="stat-v">${fNum(Math.max(...vals), 2)} <small>${esc(unidad)}</small></span></div>
-        <div class="card stat"><span class="stat-k">Progreso</span><span class="stat-v">${vals.at(-1) - vals[0] >= 0 ? "+" : ""}${fNum(vals.at(-1) - vals[0], 2)} <small>${esc(unidad)}</small></span></div>
+        <div class="card stat"><span class="stat-k">Último</span><span class="stat-v">${esc(fmt(vals.at(-1)))}</span></div>
+        <div class="card stat"><span class="stat-k">${esTiempo(unidad) ? "Más largo" : "Récord"}</span><span class="stat-v">${esc(fmt(Math.max(...vals)))}</span></div>
+        <div class="card stat"><span class="stat-k">Progreso</span><span class="stat-v">${esc(fDelta(vals.at(-1) - vals[0], unidad))}</span></div>
       </section>
-      <section class="card"><h2>${esc(estado.gymSel)}</h2>${lineChart(rs.map((r) => ({ x: r.fecha, y: Number(r.valor) })), { formato: (v) => `${fNum(v, 2)} ${unidad}` })}</section>
+      <section class="card"><h2>${esc(estado.gymSel)} <small>· ${esTiempo(unidad) ? "Tiempo" : "Peso"}</small></h2>${lineChart(rs.map((r) => ({ x: r.fecha, y: Number(r.valor) })), { formato: fmt })}</section>
       <section class="card"><h2>Sesiones</h2>${listaRegistros([...rs].reverse())}</section>`;
   },
 
@@ -255,7 +268,7 @@ async function cargarDocs() {
 // ---------- Formulario de registro ----------
 function abrirFormulario() {
   const v = vistaActual();
-  const cat = CATS[v] ? v : "gimnasio";
+  const cat = CATS[v] ? v : "fitness";
   const dlg = $("#dlg");
   dlg.innerHTML = `<form method="dialog" id="form-reg">
     <h2>Nuevo registro</h2>
@@ -272,19 +285,58 @@ function abrirFormulario() {
     const k = $("[name=categoria]", dlg).value;
     const c = CATS[k];
     const previos = [...new Set(deCat(k).map((r) => r.titulo))];
-    const sel = k === "gimnasio" && estado.gymSel ? estado.gymSel : c.tituloDef ?? "";
+    const sel = k === "fitness" && estado.gymSel ? estado.gymSel : c.tituloDef ?? "";
     $("#campos", dlg).innerHTML = `
       <label>${c.titulo}<input name="titulo" list="dl-titulos" required value="${esc(sel)}" autocomplete="off"></label>
       <datalist id="dl-titulos">${previos.map((p) => `<option value="${esc(p)}">`).join("")}</datalist>
+      ${c.medida ? `
+      <div class="dos">
+        <label>Unidad<select name="medida"><option value="kg">Peso</option><option value="tiempo">Tiempo</option></select></label>
+        <label>Fecha<input name="fecha" type="date" required value="${hoy()}"></label>
+      </div>
+      <div id="campo-valor"></div>` : `
       <div class="dos">
         <label>${c.valor}<input name="valor" type="number" inputmode="decimal" step="any" ${k === "trabajo" ? "" : "required"} ${k === "skills" ? 'min="0" max="10"' : ""}></label>
         <label>Fecha<input name="fecha" type="date" required value="${hoy()}"></label>
-      </div>
+      </div>`}
       ${c.series ? `<div class="dos"><label>Series<input name="series" type="number" inputmode="numeric" min="0"></label><label>Repeticiones<input name="reps" type="number" inputmode="numeric" min="0"></label></div>` : ""}
       <label>${c.nota ?? "Nota (opcional)"}<input name="nota"></label>`;
   };
-  pintarCampos();
-  $("[name=categoria]", dlg).addEventListener("change", pintarCampos);
+  // Fitness: el campo de valor cambia según la unidad elegida.
+  const pintarValor = () => {
+    const cont = $("#campo-valor", dlg);
+    if (!cont) return;
+    cont.innerHTML = $("[name=medida]", dlg).value === "tiempo"
+      ? `<fieldset class="tiempo"><legend>Tiempo (hh:mm:ss)</legend>
+          <input name="hh" type="number" inputmode="numeric" min="0" max="99" placeholder="hh" aria-label="Horas">
+          <span>:</span><input name="mm" type="number" inputmode="numeric" min="0" max="59" placeholder="mm" aria-label="Minutos">
+          <span>:</span><input name="ss" type="number" inputmode="numeric" min="0" max="59" placeholder="ss" aria-label="Segundos">
+        </fieldset>`
+      : `<label>Peso (kg)<input name="valor" type="number" inputmode="decimal" step="any" min="0" placeholder="0,0" required></label>`;
+  };
+  // Al elegir un ejercicio ya usado, propone la unidad con la que se registró.
+  const unidadPorEjercicio = () => {
+    const sel = $("[name=medida]", dlg);
+    if (!sel) return;
+    const t = $("[name=titulo]", dlg).value.trim().toLowerCase();
+    const prev = deCat("fitness").filter((r) => r.titulo.toLowerCase() === t).at(-1);
+    const nueva = prev?.unidad === "tiempo" ? "tiempo" : "kg";
+    // Solo se redibuja si cambia la unidad, para no borrar lo ya escrito ni quitar el foco.
+    if (sel.value !== nueva || !$("#campo-valor", dlg).innerHTML) {
+      sel.value = nueva;
+      pintarValor();
+    }
+  };
+  const pintarTodo = () => {
+    pintarCampos();
+    if ($("[name=medida]", dlg)) {
+      $("[name=medida]", dlg).addEventListener("change", pintarValor);
+      $("[name=titulo]", dlg).addEventListener("change", unidadPorEjercicio);
+      unidadPorEjercicio();
+    }
+  };
+  pintarTodo();
+  $("[name=categoria]", dlg).addEventListener("change", pintarTodo);
   $("#cancelar", dlg).addEventListener("click", () => dlg.close());
   $("#form-reg", dlg).addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -292,17 +344,29 @@ function abrirFormulario() {
     const extra = {};
     if (f.series) extra.series = Number(f.series);
     if (f.reps) extra.reps = Number(f.reps);
+    let valor = f.valor === undefined || f.valor === "" ? null : Number(f.valor);
+    let unidad = CATS[f.categoria].unidad || null;
+    if (CATS[f.categoria].medida) {
+      unidad = f.medida;
+      if (unidad === "tiempo") {
+        valor = (Number(f.hh) || 0) * 3600 + (Number(f.mm) || 0) * 60 + (Number(f.ss) || 0);
+        if (!valor) return toast("Escribe un tiempo mayor que 0", true);
+      } else {
+        valor = Math.round(valor * 10) / 10;
+      }
+    }
     const fila = {
       categoria: f.categoria,
       titulo: f.titulo.trim(),
-      valor: f.valor === "" ? null : Number(f.valor),
-      unidad: CATS[f.categoria].unidad || null,
+      valor,
+      unidad,
       nota: f.nota?.trim() || null,
       fecha: f.fecha,
       extra,
     };
     try {
       await db.agregarRegistro(fila);
+      if (fila.categoria === "fitness") estado.gymSel = fila.titulo;
       dlg.close();
       await recargar();
       toast("Guardado ✓");
@@ -381,6 +445,11 @@ window.addEventListener("hashchange", render);
 // ---------- Arranque ----------
 async function recargar() {
   [estado.registros, estado.ajustes] = await Promise.all([db.listarRegistros(), db.leerAjustes()]);
+  // Registros antiguos de "gimnasio" se muestran dentro de Fitness.
+  estado.registros.forEach((r) => {
+    if (r.categoria === "gimnasio") r.categoria = "fitness";
+    if (r.categoria === "fitness" && (!r.unidad || r.unidad === "peso")) r.unidad = "kg";
+  });
   render();
 }
 

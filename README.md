@@ -1,6 +1,6 @@
 # Segundo Cerebro
 
-Mi panel personal tipo app (PWA) para PC e iPhone: progreso del pago del apartamento, evolución laboral, skills, gimnasio y documentos personales por sección.
+Mi panel personal tipo app (PWA) para PC e iPhone: progreso del pago del apartamento, evolución laboral, skills, fitness y documentos personales por sección.
 
 - **Web:** GitHub Pages (este repo). El código es público, **los datos no**.
 - **Datos, inicio de sesión y documentos:** [Supabase](https://supabase.com) (plan gratis), protegidos con reglas por usuario (RLS) y un bucket privado.
@@ -15,11 +15,12 @@ index.html               App (una sola página)
 css/app.css              Estilos (claro/oscuro automático)
 js/config.js             ← aquí van tu URL y clave anon de Supabase
 js/data.js               Lectura/escritura (Supabase o demo)
-js/app.js                Vistas: Inicio, Apartamento, Trabajo, Skills, Gimnasio, Documentos
+js/app.js                Vistas: Inicio, Apartamento, Trabajo, Skills, Fitness, Documentos
 js/charts.js             Gráficas SVG sin librerías
 sw.js, manifest.webmanifest, icons/   Para instalarla como app
 supabase/schema.sql      Tablas, seguridad y bucket de documentos
 supabase/functions/registrar/index.ts   Endpoint para el Atajo
+supabase/migraciones/    Cambios opcionales de datos
 ```
 
 ## Puesta en marcha (≈15 minutos)
@@ -52,7 +53,7 @@ Abre la web en **Safari → Compartir → Añadir a pantalla de inicio**. Se abr
 
 ## Atajo de iOS para registrar
 
-Ejemplo "Registrar gimnasio" (en la app Atajos):
+Ejemplo "Registrar fitness" con peso (en la app Atajos):
 
 1. **Pedir entrada** (Texto): "¿Ejercicio?" → variable *Ejercicio*
 2. **Pedir entrada** (Número): "¿Peso (kg)?" → *Peso*
@@ -62,7 +63,7 @@ Ejemplo "Registrar gimnasio" (en la app Atajos):
    - Método: **POST**
    - Encabezados: `Authorization` = `Bearer TU_ATAJO_TOKEN`
    - Cuerpo de la solicitud: **JSON**
-     - `categoria` (Texto) = `gimnasio`
+     - `categoria` (Texto) = `fitness`
      - `titulo` (Texto) = *Ejercicio*
      - `valor` (Número) = *Peso*
      - `unidad` (Texto) = `kg`
@@ -73,13 +74,16 @@ Otros ejemplos de cuerpo JSON:
 
 | Qué registras | JSON |
 |---|---|
+| Fitness por tiempo (hh:mm:ss) | `{"categoria":"fitness","titulo":"Running","valor":"00:32:15"}` |
 | Pago del apartamento | `{"categoria":"apartamento","titulo":"Cuota mensual","valor":1500000}` |
 | Nivel de una skill (1-10) | `{"categoria":"skills","titulo":"Python","valor":7}` |
 | Hito laboral | `{"categoria":"trabajo","titulo":"Analista Senior","valor":5200000,"nota":"Ascenso"}` |
 
 Campos opcionales: `fecha` (`AAAA-MM-DD`, por defecto hoy) y `nota`. Puedes usar categorías nuevas (ej. `lectura`) y ya quedan guardadas.
 
-Un único Atajo con **Elegir del menú** (Gimnasio / Apartamento / Skills / Trabajo) puede cubrir todo.
+En **Fitness**, la unidad es `kg` (peso, 1 decimal) o tiempo: si `valor` lleva `:` (ej. `"00:32:15"`) se guarda como tiempo automáticamente. Se sigue aceptando `"gimnasio"` como categoría, y esos registros aparecen en Fitness.
+
+Un único Atajo con **Elegir del menú** (Fitness / Apartamento / Skills / Trabajo) puede cubrir todo.
 
 ## Privacidad
 - GitHub Pages es público: en este repo solo hay código, nunca datos ni documentos.
