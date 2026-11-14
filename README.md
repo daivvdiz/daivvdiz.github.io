@@ -1,5 +1,7 @@
 # Segundo Cerebro
 
+> **LIFE OS**, la nueva versión, vive en [`life-os/`](life-os/README.md) y usa este mismo Supabase. Esta app sigue funcionando sin cambios mientras tanto.
+
 Mi panel personal tipo app (PWA) para PC e iPhone: progreso del pago del apartamento, evolución laboral, skills, fitness y documentos personales por sección.
 
 - **Web:** GitHub Pages (este repo). El código es público, **los datos no**.

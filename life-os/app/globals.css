@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tema oscuro por defecto */
+:root {
+  --background: #101114;
+  --surface: #17191e;
+  --card: #1d2026;
+  --border: #2c3038;
+  --foreground: #f4f5f7;
+  --muted: #9ca3af;
+  --accent: #8b8cf6;
+  --accent-foreground: #101114;
+  --accent-soft: rgb(139 140 246 / 0.14);
+  --success: #5fb37f;
+  --warning: #d6a64f;
+  --danger: #d46a6a;
+  --ring: #8b8cf6;
+  --chart-1: #8b8cf6;
+  --chart-2: #5fb3a8;
+  --chart-3: #d6a64f;
+  --chart-4: #c27aa8;
+  --chart-5: #6d9fd8;
+  --chart-6: #9fb35f;
+  color-scheme: dark;
+}
+
+/* Tema claro opcional */
+:root.light {
+  --background: #f7f7f8;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --border: #e3e4e8;
+  --foreground: #16181d;
+  --muted: #5f6672;
+  --accent: #5b5cd6;
+  --accent-foreground: #ffffff;
+  --accent-soft: rgb(91 92 214 / 0.1);
+  --success: #2f8a55;
+  --warning: #a7741a;
+  --danger: #b84747;
+  --ring: #5b5cd6;
+  color-scheme: light;
+}
+
+:root[data-accent="blue"] { --accent: #6d9fd8; --ring: #6d9fd8; --accent-soft: rgb(109 159 216 / 0.14); }
+:root[data-accent="green"] { --accent: #5fb37f; --ring: #5fb37f; --accent-soft: rgb(95 179 127 / 0.14); }
+:root[data-accent="amber"] { --accent: #d6a64f; --ring: #d6a64f; --accent-soft: rgb(214 166 79 / 0.14); }
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-ring: var(--ring);
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+}
+
+* { border-color: var(--border); }
+
+html, body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent-soft); }
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
