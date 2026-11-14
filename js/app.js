@@ -347,12 +347,33 @@ function abrirFormulario() {
   dlg.showModal();
 }
 
+// ---------- Respaldo ----------
+// Descarga los datos tal como están en la base (sin normalizar), para conservarlos antes de migrar.
+async function descargarRespaldo() {
+  try {
+    const [registros, ajustes] = await Promise.all([db.listarRegistros(), db.leerAjustes()]);
+    const respaldo = { app: "segundo-cerebro", version: 1, exportado: new Date().toISOString(), modo: db.MODO, registros, ajustes };
+    const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `segundo-cerebro-respaldo-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    toast(`Respaldo descargado: ${registros.length} registros`);
+  } catch (err) {
+    toast("No se pudo crear el respaldo: " + err.message, true);
+  }
+}
+
 // ---------- Eventos globales ----------
 document.addEventListener("click", async (e) => {
   if (e.target.closest("#explorador")) return; // lo gestiona docs.js
   const t = e.target.closest("button, [data-gym]");
   if (!t) return;
   if (t.id === "fab") return abrirFormulario();
+  if (t.id === "respaldo") return descargarRespaldo();
   if (t.id === "salir") {
     await db.salir();
     return iniciar();
