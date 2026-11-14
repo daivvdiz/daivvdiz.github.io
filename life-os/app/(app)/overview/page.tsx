@@ -40,7 +40,7 @@ export default async function OverviewPage() {
         description={`${longToday(tz)} · ${PROMPTS[dayOfYear % PROMPTS.length]}`}
         actions={
           <Button asChild>
-            <Link href="/settings#datos">Mis datos</Link>
+            <Link href={`/calendar?view=day&date=${data.today}`}>{data.daily ? "Continuar el día de hoy" : "Escribir el día de hoy"}</Link>
           </Button>
         }
       />

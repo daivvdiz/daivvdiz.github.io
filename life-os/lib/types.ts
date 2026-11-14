@@ -53,3 +53,15 @@ export const EVENT_CATEGORIES: Record<string, string> = {
   learning: "Aprendizaje",
   other: "Otro",
 };
+
+/** Colores de categoría de eventos (tokens del tema). */
+export const CATEGORY_COLORS: Record<string, string> = {
+  personal: "var(--chart-1)",
+  work: "var(--chart-5)",
+  health: "var(--chart-2)",
+  fitness: "var(--chart-6)",
+  finance: "var(--chart-3)",
+  social: "var(--chart-4)",
+  learning: "var(--chart-5)",
+  other: "var(--muted)",
+};

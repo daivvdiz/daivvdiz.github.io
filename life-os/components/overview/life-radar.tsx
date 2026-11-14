@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Pencil, Plus, Radar as RadarIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -17,7 +16,6 @@ import { deleteAssessment } from "@/lib/assessments/actions";
 import { AssessmentForm } from "./assessment-form";
 
 export function LifeRadar({ assessments, today }: { assessments: LifeAssessment[]; today: string }) {
-  const router = useRouter();
   const [selectedId, setSelectedId] = useState(assessments[0]?.id ?? "");
   const [compareId, setCompareId] = useState(assessments[1]?.id ?? "");
   const [editing, setEditing] = useState<LifeAssessment | "new" | null>(null);
@@ -37,7 +35,6 @@ export function LifeRadar({ assessments, today }: { assessments: LifeAssessment[
 
   const close = () => {
     setEditing(null);
-    router.refresh();
   };
 
   return (
@@ -114,7 +111,6 @@ export function LifeRadar({ assessments, today }: { assessments: LifeAssessment[
                     if (!res.ok) return void toast.error(res.error);
                     toast.success("Autoevaluación eliminada");
                     setSelectedId("");
-                    router.refresh();
                   }}
                 />
               </span>
