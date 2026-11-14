@@ -33,8 +33,10 @@ export function formatDateTime(iso: string, pattern = "EEE d MMM, HH:mm") {
   }).format(d);
 }
 
-export function timeAgo(iso: string) {
-  return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: es });
+export function timeAgo(iso: string | null | undefined) {
+  const d = iso ? new Date(iso) : null;
+  if (!d || Number.isNaN(d.getTime())) return "";
+  return formatDistanceToNow(d, { addSuffix: true, locale: es });
 }
 
 export function formatDuration(seconds: number | null | undefined) {

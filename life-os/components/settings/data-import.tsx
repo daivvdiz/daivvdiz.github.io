@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { previewImport, runImport, type PreviewRow } from "@/lib/import/actions";
@@ -18,7 +17,6 @@ const LABELS: Record<string, string> = {
 };
 
 export function DataImport() {
-  const router = useRouter();
   const [rows, setRows] = useState<PreviewRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -48,7 +46,6 @@ export function DataImport() {
         .join(", ");
       toast.success(summary ? `Importado: ${summary}` : "No había nada nuevo por importar");
       await load();
-      router.refresh();
     });
 
   if (error) return <p className="text-sm text-danger" role="alert">{error}</p>;

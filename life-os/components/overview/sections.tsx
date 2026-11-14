@@ -45,7 +45,8 @@ export function DailySummary({ data }: { data: Overview }) {
       </CardContent>
       {!d && (
         <p className="border-t border-border px-5 py-3 text-xs text-muted">
-          Aún no hay entrada para hoy. La entrada diaria (ánimo, energía, sueño, gratitud y logros) llega en la fase 2.
+          Aún no hay entrada para hoy.{" "}
+          <Link href={`/calendar?view=day&date=${data.today}`} className="text-accent hover:underline">Registrar cómo va el día</Link>
         </p>
       )}
     </Card>
@@ -118,7 +119,10 @@ export function LiabilitiesCard({ data }: { data: Overview }) {
 export function UpcomingEvents({ events }: { events: CalendarEvent[] }) {
   return (
     <Card>
-      <CardHeader><CardTitle>Próximos eventos</CardTitle></CardHeader>
+      <CardHeader>
+        <CardTitle>Próximos eventos</CardTitle>
+        <Link href="/calendar" className="text-xs text-accent hover:underline">Ver calendario</Link>
+      </CardHeader>
       <CardContent>
         {events.length === 0 ? (
           <EmptyState icon={CalendarDays} title="Nada en los próximos 14 días" description="Los eventos y fechas límite del calendario aparecerán aquí." />

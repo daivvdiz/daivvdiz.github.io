@@ -14,8 +14,9 @@ interface Props {
 /** Confirmación para acciones destructivas. */
 export function ConfirmDialog({ trigger, title, description, confirmLabel = "Eliminar", onConfirm }: Props) {
   const [pending, setPending] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   return (
-    <AlertDialog.Root>
+    <AlertDialog.Root open={open} onOpenChange={setOpen}>
       <AlertDialog.Trigger asChild>{trigger}</AlertDialog.Trigger>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/60" />
@@ -35,6 +36,7 @@ export function ConfirmDialog({ trigger, title, description, confirmLabel = "Eli
                   await onConfirm();
                 } finally {
                   setPending(false);
+                  setOpen(false);
                 }
               }}
             >
