@@ -123,7 +123,7 @@ export async function getRecentActivity(supabase: SupabaseClient): Promise<Activ
     ...(workouts.data ?? []).map((r) => ({ id: `w-${r.id}`, kind: "workout" as const, label: "Entrenamiento registrado", detail: WORKOUT_TYPES[r.activity_type] ?? r.activity_type, at: r.created_at })),
     ...(apps.data ?? []).map((r) => ({ id: `a-${r.id}`, kind: "application" as const, label: "Aplicación registrada", detail: `${r.position} · ${r.company}`, at: r.created_at })),
     ...(memories.data ?? []).map((r) => ({ id: `m-${r.id}`, kind: "memory" as const, label: "Recuerdo agregado", detail: r.title, at: r.created_at })),
-    ...(txs.data ?? []).map((r) => ({ id: `t-${r.id}`, kind: "transaction" as const, label: r.type === "income" ? "Ingreso registrado" : r.type === "expense" ? "Gasto registrado" : "Transferencia registrada", detail: r.description, at: r.created_at })),
+    ...(txs.data ?? []).map((r) => ({ id: `t-${r.id}`, kind: "transaction" as const, label: r.type === "income" ? "Ingreso registrado" : r.type === "expense" ? "Gasto registrado" : "Aporte a ahorro registrado", detail: r.description, at: r.created_at })),
     ...(positions.data ?? []).map((r) => ({ id: `p-${r.id}`, kind: "position" as const, label: "Cargo registrado", detail: [r.title, r.company].filter(Boolean).join(" · "), at: r.created_at })),
     ...(skills.data ?? []).map((r) => ({
       id: `s-${r.id}`, kind: "skill" as const, label: "Nivel de skill registrado",
@@ -131,5 +131,5 @@ export async function getRecentActivity(supabase: SupabaseClient): Promise<Activ
     })),
     ...(assessments.data ?? []).map((r) => ({ id: `la-${r.id}`, kind: "assessment" as const, label: "Autoevaluación de vida", detail: formatDay(r.assessed_on), at: r.created_at })),
   ];
-  return items.sort((a, b) => b.at.localeCompare(a.at)).slice(0, 12);
+  return items.sort((a, b) => (b.at ?? "").localeCompare(a.at ?? "")).slice(0, 12);
 }

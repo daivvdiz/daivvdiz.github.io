@@ -1,94 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { Controller, useForm, type FieldValues, type DefaultValues, type Resolver } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Landmark, Pencil, PiggyBank, Plus, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import type { ZodTypeAny } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input, Select, Textarea } from "@/components/ui/input";
-import { Label, FieldError } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { EntityDialog, useEditor } from "@/components/entity-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProgressBar } from "@/components/goals/goal-parts";
 import { formatDay, formatMoney } from "@/lib/format";
-import { useResetOnOpen } from "@/lib/use-reset-on-open";
 import {
   ASSET_KINDS, LIABILITY_KINDS, assetSchema, liabilitySchema, savingsSchema,
   type AssetInput, type LiabilityInput, type SavingsInput,
 } from "@/lib/finance/schema";
 import { deleteAsset, deleteLiability, deleteSavingsGoal, saveAsset, saveLiability, saveSavingsGoal } from "@/lib/finance/actions";
 import type { Asset, Liability, SavingsGoal } from "@/lib/finance/queries";
-import { MoneyInput } from "./money-input";
 import { NewTxButton, type TxRefs } from "./tx-dialog";
-
-type Field = { name: string; label: string; kind: "text" | "money" | "date" | "textarea" | "select"; options?: Record<string, string>; placeholder?: string };
-
-/** Diálogo genérico para las entidades simples de Finanzas (ahorro, activos, deudas). */
-function EntityDialog<T extends FieldValues>({
-  open, onOpenChange, title, description, schema, defaults, fields, onSave,
-}: {
-  open: boolean; onOpenChange: (o: boolean) => void; title: string; description: string; schema: ZodTypeAny;
-  defaults: T; fields: Field[]; onSave: (v: T) => Promise<{ ok: true } | { ok: false; error: string }>;
-}) {
-  const { register, handleSubmit, control, formState, reset } = useForm<T>({
-    resolver: zodResolver(schema) as unknown as Resolver<T>,
-    values: defaults,
-    defaultValues: defaults as DefaultValues<T>,
-  });
-  useResetOnOpen(open, () => reset());
-  const errors = formState.errors as Record<string, { message?: string } | undefined>;
-  const onSubmit = handleSubmit(async (v) => {
-    const r = await onSave(v);
-    if (!r.ok) return void toast.error(r.error);
-    toast.success("Guardado");
-    onOpenChange(false);
-  });
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4" noValidate>
-          {fields.map((f) => {
-            const id = `ent-${f.name}`;
-            return (
-              <div key={f.name} className="space-y-1.5">
-                <Label htmlFor={id}>{f.label}</Label>
-                {f.kind === "money" ? (
-                  <Controller control={control} name={f.name as never}
-                    render={({ field }) => <MoneyInput id={id} value={field.value as number | null} onChange={field.onChange} invalid={!!errors[f.name]} />} />
-                ) : f.kind === "textarea" ? (
-                  <Textarea id={id} rows={2} {...register(f.name as never)} />
-                ) : f.kind === "select" ? (
-                  <Select id={id} {...register(f.name as never)}>
-                    {Object.entries(f.options ?? {}).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
-                  </Select>
-                ) : (
-                  <Input id={id} type={f.kind === "date" ? "date" : "text"} placeholder={f.placeholder} aria-invalid={!!errors[f.name]} {...register(f.name as never)} />
-                )}
-                <FieldError message={errors[f.name]?.message} />
-              </div>
-            );
-          })}
-          <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? "Guardando…" : "Guardar"}</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function useEditor<T>() {
-  const [editing, setEditing] = useState<T | "new" | null>(null);
-  return { editing, open: editing !== null, item: editing && editing !== "new" ? (editing as T) : undefined, setEditing, close: () => setEditing(null) };
-}
 
 // ---------------------------------------------------------------- Ahorro
 
