@@ -73,7 +73,7 @@ middleware.ts           Redirige a /login si no hay sesión
 - [x] Fase 2: calendario (mes, semana, día, filtros), eventos y entrada diaria (ánimo, energía, estrés, sueño, diario, gratitud, recuerdo, logros, etiquetas, conexiones, adjuntos)
 - [x] Fase 3a: salud mental (tendencias, calendario de ánimo, sueño, distribución, promedios, relaciones exploratorias, emociones y factores de estrés, diario emocional, estrategias)
 - [ ] Fase 3b: archivo de vida (incluye Documentos)
-- [ ] Fase 4: metas y hábitos
+- [x] Fase 4: metas (hitos, estados, avance, vínculos con diario, logros y eventos) y hábitos (frecuencias, registro semanal, cumplimiento sin rachas)
 - [ ] Fase 5: finanzas y carrera
 - [ ] Fase 6: físico
 - [ ] Fase 7: analítica de vida

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useResetOnOpen } from "@/lib/use-reset-on-open";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Label, FieldError } from "@/components/ui/label";
@@ -46,6 +47,7 @@ export function EventDialog({
         }
       : { title: "", description: "", category: "personal", date: defaultDate, all_day: false, start_time: "09:00", end_time: "", location: "", goal_id: "" },
   });
+  useResetOnOpen(open, () => form.reset());
   const { register, handleSubmit, watch, formState } = form;
   const allDay = watch("all_day");
 

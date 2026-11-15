@@ -16,7 +16,7 @@ export const MODULES: ModuleDef[] = [
   { href: "/overview", label: "Resumen", icon: LayoutDashboard, description: "Tu contexto de vida hoy." },
   { href: "/calendar", label: "Calendario y diario", icon: CalendarDays, description: "Eventos, entrada diaria, gratitud, recuerdos y logros." },
   { href: "/mental-health", label: "Salud mental", icon: Brain, description: "Ánimo, energía, estrés, sueño y estrategias que te ayudan." },
-  { href: "/goals", label: "Metas y hábitos", icon: Target, description: "Metas, hitos y hábitos sin presión de rachas.", phase: 4 },
+  { href: "/goals", label: "Metas y hábitos", icon: Target, description: "Metas, hitos y hábitos sin presión de rachas." },
   { href: "/finances", label: "Finanzas", icon: Wallet, description: "Movimientos, presupuesto, ahorro y patrimonio en COP.", phase: 5 },
   { href: "/career", label: "Carrera", icon: Briefcase, description: "Aplicaciones, skills, proyectos y aprendizaje.", phase: 5 },
   { href: "/physical", label: "Físico", icon: Dumbbell, description: "Entrenamientos, progresión y medidas corporales.", phase: 6 },

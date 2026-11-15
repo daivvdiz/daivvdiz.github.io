@@ -13,6 +13,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDay, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useResetOnOpen } from "@/lib/use-reset-on-open";
 import {
   HELPED_LABELS, strategyLogSchema, strategySchema, SUGGESTED_STRATEGIES, type StrategyInput, type StrategyLogInput,
 } from "@/lib/mental/schema";
@@ -22,10 +23,11 @@ export type Strategy = { id: string; name: string; description: string | null; i
 export type StrategyLog = { id: string; coping_strategy_id: string; used_on: string; helped: number | null; notes: string | null };
 
 function StrategyDialog({ open, onOpenChange, item }: { open: boolean; onOpenChange: (o: boolean) => void; item?: Strategy }) {
-  const { register, handleSubmit, formState } = useForm<StrategyInput>({
+  const { register, handleSubmit, formState, reset } = useForm<StrategyInput>({
     resolver: zodResolver(strategySchema),
     values: item ? { name: item.name, description: item.description ?? "", is_active: item.is_active } : { name: "", description: "", is_active: true },
   });
+  useResetOnOpen(open, () => reset());
   const onSubmit = handleSubmit(async (v) => {
     const r = await saveStrategy(v, item?.id);
     if (!r.ok) return void toast.error(r.error);
@@ -68,12 +70,13 @@ function LogDialog({
 }: {
   open: boolean; onOpenChange: (o: boolean) => void; strategies: Strategy[]; log?: StrategyLog; defaultStrategy?: string; today: string;
 }) {
-  const { register, handleSubmit, control, formState } = useForm<StrategyLogInput>({
+  const { register, handleSubmit, control, formState, reset } = useForm<StrategyLogInput>({
     resolver: zodResolver(strategyLogSchema),
     values: log
       ? { coping_strategy_id: log.coping_strategy_id, used_on: log.used_on, helped: log.helped, notes: log.notes ?? "" }
       : { coping_strategy_id: defaultStrategy ?? strategies.find((s) => s.is_active)?.id ?? strategies[0]?.id ?? "", used_on: today, helped: null, notes: "" },
   });
+  useResetOnOpen(open, () => reset());
   const onSubmit = handleSubmit(async (v) => {
     const r = await saveStrategyLog(v, log?.id);
     if (!r.ok) return void toast.error(r.error);
