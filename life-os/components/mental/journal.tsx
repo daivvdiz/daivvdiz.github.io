@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { NotebookPen, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useResetOnOpen } from "@/lib/use-reset-on-open";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Label, FieldError } from "@/components/ui/label";
@@ -33,6 +34,7 @@ function JournalDialog({ open, onOpenChange, item, today }: { open: boolean; onO
       ? { entry_date: item.entry_date, kind: item.kind as Kind, title: item.title ?? "", content: item.content }
       : { entry_date: today, kind: "emotional", title: "", content: "" },
   });
+  useResetOnOpen(open, () => form.reset());
   const { register, handleSubmit, watch, formState } = form;
   const kind = watch("kind");
 
