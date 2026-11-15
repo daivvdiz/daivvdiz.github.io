@@ -71,7 +71,8 @@ middleware.ts           Redirige a /login si no hay sesión
 - [x] Fase 0: respaldo JSON en Segundo Cerebro
 - [x] Fase 1: base, diseño, login, sidebar, esquema completo con RLS, Resumen, Ajustes, importador
 - [x] Fase 2: calendario (mes, semana, día, filtros), eventos y entrada diaria (ánimo, energía, estrés, sueño, diario, gratitud, recuerdo, logros, etiquetas, conexiones, adjuntos)
-- [ ] Fase 3: salud mental y archivo de vida (incluye Documentos)
+- [x] Fase 3a: salud mental (tendencias, calendario de ánimo, sueño, distribución, promedios, relaciones exploratorias, emociones y factores de estrés, diario emocional, estrategias)
+- [ ] Fase 3b: archivo de vida (incluye Documentos)
 - [ ] Fase 4: metas y hábitos
 - [ ] Fase 5: finanzas y carrera
 - [ ] Fase 6: físico
