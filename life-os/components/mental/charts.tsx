@@ -17,7 +17,7 @@ export const tooltipStyle = {
   labelStyle: { color: "var(--foreground)", marginBottom: 4 },
   itemStyle: { color: "var(--foreground)", padding: 0 },
 };
-const axisTick = { fill: "var(--muted)", fontSize: 11 };
+export const axisTick = { fill: "var(--muted)", fontSize: 11 };
 
 /** Todos los días del periodo; los días sin registro quedan vacíos (nunca se rellenan). */
 function fillDays(points: DayPoint[], from: string, to: string) {
@@ -36,7 +36,7 @@ const SERIES = [
   { key: "stress", label: "Estrés", color: "var(--series-3)" },
 ] as const;
 
-function ViewToggle({ table, onChange }: { table: boolean; onChange: (t: boolean) => void }) {
+export function ViewToggle({ table, onChange }: { table: boolean; onChange: (t: boolean) => void }) {
   return (
     <Button size="sm" variant="ghost" onClick={() => onChange(!table)} aria-pressed={table}>
       {table ? <><LineIcon /> Ver gráfico</> : <><Table2 /> Ver tabla</>}
@@ -44,7 +44,7 @@ function ViewToggle({ table, onChange }: { table: boolean; onChange: (t: boolean
   );
 }
 
-function DataTable({ rows, cols }: { rows: Record<string, string | number | null>[]; cols: { key: string; label: string }[] }) {
+export function DataTable({ rows, cols }: { rows: Record<string, string | number | null>[]; cols: { key: string; label: string }[] }) {
   return (
     <div className="max-h-72 overflow-auto rounded-md border border-border">
       <table className="w-full text-xs">
