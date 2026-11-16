@@ -21,6 +21,6 @@ export const MODULES: ModuleDef[] = [
   { href: "/career", label: "Carrera", icon: Briefcase, description: "Aplicaciones, skills, proyectos y aprendizaje." },
   { href: "/physical", label: "Físico", icon: Dumbbell, description: "Entrenamientos, progresión y medidas corporales." },
   { href: "/archive", label: "Archivo de vida", icon: Archive, description: "Recuerdos, capítulos, documentos y un día como hoy." },
-  { href: "/analytics", label: "Analítica de vida", icon: LineChart, description: "Tu evolución en todas las áreas, sin juicios.", phase: 7 },
+  { href: "/analytics", label: "Analítica de vida", icon: LineChart, description: "Tu evolución en todas las áreas, sin juicios." },
   { href: "/settings", label: "Ajustes", icon: Settings, description: "Perfil, apariencia, privacidad y tus datos." },
 ];
