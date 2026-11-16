@@ -80,8 +80,8 @@ function itemValue(measure: Measure, i: WorkoutItem) {
   }
 }
 function itemDetail(measure: Measure, i: WorkoutItem) {
-  const sr = i.sets != null && i.reps != null ? `${i.sets} × ${i.reps}` : i.reps != null && measure !== "reps" ? `${i.reps} reps` : i.sets != null ? `${i.sets} series` : null;
-  return measure === "reps" ? (i.sets != null ? `${i.sets} series` : null) : sr;
+  const sr = i.sets != null && i.reps != null ? `${i.sets} × ${i.reps}` : i.reps != null && measure !== "reps" ? `${i.reps} reps` : i.sets != null ? `${i.sets} sets` : null;
+  return measure === "reps" ? (i.sets != null ? `${i.sets} sets` : null) : sr;
 }
 
 export async function getPhysicalData(supabase: SupabaseClient, today: string, weekStartsOn: number) {

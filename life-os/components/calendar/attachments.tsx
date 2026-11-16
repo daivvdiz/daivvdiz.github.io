@@ -38,17 +38,17 @@ export function FileAttachments({ pathPrefix, files, onRegister, onDelete }: {
     let done = 0;
     for (const f of Array.from(list)) {
       if (f.size > MAX) {
-        toast.error(`${f.name} supera 10 MB`);
+        toast.error(`${f.name} is larger than 10 MB`);
         continue;
       }
       if (!/^image\/|^application\/pdf$/.test(f.type)) {
-        toast.error(`${f.name}: solo imágenes o PDF`);
+        toast.error(`${f.name}: images or PDFs only`);
         continue;
       }
       const path = `${pathPrefix}${Date.now()}-${safe(f.name)}`;
       const up = await supabase.storage.from("life-os").upload(path, f, { contentType: f.type });
       if (up.error) {
-        toast.error(`No se pudo subir ${f.name}`);
+        toast.error(`Couldn't upload ${f.name}`);
         continue;
       }
       const r = await onRegister({ path, name: f.name, mime: f.type, size: f.size });
@@ -62,7 +62,7 @@ export function FileAttachments({ pathPrefix, files, onRegister, onDelete }: {
     setBusy(false);
     if (input.current) input.current.value = "";
     if (done) {
-      toast.success(done === 1 ? "Archivo adjuntado" : `${done} archivos adjuntados`);
+      toast.success(done === 1 ? "File attached" : `${done} files attached`);
     }
   };
 
@@ -84,16 +84,16 @@ export function FileAttachments({ pathPrefix, files, onRegister, onDelete }: {
               </a>
               <ConfirmDialog
                 trigger={
-                  <button type="button" className="absolute right-1 top-1 rounded bg-black/60 p-1 text-white opacity-80 hover:opacity-100" aria-label={`Eliminar ${f.name}`}>
+                  <button type="button" className="absolute right-1 top-1 rounded bg-black/60 p-1 text-white opacity-80 hover:opacity-100" aria-label={`Delete ${f.name}`}>
                     <Trash2 className="size-3.5" />
                   </button>
                 }
-                title="¿Eliminar este archivo?"
-                description={`"${f.name}" se borrará de forma permanente.`}
+                title="Delete this file?"
+                description={`"${f.name}" will be permanently deleted.`}
                 onConfirm={async () => {
                   const r = await onDelete(f.id);
                   if (!r.ok) return void toast.error(r.error);
-                  toast.success("Archivo eliminado");
+                  toast.success("File deleted");
                 }}
               />
             </li>
@@ -102,7 +102,7 @@ export function FileAttachments({ pathPrefix, files, onRegister, onDelete }: {
       )}
       <input ref={input} type="file" accept="image/*,application/pdf" multiple hidden onChange={(e) => upload(e.target.files)} />
       <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => input.current?.click()}>
-        <Paperclip /> {busy ? "Subiendo…" : "Adjuntar imágenes o PDF"}
+        <Paperclip /> {busy ? "Subiendo…" : "Attach images or PDFs"}
       </Button>
     </div>
   );

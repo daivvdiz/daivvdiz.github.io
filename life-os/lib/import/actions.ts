@@ -14,7 +14,7 @@ export async function previewImport(): Promise<{ ok: true; rows: PreviewRow[] } 
   const { supabase } = await requireUser();
   const { data, error } = await supabase.rpc("preview_segundo_cerebro_import");
   if (error) {
-    return { ok: false, error: "No se pudo leer Segundo Cerebro. ¿Ya ejecutaste las migraciones de LIFE OS en Supabase?" };
+    return { ok: false, error: "Couldn't read Segundo Cerebro. Have you run the LIFE OS migrations in Supabase?" };
   }
   return {
     ok: true,
@@ -25,7 +25,7 @@ export async function previewImport(): Promise<{ ok: true; rows: PreviewRow[] } 
 export async function runImport(): Promise<{ ok: true; result: Record<string, number> } | { ok: false; error: string }> {
   const { supabase } = await requireUser();
   const { data, error } = await supabase.rpc("import_segundo_cerebro");
-  if (error) return { ok: false, error: "La importación no se completó. Tus datos originales siguen intactos." };
+  if (error) return { ok: false, error: "The import didn't finish. Your original data is untouched." };
   revalidatePath("/", "layout");
   return { ok: true, result: (data ?? {}) as Record<string, number> };
 }

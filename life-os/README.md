@@ -7,6 +7,7 @@ Tu sistema operativo personal: diario, salud mental, metas, finanzas, carrera, f
 - **Stack:** Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · componentes estilo shadcn/ui · Recharts · React Hook Form + Zod · date-fns · Sonner · Lucide.
 - **Backend:** el **mismo proyecto de Supabase** que usa Segundo Cerebro (Auth, Postgres con RLS, Storage).
 - **Hosting:** Vercel (carpeta raíz `life-os/`). Segundo Cerebro sigue en GitHub Pages sin cambios.
+- **Idioma:** la interfaz está en inglés (textos fijos, fechas y números en formato en-US; dinero en COP). Lo que tú escribes o importaste (categorías, emociones, notas, nombres) se muestra tal cual, sin traducir.
 
 ## Puesta en marcha
 
@@ -79,6 +80,7 @@ middleware.ts           Redirige a /login si no hay sesión
 - [x] Fase 5b: carrera (cargos y evolución salarial, aplicaciones con entrevistas, skills con historial de nivel, proyectos de portafolio, aprendizaje)
 - [x] Fase 6: entrenamiento físico y de estudio (simulacros con puntaje, nivel, preguntas, correctas, incorrectas y tiempo; entrenamientos con ejercicios, progresión por ejercicio, medidas corporales, nutrición opcional, frecuencia, volumen, tipos de actividad y sueño)
 - [x] Fase 7: analítica de vida (bienestar, físico, hábitos, metas, finanzas, carrera y actividad por periodo; comparaciones entre periodos y correlaciones exploratorias)
+- [x] Interfaz traducida al inglés (solo textos fijos)
 - [ ] Fase 8: pulido, accesibilidad, seguridad, CSV, pruebas, eliminación de cuenta
 
 Los módulos de fases futuras muestran una página que lo indica, sin controles falsos.

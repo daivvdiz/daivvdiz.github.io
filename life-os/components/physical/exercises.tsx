@@ -16,7 +16,7 @@ import { FORMATS, ValueLine, type FormatKind } from "./charts";
 
 const measureKind: Record<Measure, FormatKind> = { weight: "kg1", reps: "reps", time: "time", distance: "km" };
 const measureFormat = Object.fromEntries(Object.entries(measureKind).map(([k, v]) => [k, FORMATS[v]])) as Record<Measure, (v: number) => string>;
-const measureLabel: Record<Measure, string> = { weight: "Peso máximo del día", reps: "Repeticiones máximas del día", time: "Tiempo máximo del día", distance: "Distancia máxima del día" };
+const measureLabel: Record<Measure, string> = { weight: "Max weight of the day", reps: "Max reps of the day", time: "Max time of the day", distance: "Max distance of the day" };
 
 export function ExerciseProgress({ exercises }: { exercises: Exercise[] }) {
   const ed = useEditor<Exercise>();
@@ -28,9 +28,9 @@ export function ExerciseProgress({ exercises }: { exercises: Exercise[] }) {
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,20rem)_1fr]">
       <div className="space-y-3">
-        <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> Nuevo ejercicio</Button>
+        <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> New exercise</Button>
         {!exercises.length ? (
-          <EmptyState icon={TrendingUp} title="Sin ejercicios" description="Se crean al registrar un entrenamiento o aquí. Ej. dominadas, flexiones, parada de manos, sentadillas, fondos." />
+          <EmptyState icon={TrendingUp} title="No exercises" description="They're created when you log a workout, or here. E.g. pull-ups, push-ups, handstand, squats, dips." />
         ) : (
           <ul className="max-h-[28rem] space-y-1 overflow-auto pr-1">
             {exercises.map((e) => (
@@ -38,22 +38,22 @@ export function ExerciseProgress({ exercises }: { exercises: Exercise[] }) {
                 <button type="button" className="min-w-0 flex-1 text-left" aria-pressed={selected === e.id} onClick={() => setSelected(e.id)}>
                   <p className="truncate text-sm">{e.name}</p>
                   <p className="text-[11px] text-muted">
-                    {e.sessions} {e.sessions === 1 ? "sesión" : "sesiones"}
-                    {e.best != null && ` · mejor ${measureFormat[e.measure](e.best)}`}
-                    {e.lastOn && ` · ${formatDay(e.lastOn, "d MMM yy")}`}
+                    {e.sessions} {e.sessions === 1 ? "session" : "sessions"}
+                    {e.best != null && ` · best ${measureFormat[e.measure](e.best)}`}
+                    {e.lastOn && ` · ${formatDay(e.lastOn, "MMM d, yy")}`}
                   </p>
                 </button>
-                <Button size="icon" variant="ghost" className="size-7" aria-label={`Editar ${e.name}`} onClick={() => ed.setEditing(e)}><Pencil /></Button>
+                <Button size="icon" variant="ghost" className="size-7" aria-label={`Edit ${e.name}`} onClick={() => ed.setEditing(e)}><Pencil /></Button>
                 <ConfirmDialog
-                  trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Eliminar ${e.name}`}><Trash2 /></Button>}
-                  title={`¿Eliminar “${e.name}”?`}
+                  trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Delete ${e.name}`}><Trash2 /></Button>}
+                  title={`Delete “${e.name}”?`}
                   description={e.sessions
-                    ? `También se quitará de ${e.sessions} ${e.sessions === 1 ? "entrenamiento" : "entrenamientos"} (los entrenamientos se conservan). Si venía de Segundo Cerebro, reaparecería al volver a importar.`
-                    : "Esta acción no se puede deshacer."}
+                    ? `It will also be removed from ${e.sessions} ${e.sessions === 1 ? "workout" : "workouts"} (the workouts are kept). If it came from Segundo Cerebro, it would reappear when you import again.`
+                    : "This can't be undone."}
                   onConfirm={async () => {
                     const r = await deleteExercise(e.id);
                     if (!r.ok) return void toast.error(r.error);
-                    toast.success("Ejercicio eliminado");
+                    toast.success("Exercise deleted");
                   }}
                 />
               </li>
@@ -66,23 +66,23 @@ export function ExerciseProgress({ exercises }: { exercises: Exercise[] }) {
           <>
             <div>
               <h3 className="text-sm font-medium">{sel.name}</h3>
-              <p className="text-xs text-muted">{measureLabel[sel.measure]}. Se mide en {MEASURES[sel.measure].toLowerCase()}; cámbialo con el lápiz si no corresponde.</p>
+              <p className="text-xs text-muted">{measureLabel[sel.measure]}. Measured in {MEASURES[sel.measure].toLowerCase()}; change it with the pencil if that's not right.</p>
             </div>
             <ValueLine points={sel.progress} label={MEASURES[sel.measure]} format={measureKind[sel.measure]}
-              ariaLabel={`Progresión de ${sel.name}`} tableExtra="Detalle" />
+              ariaLabel={`${sel.name} progression`} tableExtra="Details" />
           </>
         ) : (
-          <p className="text-sm text-muted">Elige un ejercicio para ver su progresión.</p>
+          <p className="text-sm text-muted">Choose an exercise to see its progression.</p>
         )}
       </div>
       <EntityDialog<ExerciseInput>
         open={ed.open} onOpenChange={(o) => !o && ed.close()}
-        title={it ? "Editar ejercicio" : "Nuevo ejercicio"} description="La medida define qué valor se usa para ver tu progresión."
+        title={it ? "Edit exercise" : "New exercise"} description="The measure sets which value is used to show your progression."
         schema={exerciseSchema}
         defaults={it ? { name: it.name, measure: it.measure } : { name: "", measure: "reps" }}
         fields={[
-          { name: "name", label: "Nombre", kind: "text", placeholder: "Ej. Dominadas" },
-          { name: "measure", label: "Progreso medido por", kind: "select", options: MEASURES },
+          { name: "name", label: "Name", kind: "text", placeholder: "E.g. Pull-ups" },
+          { name: "measure", label: "Progress measured by", kind: "select", options: MEASURES },
         ]}
         onSave={(v) => saveExercise(v, it?.id)}
       />

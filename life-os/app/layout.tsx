@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "LIFE OS", template: "%s · LIFE OS" },
-  description: "Tu sistema operativo personal.",
+  description: "Your personal operating system.",
   robots: { index: false, follow: false },
 };
 
@@ -20,7 +20,7 @@ const themeScript = `try{var t=localStorage.getItem('lifeos-theme');var a=localS
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

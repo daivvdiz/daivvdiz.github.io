@@ -19,53 +19,53 @@ export function ProfileForm({ initial, email }: { initial: ProfileInput; email: 
 
   const onSubmit = handleSubmit(async (v) => {
     const res = await saveProfile(v);
-    if (res.ok) toast.success("Perfil guardado");
+    if (res.ok) toast.success("Profile saved");
     else toast.error(res.error);
   });
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2" noValidate>
       <div className="space-y-1.5">
-        <Label htmlFor="full_name">Nombre</Label>
-        <Input id="full_name" {...register("full_name")} placeholder="¿Cómo quieres que te salude?" />
+        <Label htmlFor="full_name">Name</Label>
+        <Input id="full_name" {...register("full_name")} placeholder="What should we call you?" />
         <FieldError message={formState.errors.full_name?.message} />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="email">Correo</Label>
+        <Label htmlFor="email">Email</Label>
         <Input id="email" value={email} disabled readOnly />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="timezone">Zona horaria</Label>
+        <Label htmlFor="timezone">Time zone</Label>
         <Select id="timezone" {...register("timezone")}>
           {ZONES.map((z) => <option key={z} value={z}>{z.replace("_", " ")}</option>)}
         </Select>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="currency">Moneda</Label>
+        <Label htmlFor="currency">Currency</Label>
         <Select id="currency" {...register("currency")}>
-          <option value="COP">Peso colombiano (COP)</option>
-          <option value="USD">Dólar (USD)</option>
+          <option value="COP">Colombian peso (COP)</option>
+          <option value="USD">US dollar (USD)</option>
           <option value="EUR">Euro (EUR)</option>
         </Select>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="week_starts_on">La semana empieza el</Label>
+        <Label htmlFor="week_starts_on">Week starts on</Label>
         <Select id="week_starts_on" {...register("week_starts_on")}>
-          <option value={1}>Lunes</option>
-          <option value={0}>Domingo</option>
+          <option value={1}>Monday</option>
+          <option value={0}>Sunday</option>
         </Select>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="default_period">Periodo de analítica por defecto</Label>
+        <Label htmlFor="default_period">Default analytics period</Label>
         <Select id="default_period" {...register("default_period")}>
-          <option value="7d">Últimos 7 días</option>
-          <option value="30d">Últimos 30 días</option>
-          <option value="90d">Últimos 90 días</option>
-          <option value="180d">Últimos 6 meses</option>
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+          <option value="90d">Last 90 days</option>
+          <option value="180d">Last 6 months</option>
         </Select>
       </div>
       <div className="sm:col-span-2">
-        <Button type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? "Guardando…" : "Guardar perfil"}</Button>
+        <Button type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? "Saving…" : "Save profile"}</Button>
       </div>
     </form>
   );

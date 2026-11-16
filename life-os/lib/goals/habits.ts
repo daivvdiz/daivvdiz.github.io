@@ -39,7 +39,7 @@ export function habitStats(h: Habit, logs: HabitLog[], from: string, to: string,
   let total = 0;
   for (const [d, l] of own) if (d >= from && d <= to && l.value != null) total += Number(l.value);
 
-  if (start > to) return { done: 0, expected: 0, unit: h.frequency === "weekly" ? "semanas" : "días", total };
+  if (start > to) return { done: 0, expected: 0, unit: h.frequency === "weekly" ? "weeks" : "days", total };
 
   if (h.frequency === "weekly") {
     let expected = 0, done = 0;
@@ -57,7 +57,7 @@ export function habitStats(h: Habit, logs: HabitLog[], from: string, to: string,
       expected++;
       if (met) done++;
     }
-    return { done, expected, unit: "semanas", total };
+    return { done, expected, unit: "weeks", total };
   }
 
   let expected = 0, done = 0;
@@ -66,12 +66,12 @@ export function habitStats(h: Habit, logs: HabitLog[], from: string, to: string,
     expected++;
     if (isDone(h, own.get(d))) done++;
   }
-  return { done, expected, unit: "días", total };
+  return { done, expected, unit: "days", total };
 }
 
 export function describeFrequency(h: Pick<Habit, "frequency" | "times_per_period" | "weekdays">) {
-  const names = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
-  if (h.frequency === "daily") return "Todos los días";
-  if (h.frequency === "weekly") return `${h.times_per_period} ${h.times_per_period === 1 ? "vez" : "veces"} por semana`;
+  const names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  if (h.frequency === "daily") return "Every day";
+  if (h.frequency === "weekly") return `${h.times_per_period} ${h.times_per_period === 1 ? "time" : "times"} a week`;
   return (h.weekdays ?? []).slice().sort().map((d) => names[d]).join(", ");
 }

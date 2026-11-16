@@ -36,9 +36,9 @@ export function Projects({ projects, skills, goals, today }: { projects: Project
   const goalName = new Map(goals.map((g) => [g.id, g.title]));
   return (
     <div className="space-y-3">
-      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> Nuevo proyecto</Button>
+      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> New project</Button>
       {!projects.length ? (
-        <EmptyState icon={FolderGit2} title="Sin proyectos" description="Tu portafolio: el problema que resolviste, cómo lo hiciste y qué resultados tuvo." />
+        <EmptyState icon={FolderGit2} title="No projects" description="Your portfolio: the problem you solved, how you did it and what the results were." />
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {projects.map((p) => (
@@ -47,37 +47,37 @@ export function Projects({ projects, skills, goals, today }: { projects: Project
                 <div className="min-w-0 flex-1">
                   <p className="break-words text-sm font-medium">{p.name}</p>
                   <p className="text-[11px] text-muted">
-                    {PROJECT_STATUS[p.status]}{p.completed_on && ` · terminado el ${formatDay(p.completed_on)}`}
-                    {p.goal_id && goalName.get(p.goal_id) && ` · Meta: ${goalName.get(p.goal_id)}`}
+                    {PROJECT_STATUS[p.status]}{p.completed_on && ` · finished ${formatDay(p.completed_on)}`}
+                    {p.goal_id && goalName.get(p.goal_id) && ` · Goal: ${goalName.get(p.goal_id)}`}
                   </p>
                 </div>
-                <Button size="icon" variant="ghost" className="size-7" aria-label={`Editar ${p.name}`} onClick={() => ed.setEditing(p)}><Pencil /></Button>
+                <Button size="icon" variant="ghost" className="size-7" aria-label={`Edit ${p.name}`} onClick={() => ed.setEditing(p)}><Pencil /></Button>
                 <ConfirmDialog
-                  trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Eliminar ${p.name}`}><Trash2 /></Button>}
-                  title={`¿Eliminar “${p.name}”?`} description="Esta acción no se puede deshacer."
+                  trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Delete ${p.name}`}><Trash2 /></Button>}
+                  title={`Delete “${p.name}”?`} description="This can't be undone."
                   onConfirm={async () => {
                     const r = await deleteProject(p.id);
                     if (!r.ok) return void toast.error(r.error);
-                    toast.success("Proyecto eliminado");
+                    toast.success("Project deleted");
                   }}
                 />
               </div>
-              {p.business_problem && <p className="mt-1.5 break-words text-xs"><span className="text-muted">Problema: </span>{p.business_problem}</p>}
-              {p.results && <p className="mt-1 break-words text-xs"><span className="text-muted">Resultados: </span>{p.results}</p>}
+              {p.business_problem && <p className="mt-1.5 break-words text-xs"><span className="text-muted">Problem: </span>{p.business_problem}</p>}
+              {p.results && <p className="mt-1 break-words text-xs"><span className="text-muted">Results: </span>{p.results}</p>}
               {(p.technologies.length > 0 || p.skill_ids.length > 0) && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {p.technologies.map((t) => <span key={t} className="rounded bg-surface px-1.5 py-0.5 text-[11px]">{t}</span>)}
                   {p.skill_ids.map((s) => skillName.get(s) && <span key={s} className="rounded border border-border px-1.5 py-0.5 text-[11px] text-muted">{skillName.get(s)}</span>)}
                 </div>
               )}
-              <Links urls={[[p.repository_url, "Repositorio"], [p.documentation_url, "Documentación"]]} />
+              <Links urls={[[p.repository_url, "Repository"], [p.documentation_url, "Documentation"]]} />
             </li>
           ))}
         </ul>
       )}
       <EntityDialog<ProjectInput>
         open={ed.open} onOpenChange={(o) => !o && ed.close()} wide
-        title={it ? "Editar proyecto" : "Nuevo proyecto"}
+        title={it ? "Edit project" : "New project"}
         schema={projectSchema}
         defaults={it
           ? {
@@ -87,17 +87,17 @@ export function Projects({ projects, skills, goals, today }: { projects: Project
             }
           : { name: "", description: "", business_problem: "", technologies: "", results: "", repository_url: "", documentation_url: "", status: "in_progress", completed_on: "", goal_id: "", skill_ids: [] }}
         fields={[
-          { name: "name", label: "Nombre", kind: "text" },
-          { name: "status", label: "Estado", kind: "select", options: PROJECT_STATUS, half: true },
-          { name: "completed_on", label: "Terminado el (opcional)", kind: "date", half: true },
-          { name: "business_problem", label: "Problema que resuelve", kind: "textarea" },
-          { name: "description", label: "Descripción", kind: "textarea" },
-          { name: "results", label: "Resultados", kind: "textarea" },
-          { name: "technologies", label: "Tecnologías", kind: "text", placeholder: "Python, SQL, Power BI", hint: "Sepáralas con comas." },
-          { name: "repository_url", label: "Repositorio (opcional)", kind: "url", placeholder: "https://github.com/…", half: true },
-          { name: "documentation_url", label: "Documentación (opcional)", kind: "url", placeholder: "https://…", half: true },
-          { name: "goal_id", label: "Meta relacionada (opcional)", kind: "select", options: toOptions(goals, "Ninguna") },
-          { name: "skill_ids", label: "Skills que usa", kind: "toggles", options: toOptions(skills), hint: "Crea skills en la pestaña Skills para vincularlas." },
+          { name: "name", label: "Name", kind: "text" },
+          { name: "status", label: "Status", kind: "select", options: PROJECT_STATUS, half: true },
+          { name: "completed_on", label: "Finished on (optional)", kind: "date", half: true },
+          { name: "business_problem", label: "Problem it solves", kind: "textarea" },
+          { name: "description", label: "Description", kind: "textarea" },
+          { name: "results", label: "Results", kind: "textarea" },
+          { name: "technologies", label: "Technologies", kind: "text", placeholder: "Python, SQL, Power BI", hint: "Separate them with commas." },
+          { name: "repository_url", label: "Repository (optional)", kind: "url", placeholder: "https://github.com/…", half: true },
+          { name: "documentation_url", label: "Documentation (optional)", kind: "url", placeholder: "https://…", half: true },
+          { name: "goal_id", label: "Related goal (optional)", kind: "select", options: toOptions(goals, "None") },
+          { name: "skill_ids", label: "Skills used", kind: "toggles", options: toOptions(skills), hint: "Create skills in the Skills tab to link them." },
         ]}
         onSave={(v) => saveProject(v, it?.id)}
       />
@@ -119,55 +119,55 @@ export function LearningList({ items, skills, today }: { items: Learning[]; skil
             <div className="min-w-0 flex-1">
               <p className="break-words text-sm font-medium">{l.title}</p>
               <p className="text-[11px] text-muted">
-                {[LEARNING_KINDS[l.kind], l.provider, l.skill_id && skillName.get(l.skill_id), l.started_on && `desde ${formatDay(l.started_on)}`, l.completed_on && `terminado el ${formatDay(l.completed_on)}`]
+                {[LEARNING_KINDS[l.kind], l.provider, l.skill_id && skillName.get(l.skill_id), l.started_on && `since ${formatDay(l.started_on)}`, l.completed_on && `finished ${formatDay(l.completed_on)}`]
                   .filter(Boolean).join(" · ")}
               </p>
             </div>
             <span className="shrink-0 text-xs tabular-nums">{l.progress}%</span>
-            <Button size="icon" variant="ghost" className="size-7" aria-label={`Editar ${l.title}`} onClick={() => ed.setEditing(l)}><Pencil /></Button>
+            <Button size="icon" variant="ghost" className="size-7" aria-label={`Edit ${l.title}`} onClick={() => ed.setEditing(l)}><Pencil /></Button>
             <ConfirmDialog
-              trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Eliminar ${l.title}`}><Trash2 /></Button>}
-              title={`¿Eliminar “${l.title}”?`} description="Esta acción no se puede deshacer."
+              trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Delete ${l.title}`}><Trash2 /></Button>}
+              title={`Delete “${l.title}”?`} description="This can't be undone."
               onConfirm={async () => {
                 const r = await deleteLearning(l.id);
                 if (!r.ok) return void toast.error(r.error);
-                toast.success("Eliminado");
+                toast.success("Deleted");
               }}
             />
           </div>
-          <div className="mt-2"><ProgressBar value={l.progress} label={`Avance de ${l.title}`} /></div>
-          <Links urls={[[l.url, "Abrir"]]} />
+          <div className="mt-2"><ProgressBar value={l.progress} label={`${l.title} progress`} /></div>
+          <Links urls={[[l.url, "Open"]]} />
         </li>
       ))}
     </ul>
   );
   return (
     <div className="space-y-3">
-      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> Nuevo curso o recurso</Button>
+      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> New course or resource</Button>
       {!items.length ? (
-        <EmptyState icon={BookOpen} title="Sin aprendizaje registrado" description="Cursos, certificaciones, objetivos y recursos, con su avance." />
+        <EmptyState icon={BookOpen} title="No learning logged" description="Courses, certifications, goals and resources, with their progress." />
       ) : (
         <>
-          {active.length > 0 && <section><h3 className="mb-1.5 text-xs font-medium text-muted">En curso ({active.length})</h3>{render(active)}</section>}
-          {done.length > 0 && <section><h3 className="mb-1.5 text-xs font-medium text-muted">Terminados ({done.length})</h3>{render(done)}</section>}
+          {active.length > 0 && <section><h3 className="mb-1.5 text-xs font-medium text-muted">In progress ({active.length})</h3>{render(active)}</section>}
+          {done.length > 0 && <section><h3 className="mb-1.5 text-xs font-medium text-muted">Finished ({done.length})</h3>{render(done)}</section>}
         </>
       )}
       <EntityDialog<LearningInput>
         open={ed.open} onOpenChange={(o) => !o && ed.close()}
-        title={it ? "Editar" : "Nuevo curso o recurso"} description="Al poner fecha de terminado pasa a la lista de terminados."
+        title={it ? "Edit" : "New course or resource"} description="Setting a finish date moves it to the finished list."
         schema={learningSchema}
         defaults={it
           ? { title: it.title, kind: it.kind, provider: it.provider ?? "", url: it.url ?? "", progress: it.progress, started_on: it.started_on ?? "", completed_on: it.completed_on ?? "", skill_id: it.skill_id ?? "" }
           : { title: "", kind: "course", provider: "", url: "", progress: 0, started_on: today, completed_on: "", skill_id: "" }}
         fields={[
-          { name: "title", label: "Título", kind: "text" },
-          { name: "kind", label: "Tipo", kind: "select", options: LEARNING_KINDS, half: true },
-          { name: "provider", label: "Plataforma o institución", kind: "text", placeholder: "Ej. Coursera, Platzi", half: true },
-          { name: "progress", label: "Avance", kind: "range" },
-          { name: "started_on", label: "Inicio (opcional)", kind: "date", half: true },
-          { name: "completed_on", label: "Terminado el (opcional)", kind: "date", half: true },
-          { name: "skill_id", label: "Skill relacionada (opcional)", kind: "select", options: toOptions(skills, "Ninguna") },
-          { name: "url", label: "Enlace (opcional)", kind: "url", placeholder: "https://…" },
+          { name: "title", label: "Title", kind: "text" },
+          { name: "kind", label: "Type", kind: "select", options: LEARNING_KINDS, half: true },
+          { name: "provider", label: "Platform or institution", kind: "text", placeholder: "E.g. Coursera, Platzi", half: true },
+          { name: "progress", label: "Progress", kind: "range" },
+          { name: "started_on", label: "Start (optional)", kind: "date", half: true },
+          { name: "completed_on", label: "Finished on (optional)", kind: "date", half: true },
+          { name: "skill_id", label: "Related skill (optional)", kind: "select", options: toOptions(skills, "None") },
+          { name: "url", label: "Link (optional)", kind: "url", placeholder: "https://…" },
         ]}
         onSave={(v) => saveLearning(v, it?.id)}
       />

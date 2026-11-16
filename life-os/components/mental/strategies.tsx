@@ -31,33 +31,33 @@ function StrategyDialog({ open, onOpenChange, item }: { open: boolean; onOpenCha
   const onSubmit = handleSubmit(async (v) => {
     const r = await saveStrategy(v, item?.id);
     if (!r.ok) return void toast.error(r.error);
-    toast.success(item ? "Estrategia actualizada" : "Estrategia creada");
+    toast.success(item ? "Strategy updated" : "Strategy created");
     onOpenChange(false);
   });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{item ? "Editar estrategia" : "Nueva estrategia"}</DialogTitle>
-          <DialogDescription>Algo que haces para cuidarte cuando lo necesitas.</DialogDescription>
+          <DialogTitle>{item ? "Edit strategy" : "New strategy"}</DialogTitle>
+          <DialogDescription>Something you do to take care of yourself when you need it.</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <div className="space-y-1.5">
-            <Label htmlFor="st-name">Nombre</Label>
+            <Label htmlFor="st-name">Name</Label>
             <Input id="st-name" maxLength={80} aria-invalid={!!formState.errors.name} {...register("name")} />
             <FieldError message={formState.errors.name?.message} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="st-desc">Descripción (opcional)</Label>
+            <Label htmlFor="st-desc">Description (optional)</Label>
             <Textarea id="st-desc" rows={3} {...register("description")} />
           </div>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" className="size-4 accent-[var(--accent)]" {...register("is_active")} />
-            La uso actualmente
+            I currently use it
           </label>
           <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? "Guardando…" : "Guardar"}</Button>
+            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? "Saving…" : "Save"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -80,27 +80,27 @@ function LogDialog({
   const onSubmit = handleSubmit(async (v) => {
     const r = await saveStrategyLog(v, log?.id);
     if (!r.ok) return void toast.error(r.error);
-    toast.success(log ? "Registro actualizado" : "Uso registrado");
+    toast.success(log ? "Entry updated" : "Use logged");
     onOpenChange(false);
   });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{log ? "Editar registro" : "Registrar uso"}</DialogTitle>
-          <DialogDescription>Anotar si te ayudó es opcional.</DialogDescription>
+          <DialogTitle>{log ? "Edit entry" : "Log use"}</DialogTitle>
+          <DialogDescription>Noting whether it helped is optional.</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="lg-st">Estrategia</Label>
+              <Label htmlFor="lg-st">Strategy</Label>
               <Select id="lg-st" {...register("coping_strategy_id")}>
                 {strategies.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </Select>
               <FieldError message={formState.errors.coping_strategy_id?.message} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="lg-date">Fecha</Label>
+              <Label htmlFor="lg-date">Date</Label>
               <Input id="lg-date" type="date" max={today} {...register("used_on")} />
               <FieldError message={formState.errors.used_on?.message} />
             </div>
@@ -110,7 +110,7 @@ function LogDialog({
             name="helped"
             render={({ field }) => (
               <div className="space-y-1.5">
-                <span id="lg-helped" className="text-sm font-medium">¿Te ayudó?</span>
+                <span id="lg-helped" className="text-sm font-medium">Did it help?</span>
                 <div role="radiogroup" aria-labelledby="lg-helped" className="grid grid-cols-1 gap-1 sm:grid-cols-5">
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button key={n} type="button" role="radio" aria-checked={field.value === n}
@@ -121,17 +121,17 @@ function LogDialog({
                     </button>
                   ))}
                 </div>
-                <p className="text-[11px] text-muted">{field.value == null ? "Sin valorar" : "Toca de nuevo para quitar la valoración."}</p>
+                <p className="text-[11px] text-muted">{field.value == null ? "Not rated" : "Tap again to clear the rating."}</p>
               </div>
             )}
           />
           <div className="space-y-1.5">
-            <Label htmlFor="lg-notes">Notas (opcional)</Label>
+            <Label htmlFor="lg-notes">Notes (optional)</Label>
             <Textarea id="lg-notes" rows={3} {...register("notes")} />
           </div>
           <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={formState.isSubmitting || !strategies.length}>{formState.isSubmitting ? "Guardando…" : "Guardar"}</Button>
+            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="submit" disabled={formState.isSubmitting || !strategies.length}>{formState.isSubmitting ? "Saving…" : "Save"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -155,24 +155,24 @@ export function Strategies({ strategies, logs, today }: { strategies: Strategy[]
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" onClick={() => setLogging({})} disabled={!strategies.length}><Plus /> Registrar uso</Button>
-        <Button size="sm" variant="secondary" onClick={() => setEditing("new")}><Plus /> Nueva estrategia</Button>
+        <Button size="sm" onClick={() => setLogging({})} disabled={!strategies.length}><Plus /> Log use</Button>
+        <Button size="sm" variant="secondary" onClick={() => setEditing("new")}><Plus /> New strategy</Button>
       </div>
 
       {!strategies.length ? (
         <EmptyState
           icon={LifeBuoy}
-          title="Aún no tienes estrategias"
-          description={`Puedes crear las tuyas o empezar con algunas comunes: ${SUGGESTED_STRATEGIES.join(", ").toLowerCase()}.`}
+          title="No strategies yet"
+          description={`You can create your own or start with some common ones: ${SUGGESTED_STRATEGIES.join(", ").toLowerCase()}.`}
           action={
             <Button size="sm" variant="secondary" disabled={pending} onClick={async () => {
               setPending(true);
               const r = await addSuggestedStrategies();
               setPending(false);
               if (!r.ok) return void toast.error(r.error);
-              toast.success("Estrategias agregadas");
+              toast.success("Strategies added");
             }}>
-              Agregar las sugeridas
+              Add the suggested ones
             </Button>
           }
         />
@@ -184,25 +184,25 @@ export function Strategies({ strategies, logs, today }: { strategies: Strategy[]
               <li key={s.id} className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center">
                 <div className="min-w-0 flex-1">
                   <p className={cn("text-sm font-medium break-words", !s.is_active && "text-muted")}>
-                    {s.name}{!s.is_active && <span className="ml-2 text-xs font-normal">(sin usar ahora)</span>}
+                    {s.name}{!s.is_active && <span className="ml-2 text-xs font-normal">(not in use now)</span>}
                   </p>
                   {s.description && <p className="text-xs text-muted break-words">{s.description}</p>}
                   <p className="mt-0.5 text-xs text-muted tabular-nums">
-                    {st.uses} {st.uses === 1 ? "uso" : "usos"} en el periodo
-                    {st.rated > 0 && <> · ayudó en promedio {formatNumber(st.avg, 1)}/5 ({st.rated} {st.rated === 1 ? "valoración" : "valoraciones"})</>}
+                    {st.uses} {st.uses === 1 ? "use" : "uses"} in this period
+                    {st.rated > 0 && <> · helped {formatNumber(st.avg, 1)}/5 on average ({st.rated} {st.rated === 1 ? "rating" : "ratings"})</>}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <Button size="sm" variant="secondary" onClick={() => setLogging({ strategy: s.id })}>Usé esta</Button>
-                  <Button size="icon" variant="ghost" className="size-8" aria-label={`Editar ${s.name}`} onClick={() => setEditing(s)}><Pencil /></Button>
+                  <Button size="sm" variant="secondary" onClick={() => setLogging({ strategy: s.id })}>I used this</Button>
+                  <Button size="icon" variant="ghost" className="size-8" aria-label={`Edit ${s.name}`} onClick={() => setEditing(s)}><Pencil /></Button>
                   <ConfirmDialog
-                    trigger={<Button size="icon" variant="ghost" className="size-8" aria-label={`Eliminar ${s.name}`}><Trash2 /></Button>}
-                    title={`¿Eliminar “${s.name}”?`}
-                    description="También se eliminarán todos sus registros de uso. Si solo ya no la usas, puedes editarla y desmarcar “La uso actualmente”."
+                    trigger={<Button size="icon" variant="ghost" className="size-8" aria-label={`Delete ${s.name}`}><Trash2 /></Button>}
+                    title={`Delete “${s.name}”?`}
+                    description="All its usage entries will also be deleted. If you just don't use it anymore, you can edit it and uncheck “I currently use it”."
                     onConfirm={async () => {
                       const r = await deleteStrategy(s.id);
                       if (!r.ok) return void toast.error(r.error);
-                      toast.success("Estrategia eliminada");
+                      toast.success("Strategy deleted");
                     }}
                   />
                 </div>
@@ -214,26 +214,26 @@ export function Strategies({ strategies, logs, today }: { strategies: Strategy[]
 
       {logs.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-xs font-medium text-muted">Usos registrados en el periodo ({logs.length})</h3>
+          <h3 className="text-xs font-medium text-muted">Uses logged in this period ({logs.length})</h3>
           <ul className="max-h-72 space-y-1.5 overflow-auto">
             {logs.map((l) => (
               <li key={l.id} className="flex items-start gap-2 rounded-md border border-border px-3 py-2 text-sm">
                 <div className="min-w-0 flex-1">
                   <p className="break-words">
-                    <span className="font-medium">{name.get(l.coping_strategy_id) ?? "Estrategia"}</span>
-                    <span className="text-muted"> · {formatDay(l.used_on, "EEE d MMM")} · {l.helped ? HELPED_LABELS[l.helped] : "Sin valorar"}</span>
+                    <span className="font-medium">{name.get(l.coping_strategy_id) ?? "Strategy"}</span>
+                    <span className="text-muted"> · {formatDay(l.used_on, "EEE, MMM d")} · {l.helped ? HELPED_LABELS[l.helped] : "Not rated"}</span>
                   </p>
                   {l.notes && <p className="text-xs text-muted break-words">{l.notes}</p>}
                 </div>
-                <Button size="icon" variant="ghost" className="size-7" aria-label="Editar registro" onClick={() => setLogging({ log: l })}><Pencil /></Button>
+                <Button size="icon" variant="ghost" className="size-7" aria-label="Edit entry" onClick={() => setLogging({ log: l })}><Pencil /></Button>
                 <ConfirmDialog
-                  trigger={<Button size="icon" variant="ghost" className="size-7" aria-label="Eliminar registro"><Trash2 /></Button>}
-                  title="¿Eliminar este registro?"
-                  description="Se eliminará este uso. La estrategia se mantiene."
+                  trigger={<Button size="icon" variant="ghost" className="size-7" aria-label="Delete entry"><Trash2 /></Button>}
+                  title="Delete this entry?"
+                  description="This use will be deleted. The strategy stays."
                   onConfirm={async () => {
                     const r = await deleteStrategyLog(l.id);
                     if (!r.ok) return void toast.error(r.error);
-                    toast.success("Registro eliminado");
+                    toast.success("Entry deleted");
                   }}
                 />
               </li>

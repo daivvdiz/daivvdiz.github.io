@@ -19,7 +19,7 @@ export function ScalePicker({
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between">
         <span id={id} className="text-xs font-medium text-muted">{label}</span>
-        <span className="text-xs tabular-nums">{value == null ? "Sin registrar" : `${value}/10`}</span>
+        <span className="text-xs tabular-nums">{value == null ? "Not logged" : `${value}/10`}</span>
       </div>
       <div role="radiogroup" aria-labelledby={id} className="grid grid-cols-10 gap-1">
         {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (

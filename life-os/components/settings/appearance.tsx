@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 import { saveAppearance } from "@/lib/profile/actions";
 
 const ACCENTS = [
-  { key: "violet", label: "Violeta", color: "#8b8cf6" },
-  { key: "blue", label: "Azul", color: "#6d9fd8" },
-  { key: "green", label: "Verde", color: "#5fb37f" },
-  { key: "amber", label: "Ámbar", color: "#d6a64f" },
+  { key: "violet", label: "Violet", color: "#8b8cf6" },
+  { key: "blue", label: "Blue", color: "#6d9fd8" },
+  { key: "green", label: "Green", color: "#5fb37f" },
+  { key: "amber", label: "Amber", color: "#d6a64f" },
 ] as const;
 
 export function AppearanceSettings({ theme: initialTheme, accent: initialAccent }: { theme: "dark" | "light"; accent: string }) {
@@ -36,9 +36,9 @@ export function AppearanceSettings({ theme: initialTheme, accent: initialAccent 
   return (
     <div className="space-y-5">
       <fieldset>
-        <legend className="mb-2 text-xs font-medium text-muted">Tema</legend>
+        <legend className="mb-2 text-xs font-medium text-muted">Theme</legend>
         <div className="flex gap-2">
-          {([["dark", "Oscuro", Moon], ["light", "Claro", Sun]] as const).map(([k, label, Icon]) => (
+          {([["dark", "Dark", Moon], ["light", "Light", Sun]] as const).map(([k, label, Icon]) => (
             <button
               key={k}
               type="button"
@@ -55,7 +55,7 @@ export function AppearanceSettings({ theme: initialTheme, accent: initialAccent 
         </div>
       </fieldset>
       <fieldset>
-        <legend className="mb-2 text-xs font-medium text-muted">Color de acento</legend>
+        <legend className="mb-2 text-xs font-medium text-muted">Accent color</legend>
         <div className="flex gap-2">
           {ACCENTS.map((a) => (
             <button

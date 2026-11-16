@@ -16,7 +16,7 @@ const TABLES = [
 
 export async function GET() {
   const { supabase, user } = await getUser();
-  if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const out: Record<string, unknown[]> = {};
   for (const t of TABLES) {

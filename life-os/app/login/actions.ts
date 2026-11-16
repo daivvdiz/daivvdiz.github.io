@@ -5,8 +5,8 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
 const schema = z.object({
-  email: z.string().trim().email("Escribe un correo válido"),
-  password: z.string().min(1, "Escribe tu contraseña"),
+  email: z.string().trim().email("Enter a valid email"),
+  password: z.string().min(1, "Enter your password"),
   next: z.string().optional(),
 });
 
@@ -24,7 +24,7 @@ export async function signIn(_prev: LoginState, formData: FormData): Promise<Log
   });
   if (error) {
     return {
-      error: error.message === "Invalid login credentials" ? "Correo o contraseña incorrectos" : "No se pudo iniciar sesión. Inténtalo de nuevo.",
+      error: error.message === "Invalid login credentials" ? "Incorrect email or password" : "Couldn't sign in. Please try again.",
       email,
     };
   }

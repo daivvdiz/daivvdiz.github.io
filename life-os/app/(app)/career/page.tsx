@@ -16,16 +16,16 @@ import { utcToZoned } from "@/lib/dates";
 import { formatDay, formatMoney, formatNumber, todayISO } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Carrera" };
+export const metadata: Metadata = { title: "Career" };
 export const dynamic = "force-dynamic";
 
 const TABS = [
-  { key: "summary", label: "Resumen" },
-  { key: "applications", label: "Aplicaciones" },
+  { key: "summary", label: "Overview" },
+  { key: "applications", label: "Applications" },
   { key: "skills", label: "Skills" },
-  { key: "projects", label: "Proyectos" },
-  { key: "learning", label: "Aprendizaje" },
-  { key: "positions", label: "Cargos y salario" },
+  { key: "projects", label: "Projects" },
+  { key: "learning", label: "Learning" },
+  { key: "positions", label: "Roles & salary" },
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 
@@ -50,9 +50,9 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageHeader title="Carrera" description="Tu trayectoria, procesos de selección, skills, proyectos y aprendizaje." />
+      <PageHeader title="Career" description="Your career path, hiring processes, skills, projects and learning." />
 
-      <nav aria-label="Secciones de Carrera" className="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <nav aria-label="Career sections" className="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         <div className="flex w-max gap-1 rounded-md border border-border p-0.5">
           {TABS.map((t) => (
             <Link key={t.key} href={href(t.key)} aria-current={tab === t.key ? "page" : undefined}
@@ -65,34 +65,34 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
 
       {d.error && (
         <Card className="mb-5 flex items-center gap-2 border-danger/40 px-4 py-3 text-sm">
-          <AlertTriangle className="size-4 text-danger" aria-hidden /> No se pudieron cargar tus datos. Intenta recargar la página.
+          <AlertTriangle className="size-4 text-danger" aria-hidden /> Couldn't load your data. Try reloading the page.
         </Card>
       )}
 
       {tab === "summary" && (
         <div className="grid gap-5 lg:grid-cols-2">
           <Card>
-            <CardHeader><div><CardTitle>Hoy</CardTitle><CardDescription>Tu cargo y salario más recientes.</CardDescription></div></CardHeader>
+            <CardHeader><div><CardTitle>Today</CardTitle><CardDescription>Your most recent role and salary.</CardDescription></div></CardHeader>
             <CardContent className="space-y-1">
               {current || lastSalary ? (
                 <>
                   <p className="text-lg font-semibold">{(current ?? lastSalary)!.title}</p>
-                  <p className="text-sm text-muted">{(current ?? lastSalary)!.company ?? "Sin empresa"} · desde {formatDay((current ?? lastSalary)!.started_on)}</p>
-                  {lastSalary && <p className="pt-2 text-sm">Salario mensual más reciente: <span className="font-medium tabular-nums">{formatMoney(lastSalary.monthly_salary)}</span> <span className="text-xs text-muted">({formatDay(lastSalary.started_on)})</span></p>}
+                  <p className="text-sm text-muted">{(current ?? lastSalary)!.company ?? "No company"} · since {formatDay((current ?? lastSalary)!.started_on)}</p>
+                  {lastSalary && <p className="pt-2 text-sm">Most recent monthly salary: <span className="font-medium tabular-nums">{formatMoney(lastSalary.monthly_salary)}</span> <span className="text-xs text-muted">({formatDay(lastSalary.started_on)})</span></p>}
                 </>
               ) : (
-                <p className="text-sm text-muted">Sin cargos registrados. <Link className="text-accent hover:underline" href={href("positions")}>Agregar uno</Link></p>
+                <p className="text-sm text-muted">No roles logged. <Link className="text-accent hover:underline" href={href("positions")}>Add one</Link></p>
               )}
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><div><CardTitle>Evolución del salario</CardTitle><CardDescription>Según los cargos y salarios que registraste.</CardDescription></div></CardHeader>
+            <CardHeader><div><CardTitle>Salary over time</CardTitle><CardDescription>Based on the roles and salaries you logged.</CardDescription></div></CardHeader>
             <CardContent><SalaryChart positions={d.positions} /></CardContent>
           </Card>
           <Card>
             <CardHeader>
-              <div><CardTitle>Procesos abiertos</CardTitle><CardDescription>{openApps.length} de {d.applications.length} aplicaciones.</CardDescription></div>
-              <Button asChild size="sm" variant="ghost"><Link href={href("applications")}>Ver todas</Link></Button>
+              <div><CardTitle>Open processes</CardTitle><CardDescription>{openApps.length} of {d.applications.length} {d.applications.length === 1 ? "application" : "applications"}.</CardDescription></div>
+              <Button asChild size="sm" variant="ghost"><Link href={href("applications")}>View all</Link></Button>
             </CardHeader>
             <CardContent className="space-y-4">
               {openApps.length ? (
@@ -101,15 +101,15 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
                     <li key={x.s} className="flex justify-between"><span>{STAGES[x.s]}</span><span className="tabular-nums text-muted">{x.n}</span></li>
                   ))}
                 </ul>
-              ) : <p className="text-sm text-muted">No tienes procesos abiertos.</p>}
+              ) : <p className="text-sm text-muted">You have no open processes.</p>}
               {upcoming.length > 0 && (
                 <div>
-                  <h3 className="mb-1.5 text-xs font-medium text-muted">Próximas entrevistas</h3>
+                  <h3 className="mb-1.5 text-xs font-medium text-muted">Upcoming interviews</h3>
                   <ul className="space-y-1 text-sm">
                     {upcoming.map((i) => (
                       <li key={i.id} className="flex items-start gap-1.5">
                         <CalendarClock className="mt-0.5 size-3.5 shrink-0 text-muted" aria-hidden />
-                        <span className="min-w-0 break-words">{formatDay(i.z.date, "EEE d MMM")} · {i.z.time} — {i.app.position} · {i.app.company}</span>
+                        <span className="min-w-0 break-words">{formatDay(i.z.date, "EEE, MMM d")} · {i.z.time} — {i.app.position} · {i.app.company}</span>
                       </li>
                     ))}
                   </ul>
@@ -119,8 +119,8 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
           </Card>
           <Card>
             <CardHeader>
-              <div><CardTitle>Skills</CardTitle><CardDescription>{d.skills.length} registradas · nivel más reciente de 0 a 10.</CardDescription></div>
-              <Button asChild size="sm" variant="ghost"><Link href={href("skills")}>Ver todas</Link></Button>
+              <div><CardTitle>Skills</CardTitle><CardDescription>{d.skills.length} logged · most recent level from 0 to 10.</CardDescription></div>
+              <Button asChild size="sm" variant="ghost"><Link href={href("skills")}>View all</Link></Button>
             </CardHeader>
             <CardContent>
               {topSkills.length ? (
@@ -128,13 +128,13 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
                   {topSkills.map((s) => (
                     <li key={s.id} className="flex justify-between gap-2">
                       <span className="min-w-0 truncate">{s.name}</span>
-                      <span className="shrink-0 tabular-nums">{formatNumber(s.current, 1)}<span className="text-xs text-muted">{s.target_level != null ? ` / meta ${s.target_level}` : ""}</span></span>
+                      <span className="shrink-0 tabular-nums">{formatNumber(s.current, 1)}<span className="text-xs text-muted">{s.target_level != null ? ` / target ${s.target_level}` : ""}</span></span>
                     </li>
                   ))}
                 </ul>
-              ) : <p className="text-sm text-muted">Sin niveles registrados.</p>}
+              ) : <p className="text-sm text-muted">No levels logged.</p>}
               <p className="mt-3 text-xs text-muted">
-                {d.projects.length} {d.projects.length === 1 ? "proyecto" : "proyectos"} · {d.learning.filter((l) => !l.completed_on).length} cursos o recursos en curso
+                {d.projects.length} {d.projects.length === 1 ? "project" : "projects"} · {d.learning.filter((l) => !l.completed_on).length} courses or resources in progress
               </p>
             </CardContent>
           </Card>
@@ -150,11 +150,11 @@ export default async function CareerPage({ searchParams }: { searchParams: Promi
       {tab === "positions" && (
         <div className="grid gap-5 lg:grid-cols-2">
           <Card>
-            <CardHeader><div><CardTitle>Cargos y salarios</CardTitle><CardDescription>Incluye lo importado de Segundo Cerebro.</CardDescription></div></CardHeader>
+            <CardHeader><div><CardTitle>Roles and salaries</CardTitle><CardDescription>Includes what you imported from Segundo Cerebro.</CardDescription></div></CardHeader>
             <CardContent><PositionsList positions={d.positions} today={today} /></CardContent>
           </Card>
           <Card>
-            <CardHeader><div><CardTitle>Evolución del salario</CardTitle></div></CardHeader>
+            <CardHeader><div><CardTitle>Salary over time</CardTitle></div></CardHeader>
             <CardContent><SalaryChart positions={d.positions} /></CardContent>
           </Card>
         </div>

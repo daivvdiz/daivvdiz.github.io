@@ -16,7 +16,7 @@ function revalidate() {
 
 export async function saveMemory(input: MemoryInput, id?: string): Promise<Result<{ id: string }>> {
   const p = memorySchema.safeParse(input);
-  if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Datos no válidos" };
+  if (!p.success) return { ok: false, error: p.error.issues[0]?.message ?? "Invalid data" };
   const v = p.data;
   const { supabase, user } = await requireUser();
 
@@ -33,7 +33,7 @@ export async function saveMemory(input: MemoryInput, id?: string): Promise<Resul
   const r = id
     ? await supabase.from("memories").update(row).eq("id", uuid.parse(id)).eq("user_id", user.id).select("id").single()
     : await supabase.from("memories").insert({ ...row, user_id: user.id }).select("id").single();
-  if (r.error || !r.data) return { ok: false, error: "No se pudo guardar el recuerdo." };
+  if (r.error || !r.data) return { ok: false, error: "Couldn't save the memory." };
   const memoryId = id ? uuid.parse(id) : (r.data.id as string);
 
   // Personas y etiquetas: se reemplazan por lo que quedó en el formulario.
@@ -41,7 +41,7 @@ export async function saveMemory(input: MemoryInput, id?: string): Promise<Resul
   const people = splitList(v.people, 100);
   if (people.length) {
     const ins = await supabase.from("memory_people").insert(people.map((name) => ({ user_id: user.id, memory_id: memoryId, name })));
-    if (ins.error) return { ok: false, error: "El recuerdo se guardó, pero no las personas." };
+    if (ins.error) return { ok: false, error: "The memory was saved, but not the people." };
   }
   await supabase.from("memory_tags").delete().eq("memory_id", memoryId).eq("user_id", user.id);
   const tags = splitList(v.tags);
@@ -50,7 +50,7 @@ export async function saveMemory(input: MemoryInput, id?: string): Promise<Resul
     const { data: rows } = await supabase.from("tags").select("id").eq("user_id", user.id).in("name", tags);
     if (rows?.length) {
       const ins = await supabase.from("memory_tags").insert(rows.map((t) => ({ user_id: user.id, memory_id: memoryId, tag_id: t.id })));
-      if (ins.error) return { ok: false, error: "El recuerdo se guardó, pero no las etiquetas." };
+      if (ins.error) return { ok: false, error: "The memory was saved, but not the tags." };
     }
   }
   revalidate();
@@ -63,11 +63,11 @@ export async function deleteMemory(id: string): Promise<Result> {
   const { data: files } = await supabase.from("attachments").select("id, storage_path").eq("entity_type", "memory").eq("entity_id", memoryId);
   if (files?.length) {
     const rm = await supabase.storage.from("life-os").remove(files.map((f) => f.storage_path as string));
-    if (rm.error) return { ok: false, error: "No se pudieron borrar sus archivos; el recuerdo no se eliminó." };
+    if (rm.error) return { ok: false, error: "Couldn't delete its files; the memory wasn't deleted." };
     await supabase.from("attachments").delete().in("id", files.map((f) => f.id as string));
   }
   const r = await supabase.from("memories").delete().eq("id", memoryId).eq("user_id", user.id);
-  if (r.error) return { ok: false, error: "No se pudo eliminar el recuerdo." };
+  if (r.error) return { ok: false, error: "Couldn't delete the memory." };
   revalidate();
   return { ok: true };
 }
@@ -77,13 +77,13 @@ export async function archiveDailyMemory(entryId: string): Promise<Result> {
   const { supabase, user } = await requireUser();
   const { data: e } = await supabase.from("daily_entries").select("id, entry_date, memory").eq("id", uuid.parse(entryId)).maybeSingle();
   const text = (e?.memory as string | null)?.trim();
-  if (!e || !text) return { ok: false, error: "Esa entrada no tiene recuerdo." };
+  if (!e || !text) return { ok: false, error: "That entry has no memory." };
   const { data: linked } = await supabase.from("memories").select("id").eq("daily_entry_id", e.id).limit(1).maybeSingle();
   if (!linked) {
     const r = await supabase.from("memories").insert({
       user_id: user.id, title: text.split("\n")[0].slice(0, 120), occurred_on: e.entry_date, description: text, category: "personal", daily_entry_id: e.id,
     });
-    if (r.error) return { ok: false, error: "No se pudo guardar en el Archivo." };
+    if (r.error) return { ok: false, error: "Couldn't save it to the Archive." };
   }
   revalidate();
   return { ok: true };
@@ -100,17 +100,17 @@ const fileSchema = z.object({
 /** Registra un archivo que el navegador ya subió al bucket privado. */
 export async function registerMemoryAttachment(input: z.infer<typeof fileSchema>): Promise<Result> {
   const p = fileSchema.safeParse(input);
-  if (!p.success) return { ok: false, error: "Archivo no válido" };
+  if (!p.success) return { ok: false, error: "Invalid file" };
   const v = p.data;
   const { supabase, user } = await requireUser();
-  if (!v.path.startsWith(`${user.id}/memories/${v.memoryId}/`)) return { ok: false, error: "Ruta no válida" };
+  if (!v.path.startsWith(`${user.id}/memories/${v.memoryId}/`)) return { ok: false, error: "Invalid path" };
   const { data: m } = await supabase.from("memories").select("id").eq("id", v.memoryId).maybeSingle();
-  if (!m) return { ok: false, error: "El recuerdo no existe" };
+  if (!m) return { ok: false, error: "The memory doesn't exist" };
   const { error } = await supabase.from("attachments").insert({
     user_id: user.id, entity_type: "memory", entity_id: v.memoryId, bucket: "life-os",
     storage_path: v.path, file_name: v.name, mime_type: v.mime || null, size_bytes: v.size,
   });
-  if (error) return { ok: false, error: "No se pudo registrar el archivo." };
+  if (error) return { ok: false, error: "Couldn't save the file." };
   revalidatePath("/archive");
   return { ok: true };
 }
@@ -118,9 +118,9 @@ export async function registerMemoryAttachment(input: z.infer<typeof fileSchema>
 export async function deleteMemoryAttachment(id: string): Promise<Result> {
   const { supabase } = await requireUser();
   const { data: file } = await supabase.from("attachments").select("id, storage_path").eq("id", uuid.parse(id)).eq("entity_type", "memory").maybeSingle();
-  if (!file) return { ok: false, error: "El archivo no existe" };
+  if (!file) return { ok: false, error: "The file doesn't exist" };
   const rm = await supabase.storage.from("life-os").remove([file.storage_path as string]);
-  if (rm.error) return { ok: false, error: "No se pudo borrar el archivo." };
+  if (rm.error) return { ok: false, error: "Couldn't delete the file." };
   await supabase.from("attachments").delete().eq("id", file.id);
   revalidatePath("/archive");
   return { ok: true };

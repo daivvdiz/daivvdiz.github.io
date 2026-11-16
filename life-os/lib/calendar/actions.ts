@@ -12,7 +12,7 @@ const uuid = z.string().uuid();
 
 export async function saveEvent(input: EventInput, id?: string): Promise<Result> {
   const parsed = eventSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos no válidos" };
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid data" };
   const v = parsed.data;
   const { supabase, user } = await requireUser();
   const { timeZone } = await getPrefs(supabase, user.id);
@@ -39,7 +39,7 @@ export async function saveEvent(input: EventInput, id?: string): Promise<Result>
   const { error } = id
     ? await supabase.from("calendar_events").update(row).eq("id", uuid.parse(id)).eq("user_id", user.id)
     : await supabase.from("calendar_events").insert({ ...row, user_id: user.id });
-  if (error) return { ok: false, error: "No se pudo guardar el evento." };
+  if (error) return { ok: false, error: "Couldn't save the event." };
 
   revalidatePath("/calendar");
   revalidatePath("/overview");
@@ -49,7 +49,7 @@ export async function saveEvent(input: EventInput, id?: string): Promise<Result>
 export async function deleteEvent(id: string): Promise<Result> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("calendar_events").delete().eq("id", uuid.parse(id)).eq("user_id", user.id);
-  if (error) return { ok: false, error: "No se pudo eliminar el evento." };
+  if (error) return { ok: false, error: "Couldn't delete the event." };
   revalidatePath("/calendar");
   revalidatePath("/overview");
   return { ok: true };

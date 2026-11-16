@@ -20,7 +20,7 @@ function revalidate() {
  */
 export async function saveDailyEntry(input: DailyEntryInput): Promise<Result<{ id: string }>> {
   const parsed = dailyEntrySchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos no válidos" };
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid data" };
   const v = parsed.data;
   const { supabase, user } = await requireUser();
   const fail = (msg: string) => ({ ok: false as const, error: msg });
@@ -44,18 +44,18 @@ export async function saveDailyEntry(input: DailyEntryInput): Promise<Result<{ i
     )
     .select("id")
     .single();
-  if (error || !entry) return fail("No se pudo guardar la entrada.");
+  if (error || !entry) return fail("Couldn't save the entry.");
   const entryId = entry.id as string;
 
   // Gratitud: se reemplaza completa (máximo 3, en orden).
   const gratitude = v.gratitude.filter(Boolean);
   const g1 = await supabase.from("daily_gratitude").delete().eq("daily_entry_id", entryId);
-  if (g1.error) return fail("No se pudo guardar la gratitud.");
+  if (g1.error) return fail("Couldn't save your gratitude.");
   if (gratitude.length) {
     const g2 = await supabase.from("daily_gratitude").insert(
       gratitude.map((content, i) => ({ user_id: user.id, daily_entry_id: entryId, position: i + 1, content })),
     );
-    if (g2.error) return fail("No se pudo guardar la gratitud.");
+    if (g2.error) return fail("Couldn't save your gratitude.");
   }
 
   // Solo se aceptan metas y eventos propios.
@@ -73,7 +73,7 @@ export async function saveDailyEntry(input: DailyEntryInput): Promise<Result<{ i
   const toDelete = (existing ?? []).map((r) => r.id as string).filter((id) => !keep.has(id));
   if (toDelete.length) {
     const d = await supabase.from("daily_accomplishments").delete().in("id", toDelete);
-    if (d.error) return fail("No se pudieron actualizar los logros.");
+    if (d.error) return fail("Couldn't update the accomplishments.");
   }
   const hasMain = v.accomplishments.some((a) => a.is_main);
   for (const [i, a] of v.accomplishments.entries()) {
@@ -85,7 +85,7 @@ export async function saveDailyEntry(input: DailyEntryInput): Promise<Result<{ i
     const r = a.id
       ? await supabase.from("daily_accomplishments").update(row).eq("id", a.id).eq("daily_entry_id", entryId)
       : await supabase.from("daily_accomplishments").insert({ ...row, user_id: user.id, daily_entry_id: entryId });
-    if (r.error) return fail("No se pudieron guardar los logros.");
+    if (r.error) return fail("Couldn't save the accomplishments.");
   }
 
   // Etiquetas: se crean si no existen y se enlazan.
@@ -96,7 +96,7 @@ export async function saveDailyEntry(input: DailyEntryInput): Promise<Result<{ i
     const { data: tags } = await supabase.from("tags").select("id").in("name", names);
     if (tags?.length) {
       const t = await supabase.from("daily_entry_tags").insert(tags.map((tg) => ({ user_id: user.id, daily_entry_id: entryId, tag_id: tg.id })));
-      if (t.error) return fail("No se pudieron guardar las etiquetas.");
+      if (t.error) return fail("Couldn't save the tags.");
     }
   }
 
@@ -120,7 +120,7 @@ export async function saveDailyEntry(input: DailyEntryInput): Promise<Result<{ i
       : await supabase.from("memories").insert({
           user_id: user.id, title, occurred_on: v.entry_date, description: memoryText, category: "personal", daily_entry_id: entryId,
         });
-    if (r.error) return fail("La entrada se guardó, pero no se pudo enviar el recuerdo al Archivo.");
+    if (r.error) return fail("The entry was saved, but the memory couldn't be sent to the Archive.");
   }
 
   revalidate();
@@ -137,7 +137,7 @@ export async function deleteDailyEntry(id: string): Promise<Result> {
     await supabase.from("attachments").delete().in("id", files.map((f) => f.id as string));
   }
   const { error } = await supabase.from("daily_entries").delete().eq("id", entryId).eq("user_id", user.id);
-  if (error) return { ok: false, error: "No se pudo eliminar la entrada." };
+  if (error) return { ok: false, error: "Couldn't delete the entry." };
   revalidate();
   return { ok: true };
 }
@@ -154,14 +154,14 @@ const attachmentSchema = z.object({
 export async function registerAttachment(input: z.infer<typeof attachmentSchema>): Promise<Result> {
   const v = attachmentSchema.parse(input);
   const { supabase, user } = await requireUser();
-  if (!v.path.startsWith(`${user.id}/daily_entries/${v.entryId}/`)) return { ok: false, error: "Ruta no válida" };
+  if (!v.path.startsWith(`${user.id}/daily_entries/${v.entryId}/`)) return { ok: false, error: "Invalid path" };
   const { data: entry } = await supabase.from("daily_entries").select("id").eq("id", v.entryId).maybeSingle();
-  if (!entry) return { ok: false, error: "La entrada no existe" };
+  if (!entry) return { ok: false, error: "The entry doesn't exist" };
   const { error } = await supabase.from("attachments").insert({
     user_id: user.id, entity_type: "daily_entry", entity_id: v.entryId, bucket: "life-os",
     storage_path: v.path, file_name: v.name, mime_type: v.mime || null, size_bytes: v.size,
   });
-  if (error) return { ok: false, error: "No se pudo registrar el archivo." };
+  if (error) return { ok: false, error: "Couldn't save the file." };
   revalidatePath("/calendar");
   return { ok: true };
 }
@@ -169,9 +169,9 @@ export async function registerAttachment(input: z.infer<typeof attachmentSchema>
 export async function deleteAttachment(id: string): Promise<Result> {
   const { supabase } = await requireUser();
   const { data: file } = await supabase.from("attachments").select("id, storage_path").eq("id", uuid.parse(id)).maybeSingle();
-  if (!file) return { ok: false, error: "El archivo no existe" };
+  if (!file) return { ok: false, error: "The file doesn't exist" };
   const rm = await supabase.storage.from("life-os").remove([file.storage_path as string]);
-  if (rm.error) return { ok: false, error: "No se pudo borrar el archivo." };
+  if (rm.error) return { ok: false, error: "Couldn't delete the file." };
   await supabase.from("attachments").delete().eq("id", file.id);
   revalidatePath("/calendar");
   return { ok: true };

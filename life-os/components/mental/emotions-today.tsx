@@ -8,7 +8,7 @@ import { Input, Select } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { saveDayEmotions } from "@/lib/mental/actions";
 
-const COMMON = ["Alegría", "Calma", "Gratitud", "Ilusión", "Orgullo", "Cansancio", "Ansiedad", "Tristeza", "Frustración", "Enojo", "Miedo", "Soledad"];
+const COMMON = ["Joy", "Calm", "Gratitude", "Excitement", "Pride", "Tiredness", "Anxiety", "Sadness", "Frustration", "Anger", "Fear", "Loneliness"];
 
 type Emo = { name: string; intensity: number | null };
 
@@ -34,14 +34,14 @@ export function EmotionsToday({
   const addEmo = (name: string) => {
     const n = name.trim().slice(0, 40);
     if (!n || emotions.some((e) => e.name.toLowerCase() === n.toLowerCase())) return setNewEmo("");
-    if (emotions.length >= 15) return void toast.error("Máximo 15 emociones por día");
+    if (emotions.length >= 15) return void toast.error("Maximum 15 emotions per day");
     setEmotions([...emotions, { name: n, intensity: null }]);
     setNewEmo("");
   };
   const addFactor = () => {
     const f = newFactor.trim().slice(0, 200);
     if (!f) return;
-    if (factors.length >= 10) return void toast.error("Máximo 10 factores por día");
+    if (factors.length >= 10) return void toast.error("Maximum 10 factors per day");
     setFactors([...factors, f]);
     setNewFactor("");
   };
@@ -51,28 +51,28 @@ export function EmotionsToday({
     const r = await saveDayEmotions({ date, emotions, stress_factors: factors });
     setPending(false);
     if (!r.ok) return void toast.error(r.error);
-    toast.success("Guardado");
+    toast.success("Saved");
   };
 
   return (
     <div className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="emo-new">Emociones</Label>
+        <Label htmlFor="emo-new">Emotions</Label>
         {emotions.length > 0 && (
           <ul className="space-y-1.5">
             {emotions.map((e, i) => (
               <li key={e.name} className="flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-sm">
                 <span className="min-w-0 flex-1 truncate">{e.name}</span>
                 <Select
-                  aria-label={`Intensidad de ${e.name}`}
+                  aria-label={`Intensity of ${e.name}`}
                   className="h-7 w-32 text-xs"
                   value={e.intensity ?? ""}
                   onChange={(ev) => setEmotions(emotions.map((x, j) => (j === i ? { ...x, intensity: ev.target.value ? Number(ev.target.value) : null } : x)))}
                 >
-                  <option value="">Sin intensidad</option>
-                  {Array.from({ length: 10 }, (_, k) => k + 1).map((n) => <option key={n} value={n}>Intensidad {n}</option>)}
+                  <option value="">No intensity</option>
+                  {Array.from({ length: 10 }, (_, k) => k + 1).map((n) => <option key={n} value={n}>Intensity {n}</option>)}
                 </Select>
-                <button type="button" className="rounded p-1 text-muted hover:text-foreground" aria-label={`Quitar ${e.name}`}
+                <button type="button" className="rounded p-1 text-muted hover:text-foreground" aria-label={`Remove ${e.name}`}
                   onClick={() => setEmotions(emotions.filter((_, j) => j !== i))}>
                   <X className="size-3.5" />
                 </button>
@@ -81,10 +81,10 @@ export function EmotionsToday({
           </ul>
         )}
         <div className="flex gap-2">
-          <Input id="emo-new" list="emo-suggestions" placeholder="Escribe o elige una emoción" value={newEmo} maxLength={40}
+          <Input id="emo-new" list="emo-suggestions" placeholder="Type or choose an emotion" value={newEmo} maxLength={40}
             onChange={(e) => setNewEmo(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addEmo(newEmo))} />
           <datalist id="emo-suggestions">{suggestions.map((s) => <option key={s} value={s} />)}</datalist>
-          <Button type="button" variant="secondary" size="icon" aria-label="Agregar emoción" onClick={() => addEmo(newEmo)}><Plus /></Button>
+          <Button type="button" variant="secondary" size="icon" aria-label="Add emotion" onClick={() => addEmo(newEmo)}><Plus /></Button>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {suggestions.slice(0, 8).map((s) => (
@@ -96,13 +96,13 @@ export function EmotionsToday({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="factor-new">Factores de estrés</Label>
+        <Label htmlFor="factor-new">Stress factors</Label>
         {factors.length > 0 && (
           <ul className="space-y-1.5">
             {factors.map((f, i) => (
               <li key={`${f}-${i}`} className="flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-sm">
                 <span className="min-w-0 flex-1 break-words">{f}</span>
-                <button type="button" className="rounded p-1 text-muted hover:text-foreground" aria-label={`Quitar ${f}`}
+                <button type="button" className="rounded p-1 text-muted hover:text-foreground" aria-label={`Remove ${f}`}
                   onClick={() => setFactors(factors.filter((_, j) => j !== i))}>
                   <X className="size-3.5" />
                 </button>
@@ -111,15 +111,15 @@ export function EmotionsToday({
           </ul>
         )}
         <div className="flex gap-2">
-          <Input id="factor-new" placeholder="Ej. entrega en el trabajo" value={newFactor} maxLength={200}
+          <Input id="factor-new" placeholder="E.g. a deadline at work" value={newFactor} maxLength={200}
             onChange={(e) => setNewFactor(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addFactor())} />
-          <Button type="button" variant="secondary" size="icon" aria-label="Agregar factor de estrés" onClick={addFactor}><Plus /></Button>
+          <Button type="button" variant="secondary" size="icon" aria-label="Add stress factor" onClick={addFactor}><Plus /></Button>
         </div>
       </div>
 
       <div className="flex items-center justify-end gap-3">
-        {dirty && <span className="text-xs text-muted">Cambios sin guardar</span>}
-        <Button onClick={save} disabled={pending || !dirty}>{pending ? "Guardando…" : "Guardar"}</Button>
+        {dirty && <span className="text-xs text-muted">Unsaved changes</span>}
+        <Button onClick={save} disabled={pending || !dirty}>{pending ? "Saving…" : "Save"}</Button>
       </div>
     </div>
   );

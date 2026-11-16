@@ -19,16 +19,16 @@ import { isISODate } from "@/lib/dates";
 import { formatDay, formatMoney, formatNumber, todayISO } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Analítica de vida" };
+export const metadata: Metadata = { title: "Life analytics" };
 export const dynamic = "force-dynamic";
 
 const TABS = [
-  { key: "personal", label: "Tendencias personales" },
-  { key: "finance", label: "Finanzas" },
-  { key: "career", label: "Carrera" },
-  { key: "activity", label: "Actividad" },
-  { key: "compare", label: "Comparar periodos" },
-  { key: "balance", label: "Balance de vida" },
+  { key: "personal", label: "Personal trends" },
+  { key: "finance", label: "Finances" },
+  { key: "career", label: "Career" },
+  { key: "activity", label: "Activity" },
+  { key: "compare", label: "Compare periods" },
+  { key: "balance", label: "Life balance" },
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 type SP = { tab?: string; period?: string; from?: string; to?: string; cmp?: string; af?: string; at?: string; bf?: string; bt?: string };
@@ -71,9 +71,9 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <PageHeader title="Analítica de vida" description="Cómo ha cambiado tu vida según tus propios registros. Tú interpretas lo que significa." />
+      <PageHeader title="Life analytics" description="How your life has changed according to your own entries. You decide what it means." />
 
-      <nav aria-label="Secciones de Analítica" className="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <nav aria-label="Analytics sections" className="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         <div className="flex w-max gap-1 rounded-md border border-border p-0.5">
           {TABS.map((t) => (
             <Link key={t.key} href={tabHref(t.key)} aria-current={tab === t.key ? "page" : undefined}
@@ -86,7 +86,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
 
       {usesPeriod && (
         <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <nav aria-label="Periodo" className="flex flex-wrap gap-1.5">
+          <nav aria-label="Period" className="flex flex-wrap gap-1.5">
             {ANALYTICS_PERIODS.map((p) => (
               <Link key={p.key} href={`/analytics?${new URLSearchParams({ ...(tab !== "personal" ? { tab } : {}), period: p.key })}`} aria-current={period.key === p.key ? "page" : undefined}
                 className={cn("rounded-md border px-3 py-1.5 text-xs", period.key === p.key ? "border-accent bg-accent-soft text-foreground" : "border-border text-muted hover:text-foreground")}>
@@ -97,9 +97,9 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
           <form action="/analytics" className="flex flex-wrap items-end gap-2">
             {tab !== "personal" && <input type="hidden" name="tab" value={tab} />}
             <input type="hidden" name="period" value="custom" />
-            <label className="space-y-1 text-[11px] text-muted">Desde<Input type="date" name="from" defaultValue={period.from} max={today} className="h-8 w-36" required /></label>
-            <label className="space-y-1 text-[11px] text-muted">Hasta<Input type="date" name="to" defaultValue={period.to} max={today} className="h-8 w-36" required /></label>
-            <Button type="submit" size="sm" variant={period.key === "custom" ? "default" : "secondary"}>Aplicar</Button>
+            <label className="space-y-1 text-[11px] text-muted">From<Input type="date" name="from" defaultValue={period.from} max={today} className="h-8 w-36" required /></label>
+            <label className="space-y-1 text-[11px] text-muted">To<Input type="date" name="to" defaultValue={period.to} max={today} className="h-8 w-36" required /></label>
+            <Button type="submit" size="sm" variant={period.key === "custom" ? "default" : "secondary"}>Apply</Button>
           </form>
         </div>
       )}
@@ -121,52 +121,52 @@ async function PeriodTabs({ tab, from, to, timeZone, weekStartsOn }: { tab: Tab;
   const { by, buckets } = makeBuckets(from, to, weekStartsOn);
   const ser = series(raw, buckets, weekStartsOn);
   const all = summarize(raw, from, to, weekStartsOn);
-  const periodText = (b: { from: string; to: string }) => (by === "month" ? formatDay(b.from, "MMMM yyyy") : `Semana del ${formatDay(b.from, "d MMM")}`);
+  const periodText = (b: { from: string; to: string }) => (by === "month" ? formatDay(b.from, "MMMM yyyy") : `Week of ${formatDay(b.from, "MMM d")}`);
   const rows = (pick: (s: Summary) => { values: Record<string, number | null>; n?: Record<string, number> }): Row[] =>
     ser.map((b) => ({ label: b.label, period: periodText(b), ...pick(b.s) }));
-  const unit = by === "month" ? "por mes" : "por semana";
+  const unit = by === "month" ? "per month" : "per week";
 
   return (
     <div className="space-y-5">
       {raw.error && (
         <Card className="flex items-center gap-2 border-danger/40 px-4 py-3 text-sm">
-          <AlertTriangle className="size-4 text-danger" aria-hidden /> Algunos datos no se pudieron cargar. Intenta recargar la página.
+          <AlertTriangle className="size-4 text-danger" aria-hidden /> Some data couldn't be loaded. Try reloading the page.
         </Card>
       )}
-      <p className="text-xs text-muted">{formatDay(from)} – {formatDay(to)} · agrupado {unit}. Cada cifra indica cuántos registros la respaldan.</p>
+      <p className="text-xs text-muted">{formatDay(from)} – {formatDay(to)} · grouped by {by === "month" ? "month" : "week"}. Each figure shows how many entries back it up.</p>
 
       {tab === "personal" && <Personal raw={raw} all={all} rows={rows} unit={unit} goals={snap.goals} />}
 
       {tab === "finance" && (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Stat label="Ingresos" value={formatMoney(all.income.value)} detail={plural(all.income.n, "movimiento", "movimientos")} />
-            <Stat label="Gastos" value={formatMoney(all.expense.value)} detail={plural(all.expense.n, "movimiento", "movimientos")} />
-            <Stat label="Aportes a ahorro" value={formatMoney(all.savings.value)} detail={plural(all.savings.n, "aporte", "aportes")} />
-            <Stat label="Patrimonio neto hoy" value={formatMoney(snap.netWorth.value)}
-              detail={`${plural(snap.netWorth.nAssets, "activo", "activos")} · ${plural(snap.netWorth.nLiabilities, "deuda", "deudas")}`} />
+            <Stat label="Income" value={formatMoney(all.income.value)} detail={plural(all.income.n, "transaction", "transactions")} />
+            <Stat label="Expenses" value={formatMoney(all.expense.value)} detail={plural(all.expense.n, "transaction", "transactions")} />
+            <Stat label="Savings contributions" value={formatMoney(all.savings.value)} detail={plural(all.savings.n, "contribution", "contributions")} />
+            <Stat label="Net worth today" value={formatMoney(snap.netWorth.value)}
+              detail={`${plural(snap.netWorth.nAssets, "asset", "assets")} · ${plural(snap.netWorth.nLiabilities, "debt", "debts")}`} />
           </div>
           <div className="grid gap-5 lg:grid-cols-2">
-            <ChartCard title="Ingresos y gastos" description={`Suma ${unit}. Los aportes a ahorro no cuentan como gasto.`}>
-              <SeriesChart format="money" ariaLabel={`Barras de ingresos y gastos ${unit}`}
-                series={[{ key: "income", label: "Ingresos" }, { key: "expense", label: "Gastos" }]}
+            <ChartCard title="Income and expenses" description={`Total ${unit}. Savings contributions don't count as expenses.`}>
+              <SeriesChart format="money" ariaLabel={`Bars of income and expenses ${unit}`}
+                series={[{ key: "income", label: "Income" }, { key: "expense", label: "Expenses" }]}
                 rows={rows((s) => ({ values: { income: s.income.n ? s.income.value : null, expense: s.expense.n ? s.expense.value : null }, n: { income: s.income.n, expense: s.expense.n } }))} />
             </ChartCard>
-            <ChartCard title="Diferencia entre ingresos y gastos" description={`Ingresos menos gastos ${unit}. Vacío si no hubo movimientos.`}>
-              <SeriesChart format="money" kind="line" ariaLabel={`Diferencia entre ingresos y gastos ${unit}`}
-                series={[{ key: "net", label: "Diferencia" }]} rows={rows((s) => ({ values: { net: s.net.value }, n: { net: s.net.n } }))} />
+            <ChartCard title="Income minus expenses" description={`Income minus expenses ${unit}. Empty if there were no transactions.`}>
+              <SeriesChart format="money" kind="line" ariaLabel={`Income minus expenses ${unit}`}
+                series={[{ key: "net", label: "Difference" }]} rows={rows((s) => ({ values: { net: s.net.value }, n: { net: s.net.n } }))} />
             </ChartCard>
-            <ChartCard title="Aportes a ahorro" description={`Suma ${unit}.`}>
-              <SeriesChart format="money" ariaLabel={`Aportes a ahorro ${unit}`} series={[{ key: "savings", label: "Aportes" }]}
+            <ChartCard title="Savings contributions" description={`Total ${unit}.`}>
+              <SeriesChart format="money" ariaLabel={`Savings contributions ${unit}`} series={[{ key: "savings", label: "Contributions" }]}
                 rows={rows((s) => ({ values: { savings: s.savings.n ? s.savings.value : null }, n: { savings: s.savings.n } }))} />
             </ChartCard>
-            <ChartCard title="Patrimonio neto" description="Valor actual de tus activos menos el saldo de tus deudas.">
+            <ChartCard title="Net worth" description="Current value of your assets minus your debt balances.">
               <dl className="space-y-1.5 text-sm">
-                <div className="flex justify-between"><dt className="text-muted">Activos</dt><dd className="tabular-nums">{formatMoney(snap.netWorth.assets)}</dd></div>
-                <div className="flex justify-between"><dt className="text-muted">Saldo de deudas</dt><dd className="tabular-nums">{formatMoney(snap.netWorth.debt)}</dd></div>
-                <div className="flex justify-between border-t border-border pt-1.5 font-medium"><dt>Patrimonio neto</dt><dd className="tabular-nums">{formatMoney(snap.netWorth.value)}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted">Assets</dt><dd className="tabular-nums">{formatMoney(snap.netWorth.assets)}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted">Debt balance</dt><dd className="tabular-nums">{formatMoney(snap.netWorth.debt)}</dd></div>
+                <div className="flex justify-between border-t border-border pt-1.5 font-medium"><dt>Net worth</dt><dd className="tabular-nums">{formatMoney(snap.netWorth.value)}</dd></div>
               </dl>
-              <p className="mt-3 flex items-start gap-1.5 text-[11px] text-muted"><Info className="mt-0.5 size-3 shrink-0" aria-hidden /> Los activos guardan solo su valor más reciente, así que aún no hay historial de patrimonio para graficar sin inventar valores.</p>
+              <p className="mt-3 flex items-start gap-1.5 text-[11px] text-muted"><Info className="mt-0.5 size-3 shrink-0" aria-hidden /> Assets only keep their latest value, so there's no net worth history to chart yet without making up values.</p>
             </ChartCard>
           </div>
         </>
@@ -175,25 +175,25 @@ async function PeriodTabs({ tab, from, to, timeZone, weekStartsOn }: { tab: Tab;
       {tab === "career" && (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Stat label="Aplicaciones" value={formatNumber(all.applications, 0)} detail="con fecha de aplicación en el periodo" />
-            <Stat label="Entrevistas" value={formatNumber(all.interviews, 0)} />
-            <Stat label="Ofertas" value={formatNumber(all.offers, 0)} detail={`de las aplicaciones del periodo · ${snap.openOffers} en total`} />
-            <Stat label="Proyectos terminados" value={formatNumber(all.projectsCompleted, 0)} />
+            <Stat label="Applications" value={formatNumber(all.applications, 0)} detail="with an application date in the period" />
+            <Stat label="Interviews" value={formatNumber(all.interviews, 0)} />
+            <Stat label="Offers" value={formatNumber(all.offers, 0)} detail={`from the period's applications · ${snap.openOffers} in total`} />
+            <Stat label="Projects finished" value={formatNumber(all.projectsCompleted, 0)} />
           </div>
           <div className="grid gap-5 lg:grid-cols-2">
-            <ChartCard title="Aplicaciones y entrevistas" description={`Conteo ${unit}.`}>
-              <SeriesChart format="count" ariaLabel={`Aplicaciones y entrevistas ${unit}`}
-                series={[{ key: "apps", label: "Aplicaciones" }, { key: "interviews", label: "Entrevistas" }]}
+            <ChartCard title="Applications and interviews" description={`Count ${unit}.`}>
+              <SeriesChart format="count" ariaLabel={`Applications and interviews ${unit}`}
+                series={[{ key: "apps", label: "Applications" }, { key: "interviews", label: "Interviews" }]}
                 rows={rows((s) => ({ values: { apps: s.applications, interviews: s.interviews } }))} />
             </ChartCard>
-            <ChartCard title="Evolución del salario" description="Todos tus cargos con salario registrado.">
+            <ChartCard title="Salary over time" description="All your roles with a logged salary.">
               <SalaryChart positions={snap.positions} />
             </ChartCard>
-            <ChartCard title="Desarrollo de skills" description="Primer y último nivel registrados dentro del periodo (0 a 10).">
+            <ChartCard title="Skill development" description="First and last level logged within the period (0 to 10).">
               <SkillChanges levels={raw.levels} names={snap.skillNames} />
             </ChartCard>
-            <ChartCard title="Proyectos terminados" description={`Conteo ${unit}.`}>
-              <SeriesChart format="count" ariaLabel={`Proyectos terminados ${unit}`} series={[{ key: "p", label: "Proyectos" }]}
+            <ChartCard title="Projects finished" description={`Count ${unit}.`}>
+              <SeriesChart format="count" ariaLabel={`Projects finished ${unit}`} series={[{ key: "p", label: "Projects" }]}
                 rows={rows((s) => ({ values: { p: s.projectsCompleted } }))} />
             </ChartCard>
           </div>
@@ -203,26 +203,26 @@ async function PeriodTabs({ tab, from, to, timeZone, weekStartsOn }: { tab: Tab;
       {tab === "activity" && (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Stat label="Recuerdos" value={formatNumber(all.memories, 0)} detail={`${all.travel} de viajes · ${all.important} importantes`} />
-            <Stat label="Días con diario escrito" value={formatNumber(all.journalDays, 0)} detail={plural(all.journalEntries, "escrito aparte", "escritos aparte")} />
-            <Stat label="Logros registrados" value={formatNumber(all.accomplishments, 0)} />
-            <Stat label="Eventos sociales" value={formatNumber(all.social, 0)} detail="categoría Social del calendario" />
+            <Stat label="Memories" value={formatNumber(all.memories, 0)} detail={`${all.travel} travel · ${all.important} important`} />
+            <Stat label="Days with a journal entry" value={formatNumber(all.journalDays, 0)} detail={plural(all.journalEntries, "separate entry", "separate entries")} />
+            <Stat label="Accomplishments logged" value={formatNumber(all.accomplishments, 0)} />
+            <Stat label="Social events" value={formatNumber(all.social, 0)} detail="calendar's Social category" />
           </div>
           <div className="grid gap-5 lg:grid-cols-2">
-            <ChartCard title="Recuerdos" description={`Conteo ${unit}, por la fecha del recuerdo.`}>
-              <SeriesChart format="count" ariaLabel={`Recuerdos ${unit}`}
-                series={[{ key: "m", label: "Todos" }, { key: "t", label: "Viajes" }, { key: "i", label: "Importantes" }]}
+            <ChartCard title="Memories" description={`Count ${unit}, by the memory's date.`}>
+              <SeriesChart format="count" ariaLabel={`Memories ${unit}`}
+                series={[{ key: "m", label: "All" }, { key: "t", label: "Travel" }, { key: "i", label: "Important" }]}
                 rows={rows((s) => ({ values: { m: s.memories, t: s.travel, i: s.important } }))}
-                note="“Importantes” son los de la categoría Momentos importantes o con importancia 4 o 5 que tú asignaste." />
+                note="“Important” means the Important moments category, or an importance of 4 or 5 that you assigned." />
             </ChartCard>
-            <ChartCard title="Diario y logros" description={`Conteo ${unit}.`}>
-              <SeriesChart format="count" ariaLabel={`Diario y logros ${unit}`}
-                series={[{ key: "j", label: "Días con diario" }, { key: "a", label: "Logros" }]}
+            <ChartCard title="Journal and accomplishments" description={`Count ${unit}.`}>
+              <SeriesChart format="count" ariaLabel={`Journal and accomplishments ${unit}`}
+                series={[{ key: "j", label: "Journal days" }, { key: "a", label: "Accomplishments" }]}
                 rows={rows((s) => ({ values: { j: s.journalDays + s.journalEntries, a: s.accomplishments } }))}
-                note="Días con diario incluye la entrada del día y los escritos aparte de Salud mental." />
+                note="Journal days include the daily entry and the separate entries from Mental health." />
             </ChartCard>
-            <ChartCard title="Eventos sociales" description={`Conteo ${unit}.`}>
-              <SeriesChart format="count" ariaLabel={`Eventos sociales ${unit}`} series={[{ key: "s", label: "Eventos sociales" }]}
+            <ChartCard title="Social events" description={`Count ${unit}.`}>
+              <SeriesChart format="count" ariaLabel={`Social events ${unit}`} series={[{ key: "s", label: "Social events" }]}
                 rows={rows((s) => ({ values: { s: s.social } }))} />
             </ChartCard>
           </div>
@@ -245,39 +245,39 @@ function Personal({ raw, all, rows, unit, goals }: {
   return (
     <>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Ánimo promedio" value={score(all.mood)} detail={plural(all.mood.n, "día", "días")} />
-        <Stat label="Sueño promedio" value={all.sleep.value == null ? "—" : `${formatNumber(all.sleep.value, 1)} h`} detail={plural(all.sleep.n, "noche", "noches")} />
-        <Stat label="Entrenamientos" value={formatNumber(all.workouts, 0)} detail={`${plural(all.workoutDays, "día", "días")} con actividad`} />
-        <Stat label="Hábitos cumplidos" value={all.habits.value == null ? "—" : `${formatNumber(all.habits.value, 0)}%`} detail={all.habits.expected ? `${all.habits.done} de ${all.habits.expected} planeados` : "sin hábitos planeados"} />
+        <Stat label="Average mood" value={score(all.mood)} detail={plural(all.mood.n, "day", "days")} />
+        <Stat label="Average sleep" value={all.sleep.value == null ? "—" : `${formatNumber(all.sleep.value, 1)} h`} detail={plural(all.sleep.n, "night", "nights")} />
+        <Stat label="Workouts" value={formatNumber(all.workouts, 0)} detail={`${plural(all.workoutDays, "active day", "active days")}`} />
+        <Stat label="Habits done" value={all.habits.value == null ? "—" : `${formatNumber(all.habits.value, 0)}%`} detail={all.habits.expected ? `${all.habits.done} of ${all.habits.expected} planned` : "no habits planned"} />
       </div>
       <div className="grid gap-5 lg:grid-cols-2">
-        <ChartCard title="Ánimo, energía y estrés" description={`Promedio ${unit} (1 a 10).`}>
-          <SeriesChart kind="line" format="score" domain={[1, 10]} ariaLabel={`Promedios de ánimo, energía y estrés ${unit}`}
-            series={[{ key: "mood", label: "Ánimo" }, { key: "energy", label: "Energía" }, { key: "stress", label: "Estrés" }]}
+        <ChartCard title="Mood, energy and stress" description={`Average ${unit} (1 to 10).`}>
+          <SeriesChart kind="line" format="score" domain={[1, 10]} ariaLabel={`Average mood, energy and stress ${unit}`}
+            series={[{ key: "mood", label: "Mood" }, { key: "energy", label: "Energy" }, { key: "stress", label: "Stress" }]}
             rows={rows((s) => ({ values: { mood: s.mood.value, energy: s.energy.value, stress: s.stress.value }, n: { mood: s.mood.n, energy: s.energy.n, stress: s.stress.n } }))}
-            note="Periodos sin registros quedan vacíos." />
+            note="Periods without entries are left empty." />
         </ChartCard>
-        <ChartCard title="Sueño" description={`Horas promedio ${unit}.`}>
-          <SeriesChart kind="line" format="hours" domain={[0, 12]} ariaLabel={`Horas de sueño promedio ${unit}`}
-            series={[{ key: "h", label: "Horas de sueño" }]} rows={rows((s) => ({ values: { h: s.sleep.value }, n: { h: s.sleep.n } }))} />
+        <ChartCard title="Sleep" description={`Average hours ${unit}.`}>
+          <SeriesChart kind="line" format="hours" domain={[0, 12]} ariaLabel={`Average sleep hours ${unit}`}
+            series={[{ key: "h", label: "Sleep hours" }]} rows={rows((s) => ({ values: { h: s.sleep.value }, n: { h: s.sleep.n } }))} />
         </ChartCard>
-        <ChartCard title="Actividad física" description={`Entrenamientos ${unit}.`}>
-          <SeriesChart format="count" ariaLabel={`Entrenamientos ${unit}`} series={[{ key: "w", label: "Entrenamientos" }]}
+        <ChartCard title="Physical activity" description={`Workouts ${unit}.`}>
+          <SeriesChart format="count" ariaLabel={`Workouts ${unit}`} series={[{ key: "w", label: "Workouts" }]}
             rows={rows((s) => ({ values: { w: s.workouts } }))}
             note={types.length ? types.map(([t, n]) => `${WORKOUT_TYPES[t] ?? t}: ${n}`).join(" · ") : undefined} />
         </ChartCard>
-        <ChartCard title="Estudio" description={`Aciertos promedio en simulacros ${unit}.`}>
-          <SeriesChart kind="line" format="pct" domain={[0, 100]} ariaLabel={`Porcentaje de aciertos promedio en simulacros ${unit}`} series={[{ key: "a", label: "Aciertos" }]}
+        <ChartCard title="Study" description={`Average mock exam accuracy ${unit}.`}>
+          <SeriesChart kind="line" format="pct" domain={[0, 100]} ariaLabel={`Average mock exam accuracy ${unit}`} series={[{ key: "a", label: "Accuracy" }]}
             rows={rows((s) => ({ values: { a: s.examAccuracy.value }, n: { a: s.examAccuracy.n } }))}
-            note={`${plural(all.exams, "simulacro", "simulacros")} en el periodo. Mezcla todos tus simulacros; el detalle por simulacro está en Entrenamiento → Estudio.`} />
+            note={`${plural(all.exams, "mock exam", "mock exams")} in the period. This mixes all your mock exams; the detail for each one is in Training → Study.`} />
         </ChartCard>
-        <ChartCard title="Constancia en hábitos" description={`Veces cumplidas frente a planeadas, ${unit}.`}>
-          <SeriesChart format="pct" domain={[0, 100]} ariaLabel={`Porcentaje de hábitos cumplidos ${unit}`} series={[{ key: "h", label: "Cumplidos" }]}
+        <ChartCard title="Habit consistency" description={`Times done versus planned, ${unit}.`}>
+          <SeriesChart format="pct" domain={[0, 100]} ariaLabel={`Percentage of habits done ${unit}`} series={[{ key: "h", label: "Done" }]}
             rows={rows((s) => ({ values: { h: s.habits.value }, n: { h: s.habits.expected } }))}
-            note="El número entre paréntesis en la tabla es cuántas veces estaba planeado. Sin rachas ni puntajes." />
+            note="The number in parentheses in the table is how many times it was planned. No streaks or scores." />
         </ChartCard>
-        <ChartCard title="Metas" description={`${plural(active.length, "meta activa", "metas activas")} · ${plural(all.milestones, "hito completado", "hitos completados")} en el periodo.`}>
-          {!active.length ? <p className="text-sm text-muted">No tienes metas activas.</p> : (
+        <ChartCard title="Goals" description={`${plural(active.length, "active goal", "active goals")} · ${plural(all.milestones, "milestone completed", "milestones completed")} in the period.`}>
+          {!active.length ? <p className="text-sm text-muted">You have no active goals.</p> : (
             <ul className="space-y-2">
               {active.slice(0, 8).map((g) => (
                 <li key={g.id} className="text-sm">
@@ -291,25 +291,25 @@ function Personal({ raw, all, rows, unit, goals }: {
             {Object.entries(GOAL_STATUS).map(([k, l]) => `${l}: ${goals.filter((g) => g.status === k).length}`).join(" · ")}
           </p>
         </ChartCard>
-        <ChartCard title="Asociaciones exploratorias" description="Cómo se mueven juntos algunos registros. No indica que uno cause el otro.">
+        <ChartCard title="Exploratory associations" description="How some entries move together. It doesn't mean one causes the other.">
           <ul className="space-y-2 text-sm">
             {pairs.map(([a, b]) => {
               const { r, n } = pearson(points, a, b);
               return (
                 <li key={`${a}-${b}`} className="flex flex-col">
-                  <span>{METRIC_LABEL[a]} y {METRIC_LABEL[b].toLowerCase()}</span>
-                  <span className="text-muted">{r == null || n < MIN_CORRELATION_N ? `pocos datos (${n} días con ambos)` : `${describeR(r)} · r = ${formatNumber(r, 2)} · ${n} días`}</span>
+                  <span>{METRIC_LABEL[a]} and {METRIC_LABEL[b].toLowerCase()}</span>
+                  <span className="text-muted">{r == null || n < MIN_CORRELATION_N ? `not enough data (${n} ${n === 1 ? "day" : "days"} with both)` : `${describeR(r)} · r = ${formatNumber(r, 2)} · ${n} days`}</span>
                 </li>
               );
             })}
             <li className="flex flex-wrap justify-between gap-x-3 border-t border-border pt-2">
-              <span>Ánimo en días con y sin entrenamiento</span>
+              <span>Mood on days with and without a workout</span>
               <span className="text-muted">
-                {mw.with.n < 3 || mw.without.n < 3 ? `pocos datos (${mw.with.n} con · ${mw.without.n} sin)` : `${formatNumber(mw.with.value, 1)} (${mw.with.n} días) · ${formatNumber(mw.without.value, 1)} (${mw.without.n} días)`}
+                {mw.with.n < 3 || mw.without.n < 3 ? `not enough data (${mw.with.n} with · ${mw.without.n} without)` : `${formatNumber(mw.with.value, 1)} (${mw.with.n} days) · ${formatNumber(mw.without.value, 1)} (${mw.without.n} days)`}
               </span>
             </li>
           </ul>
-          <p className="mt-3 text-[11px] text-muted">Se usan solo días que tienen ambos registros; con menos de {MIN_CORRELATION_N} no se calcula.</p>
+          <p className="mt-3 text-[11px] text-muted">Only days with both entries are used; with fewer than {MIN_CORRELATION_N} it isn't calculated.</p>
         </ChartCard>
       </div>
     </>
@@ -323,14 +323,14 @@ function SkillChanges({ levels, names }: { levels: { skill: string; level: numbe
     const s = [...ls].sort((a, b) => a.date.localeCompare(b.date));
     return { id, name: names.get(id) ?? "Skill", first: s[0], last: s[s.length - 1], n: s.length };
   }).sort((a, b) => a.name.localeCompare(b.name));
-  if (!list.length) return <p className="text-sm text-muted">Sin niveles registrados en este periodo.</p>;
+  if (!list.length) return <p className="text-sm text-muted">No levels logged in this period.</p>;
   return (
     <ul className="space-y-1.5 text-sm">
       {list.map((s) => (
         <li key={s.id} className="flex flex-wrap justify-between gap-x-3">
           <span className="min-w-0 truncate">{s.name}</span>
           <span className="tabular-nums text-muted">
-            {s.n === 1 ? `${formatNumber(s.last.level, 1)} (${formatDay(s.last.date, "d MMM yy")})` : `de ${formatNumber(s.first.level, 1)} a ${formatNumber(s.last.level, 1)} · ${s.n} registros`}
+            {s.n === 1 ? `${formatNumber(s.last.level, 1)} (${formatDay(s.last.date, "MMM d, yy")})` : `from ${formatNumber(s.first.level, 1)} to ${formatNumber(s.last.level, 1)} · ${s.n} entries`}
           </span>
         </li>
       ))}
@@ -352,38 +352,38 @@ async function Compare({ sp, today, timeZone, weekStartsOn }: { sp: SP; today: s
   type Line = { label: string; a: number | null; b: number | null; fmt: (v: number) => string; na?: number; nb?: number };
   const money = (v: number) => formatMoney(v), int = (v: number) => formatNumber(v, 0), one = (v: number) => formatNumber(v, 1);
   const sections: { title: string; lines: Line[] }[] = [
-    { title: "Bienestar", lines: [
-      { label: "Días con registro", a: a.daysRecorded, b: b.daysRecorded, fmt: int },
-      { label: "Ánimo promedio (1–10)", a: a.mood.value, b: b.mood.value, fmt: one, na: a.mood.n, nb: b.mood.n },
-      { label: "Energía promedio (1–10)", a: a.energy.value, b: b.energy.value, fmt: one, na: a.energy.n, nb: b.energy.n },
-      { label: "Estrés promedio (1–10)", a: a.stress.value, b: b.stress.value, fmt: one, na: a.stress.n, nb: b.stress.n },
-      { label: "Horas de sueño promedio", a: a.sleep.value, b: b.sleep.value, fmt: one, na: a.sleep.n, nb: b.sleep.n },
-      { label: "Hábitos cumplidos (%)", a: a.habits.value, b: b.habits.value, fmt: int, na: a.habits.expected, nb: b.habits.expected },
+    { title: "Well-being", lines: [
+      { label: "Days with an entry", a: a.daysRecorded, b: b.daysRecorded, fmt: int },
+      { label: "Average mood (1–10)", a: a.mood.value, b: b.mood.value, fmt: one, na: a.mood.n, nb: b.mood.n },
+      { label: "Average energy (1–10)", a: a.energy.value, b: b.energy.value, fmt: one, na: a.energy.n, nb: b.energy.n },
+      { label: "Average stress (1–10)", a: a.stress.value, b: b.stress.value, fmt: one, na: a.stress.n, nb: b.stress.n },
+      { label: "Average sleep hours", a: a.sleep.value, b: b.sleep.value, fmt: one, na: a.sleep.n, nb: b.sleep.n },
+      { label: "Habits done (%)", a: a.habits.value, b: b.habits.value, fmt: int, na: a.habits.expected, nb: b.habits.expected },
     ] },
-    { title: "Entrenamiento", lines: [
-      { label: "Entrenamientos", a: a.workouts, b: b.workouts, fmt: int },
-      { label: "Días con actividad", a: a.workoutDays, b: b.workoutDays, fmt: int },
-      { label: "Minutos registrados", a: a.workoutMinutes.value, b: b.workoutMinutes.value, fmt: int, na: a.workoutMinutes.n, nb: b.workoutMinutes.n },
-      { label: "Simulacros", a: a.exams, b: b.exams, fmt: int },
-      { label: "Aciertos en simulacros (%)", a: a.examAccuracy.value, b: b.examAccuracy.value, fmt: int, na: a.examAccuracy.n, nb: b.examAccuracy.n },
+    { title: "Training", lines: [
+      { label: "Workouts", a: a.workouts, b: b.workouts, fmt: int },
+      { label: "Active days", a: a.workoutDays, b: b.workoutDays, fmt: int },
+      { label: "Minutes logged", a: a.workoutMinutes.value, b: b.workoutMinutes.value, fmt: int, na: a.workoutMinutes.n, nb: b.workoutMinutes.n },
+      { label: "Mock exams", a: a.exams, b: b.exams, fmt: int },
+      { label: "Mock exam accuracy (%)", a: a.examAccuracy.value, b: b.examAccuracy.value, fmt: int, na: a.examAccuracy.n, nb: b.examAccuracy.n },
     ] },
-    { title: "Finanzas", lines: [
-      { label: "Ingresos", a: a.income.n ? a.income.value : null, b: b.income.n ? b.income.value : null, fmt: money, na: a.income.n, nb: b.income.n },
-      { label: "Gastos", a: a.expense.n ? a.expense.value : null, b: b.expense.n ? b.expense.value : null, fmt: money, na: a.expense.n, nb: b.expense.n },
-      { label: "Aportes a ahorro", a: a.savings.n ? a.savings.value : null, b: b.savings.n ? b.savings.value : null, fmt: money, na: a.savings.n, nb: b.savings.n },
+    { title: "Finances", lines: [
+      { label: "Income", a: a.income.n ? a.income.value : null, b: b.income.n ? b.income.value : null, fmt: money, na: a.income.n, nb: b.income.n },
+      { label: "Expenses", a: a.expense.n ? a.expense.value : null, b: b.expense.n ? b.expense.value : null, fmt: money, na: a.expense.n, nb: b.expense.n },
+      { label: "Savings contributions", a: a.savings.n ? a.savings.value : null, b: b.savings.n ? b.savings.value : null, fmt: money, na: a.savings.n, nb: b.savings.n },
     ] },
-    { title: "Carrera", lines: [
-      { label: "Aplicaciones", a: a.applications, b: b.applications, fmt: int },
-      { label: "Entrevistas", a: a.interviews, b: b.interviews, fmt: int },
-      { label: "Niveles de skill registrados", a: a.skillLevels, b: b.skillLevels, fmt: int },
-      { label: "Proyectos terminados", a: a.projectsCompleted, b: b.projectsCompleted, fmt: int },
+    { title: "Career", lines: [
+      { label: "Applications", a: a.applications, b: b.applications, fmt: int },
+      { label: "Interviews", a: a.interviews, b: b.interviews, fmt: int },
+      { label: "Skill levels logged", a: a.skillLevels, b: b.skillLevels, fmt: int },
+      { label: "Projects finished", a: a.projectsCompleted, b: b.projectsCompleted, fmt: int },
     ] },
-    { title: "Vida", lines: [
-      { label: "Recuerdos", a: a.memories, b: b.memories, fmt: int },
-      { label: "Días con diario escrito", a: a.journalDays, b: b.journalDays, fmt: int },
-      { label: "Logros", a: a.accomplishments, b: b.accomplishments, fmt: int },
-      { label: "Eventos sociales", a: a.social, b: b.social, fmt: int },
-      { label: "Hitos de metas completados", a: a.milestones, b: b.milestones, fmt: int },
+    { title: "Life", lines: [
+      { label: "Memories", a: a.memories, b: b.memories, fmt: int },
+      { label: "Days with a journal entry", a: a.journalDays, b: b.journalDays, fmt: int },
+      { label: "Accomplishments", a: a.accomplishments, b: b.accomplishments, fmt: int },
+      { label: "Social events", a: a.social, b: b.social, fmt: int },
+      { label: "Goal milestones completed", a: a.milestones, b: b.milestones, fmt: int },
     ] },
   ];
   const cell = (v: number | null, n: number | undefined, fmt: (v: number) => string) =>
@@ -394,13 +394,13 @@ async function Compare({ sp, today, timeZone, weekStartsOn }: { sp: SP; today: s
     // Se resta lo que se muestra (redondeado), para que la diferencia cuadre con las cifras.
     const r = (x: number) => (l.fmt === one ? Math.round(x * 10) / 10 : Math.round(x));
     const d = Math.round((r(l.a) - r(l.b)) * 10) / 10;
-    return d === 0 ? "igual" : `${d > 0 ? "+" : "−"}${l.fmt(Math.abs(d))}`;
+    return d === 0 ? "same" : `${d > 0 ? "+" : "−"}${l.fmt(Math.abs(d))}`;
   };
 
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <nav aria-label="Periodos a comparar" className="flex flex-wrap gap-1.5">
+        <nav aria-label="Periods to compare" className="flex flex-wrap gap-1.5">
           {presets.map((p) => (
             <Link key={p.key} href={`/analytics?tab=compare&cmp=${p.key}`} aria-current={!custom && preset.key === p.key ? "page" : undefined}
               className={cn("rounded-md border px-3 py-1.5 text-xs", !custom && preset.key === p.key ? "border-accent bg-accent-soft text-foreground" : "border-border text-muted hover:text-foreground")}>
@@ -410,18 +410,18 @@ async function Compare({ sp, today, timeZone, weekStartsOn }: { sp: SP; today: s
         </nav>
         <form action="/analytics" className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap">
           <input type="hidden" name="tab" value="compare" /><input type="hidden" name="cmp" value="custom" />
-          <label className="space-y-1 text-[11px] text-muted">A desde<Input type="date" name="af" defaultValue={A.from} max={today} className="h-8 sm:w-36" required /></label>
-          <label className="space-y-1 text-[11px] text-muted">A hasta<Input type="date" name="at" defaultValue={A.to} max={today} className="h-8 sm:w-36" required /></label>
-          <label className="space-y-1 text-[11px] text-muted">B desde<Input type="date" name="bf" defaultValue={B.from} max={today} className="h-8 sm:w-36" required /></label>
-          <label className="space-y-1 text-[11px] text-muted">B hasta<Input type="date" name="bt" defaultValue={B.to} max={today} className="h-8 sm:w-36" required /></label>
-          <Button type="submit" size="sm" variant={custom ? "default" : "secondary"} className="col-span-2">Comparar</Button>
+          <label className="space-y-1 text-[11px] text-muted">A from<Input type="date" name="af" defaultValue={A.from} max={today} className="h-8 sm:w-36" required /></label>
+          <label className="space-y-1 text-[11px] text-muted">A to<Input type="date" name="at" defaultValue={A.to} max={today} className="h-8 sm:w-36" required /></label>
+          <label className="space-y-1 text-[11px] text-muted">B from<Input type="date" name="bf" defaultValue={B.from} max={today} className="h-8 sm:w-36" required /></label>
+          <label className="space-y-1 text-[11px] text-muted">B to<Input type="date" name="bt" defaultValue={B.to} max={today} className="h-8 sm:w-36" required /></label>
+          <Button type="submit" size="sm" variant={custom ? "default" : "secondary"} className="col-span-2">Compare</Button>
         </form>
       </div>
       <Card>
         <CardHeader>
           <div>
-            <CardTitle>{name(A)} frente a {name(B)}</CardTitle>
-            <CardDescription>Cifras de tus registros en cada periodo. Entre paréntesis, cuántos registros respaldan el valor. No significa que un periodo haya sido mejor que otro.</CardDescription>
+            <CardTitle>{name(A)} vs. {name(B)}</CardTitle>
+            <CardDescription>Figures from your entries in each period. In parentheses, how many entries back up the value. It doesn't mean one period was better than the other.</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
@@ -429,7 +429,7 @@ async function Compare({ sp, today, timeZone, weekStartsOn }: { sp: SP; today: s
             <table className="w-full text-xs sm:text-sm">
               <thead className="text-xs text-muted">
                 <tr>
-                  <th scope="col" className="py-2 pr-3 text-left font-medium">Dato</th>
+                  <th scope="col" className="py-2 pr-3 text-left font-medium">Measure</th>
                   <th scope="col" className="px-3 py-2 text-right font-medium">A · {name(A)}</th>
                   <th scope="col" className="px-3 py-2 text-right font-medium">B · {name(B)}</th>
                   <th scope="col" className="hidden py-2 pl-3 text-right font-medium sm:table-cell">A − B</th>
@@ -450,7 +450,7 @@ async function Compare({ sp, today, timeZone, weekStartsOn }: { sp: SP; today: s
               ))}
             </table>
           </div>
-          <p className="mt-3 text-[11px] text-muted">Si un periodo está en curso, solo cuenta hasta hoy. Los periodos pueden tener distinta cantidad de días.<span className="sm:hidden"> En pantallas pequeñas se oculta la columna de diferencia.</span></p>
+          <p className="mt-3 text-[11px] text-muted">If a period is in progress, it only counts up to today. Periods can have a different number of days.<span className="sm:hidden"> On small screens the difference column is hidden.</span></p>
         </CardContent>
       </Card>
     </div>
@@ -464,11 +464,11 @@ async function Balance({ today }: { today: string }) {
     <div className="grid gap-5 lg:grid-cols-2">
       <LifeRadar assessments={snap.assessments as LifeAssessment[]} today={today} />
       <Card>
-        <CardHeader><div><CardTitle>Cómo leerlo</CardTitle></div></CardHeader>
+        <CardHeader><div><CardTitle>How to read it</CardTitle></div></CardHeader>
         <CardContent className="space-y-2 text-sm text-muted">
-          <p>Cada autoevaluación es tu propia valoración de 1 a 10 en seis áreas. Compara dos fechas para ver qué cambió.</p>
-          <p>No hay un puntaje global ni una forma correcta de distribuir tu atención. El historial completo está en Archivo de vida → Balance de vida.</p>
-          <Button asChild size="sm" variant="secondary"><Link href="/archive?tab=radar">Ver historial</Link></Button>
+          <p>Each self-assessment is your own rating from 1 to 10 in six areas. Compare two dates to see what changed.</p>
+          <p>There's no overall score and no right way to split your attention. The full history is in Life archive → Life balance.</p>
+          <Button asChild size="sm" variant="secondary"><Link href="/archive?tab=radar">View history</Link></Button>
         </CardContent>
       </Card>
     </div>

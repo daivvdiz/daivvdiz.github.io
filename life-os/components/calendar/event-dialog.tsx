@@ -54,7 +54,7 @@ export function EventDialog({
   const onSubmit = handleSubmit(async (v) => {
     const r = await saveEvent(v, event?.id);
     if (!r.ok) return void toast.error(r.error);
-    toast.success(event ? "Evento actualizado" : "Evento creado");
+    toast.success(event ? "Event updated" : "Event created");
     onOpenChange(false);
   });
 
@@ -62,78 +62,78 @@ export function EventDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{event ? "Editar evento" : "Nuevo evento"}</DialogTitle>
-          <DialogDescription>Las horas usan tu zona horaria de Ajustes.</DialogDescription>
+          <DialogTitle>{event ? "Edit event" : "New event"}</DialogTitle>
+          <DialogDescription>Times use your time zone from Settings.</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
           <div className="space-y-1.5">
-            <Label htmlFor="ev-title">Título</Label>
+            <Label htmlFor="ev-title">Title</Label>
             <Input id="ev-title" {...register("title")} aria-invalid={!!formState.errors.title} autoFocus />
             <FieldError message={formState.errors.title?.message} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="ev-date">Fecha</Label>
+              <Label htmlFor="ev-date">Date</Label>
               <Input id="ev-date" type="date" {...register("date")} />
               <FieldError message={formState.errors.date?.message} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="ev-cat">Categoría</Label>
+              <Label htmlFor="ev-cat">Category</Label>
               <Select id="ev-cat" {...register("category")}>
                 {Object.entries(EVENT_CATEGORIES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
               </Select>
             </div>
           </div>
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" className="size-4 accent-[var(--accent)]" {...register("all_day")} /> Todo el día
+            <input type="checkbox" className="size-4 accent-[var(--accent)]" {...register("all_day")} /> All day
           </label>
           {!allDay && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="ev-start">Inicio</Label>
+                <Label htmlFor="ev-start">Start</Label>
                 <Input id="ev-start" type="time" {...register("start_time")} />
                 <FieldError message={formState.errors.start_time?.message} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="ev-end">Fin (opcional)</Label>
+                <Label htmlFor="ev-end">End (optional)</Label>
                 <Input id="ev-end" type="time" {...register("end_time")} />
                 <FieldError message={formState.errors.end_time?.message} />
               </div>
             </div>
           )}
           <div className="space-y-1.5">
-            <Label htmlFor="ev-loc">Lugar (opcional)</Label>
+            <Label htmlFor="ev-loc">Location (optional)</Label>
             <Input id="ev-loc" {...register("location")} />
           </div>
           {goals.length > 0 && (
             <div className="space-y-1.5">
-              <Label htmlFor="ev-goal">Meta relacionada (opcional)</Label>
+              <Label htmlFor="ev-goal">Related goal (optional)</Label>
               <Select id="ev-goal" {...register("goal_id")}>
-                <option value="">Ninguna</option>
+                <option value="">None</option>
                 {goals.map((g) => <option key={g.id} value={g.id}>{g.title}</option>)}
               </Select>
             </div>
           )}
           <div className="space-y-1.5">
-            <Label htmlFor="ev-desc">Notas (opcional)</Label>
+            <Label htmlFor="ev-desc">Notes (optional)</Label>
             <Textarea id="ev-desc" {...register("description")} />
           </div>
           <DialogFooter className="sm:justify-between">
             {event ? (
               <ConfirmDialog
-                trigger={<Button type="button" variant="ghost"><Trash2 /> Eliminar</Button>}
-                title="¿Eliminar este evento?"
-                description={`"${event.title}" se eliminará del calendario. Esta acción no se puede deshacer.`}
+                trigger={<Button type="button" variant="ghost"><Trash2 /> Delete</Button>}
+                title="Delete this event?"
+                description={`"${event.title}" will be removed from the calendar. This can't be undone.`}
                 onConfirm={async () => {
                   const r = await deleteEvent(event.id);
                   if (!r.ok) return void toast.error(r.error);
-                  toast.success("Evento eliminado");
+                  toast.success("Event deleted");
                   // Cierra primero la confirmación y después este diálogo (evita que la página quede bloqueada).
                   setTimeout(() => onOpenChange(false), 0);
                 }}
               />
             ) : <span />}
-            <Button type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? "Guardando…" : "Guardar"}</Button>
+            <Button type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? "Saving…" : "Save"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -165,7 +165,7 @@ export function EventChip({ event, goals, compact = false, wrap = false }: { eve
   );
 }
 
-export function NewEventButton({ date, goals, label = "Nuevo evento", variant = "default" }: { date: string; goals: GoalOption[]; label?: string; variant?: "default" | "secondary" }) {
+export function NewEventButton({ date, goals, label = "New event", variant = "default" }: { date: string; goals: GoalOption[]; label?: string; variant?: "default" | "secondary" }) {
   const [open, setOpen] = useState(false);
   return (
     <>

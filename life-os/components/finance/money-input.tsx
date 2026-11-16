@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { parseMoney } from "@/lib/finance/schema";
 
-const fmt = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 2 });
+const fmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 
-/** Campo de dinero en COP: acepta "1.250.000" o "1250000" y muestra el valor con puntos de miles. */
+/** COP money field: accepts "1,250,000" or "1250000" and shows the value with thousands separators. */
 export function MoneyInput({
   value, onChange, id, invalid, placeholder = "0", className,
 }: { value: number | null | undefined; onChange: (v: number | null) => void; id?: string; invalid?: boolean; placeholder?: string; className?: string }) {

@@ -21,7 +21,7 @@ import { daysBetween } from "@/lib/dates";
 import { formatDay, formatNumber, todayISO } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Salud mental" };
+export const metadata: Metadata = { title: "Mental health" };
 export const dynamic = "force-dynamic";
 
 type SP = Promise<{ period?: string; from?: string; to?: string }>;
@@ -54,17 +54,17 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
   return (
     <>
       <PageHeader
-        title="Salud mental"
-        description="Cómo te has sentido, según lo que registras. Sin puntajes ni diagnósticos."
+        title="Mental health"
+        description="How you've been feeling, based on what you log. No scores or diagnoses."
         actions={
           <Button asChild variant="secondary">
-            <Link href={`/calendar?view=day&date=${today}`}>Registrar ánimo de hoy</Link>
+            <Link href={`/calendar?view=day&date=${today}`}>Log today's mood</Link>
           </Button>
         }
       />
 
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <nav aria-label="Periodo" className="flex flex-wrap gap-1.5">
+        <nav aria-label="Period" className="flex flex-wrap gap-1.5">
           {PERIODS.map((p) => (
             <Link
               key={p.key}
@@ -82,25 +82,25 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
         <form action="/mental-health" className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="period" value="custom" />
           <label className="space-y-1 text-[11px] text-muted">
-            Desde
+            From
             <Input type="date" name="from" defaultValue={period.from} max={today} className="h-8 w-36" required />
           </label>
           <label className="space-y-1 text-[11px] text-muted">
-            Hasta
+            To
             <Input type="date" name="to" defaultValue={period.to} max={today} className="h-8 w-36" required />
           </label>
-          <Button type="submit" size="sm" variant={period.key === "custom" ? "default" : "secondary"}>Aplicar</Button>
+          <Button type="submit" size="sm" variant={period.key === "custom" ? "default" : "secondary"}>Apply</Button>
         </form>
       </div>
 
       {data.error && (
         <Card className="mb-5 flex items-center gap-2 border-danger/40 px-4 py-3 text-sm">
-          <AlertTriangle className="size-4 text-danger" aria-hidden /> No se pudieron cargar tus registros. Intenta recargar la página.
+          <AlertTriangle className="size-4 text-danger" aria-hidden /> Couldn't load your entries. Try reloading the page.
         </Card>
       )}
 
       <p className="mb-3 text-xs text-muted">
-        {formatDay(period.from)} – {formatDay(period.to)} · {recorded.length} de {totalDays} días con algún registro
+        {formatDay(period.from)} – {formatDay(period.to)} · {recorded.length} of {totalDays} days with an entry
       </p>
 
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -108,12 +108,12 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
           const s = summary(data.points, t.key);
           return (
             <Card key={t.key} className="px-4 py-3">
-              <p className="text-xs text-muted">{METRIC_LABEL[t.key]} promedio</p>
+              <p className="text-xs text-muted">Average {METRIC_LABEL[t.key].toLowerCase()}</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">
                 {s.n ? <>{formatNumber(s.avg, 1)}{t.unit}<span className="text-sm font-normal text-muted">{t.scale}</span></> : <span className="text-muted">—</span>}
               </p>
               <p className="text-[11px] text-muted tabular-nums">
-                {s.n ? `${s.n} ${s.n === 1 ? "día" : "días"} · rango ${formatNumber(s.min, 1)}–${formatNumber(s.max, 1)}` : "Sin registros"}
+                {s.n ? `${s.n} ${s.n === 1 ? "day" : "days"} · range ${formatNumber(s.min, 1)}–${formatNumber(s.max, 1)}` : "No entries"}
               </p>
             </Card>
           );
@@ -125,9 +125,9 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
           <EmptyState
             icon={Brain}
             className="py-12"
-            title="Aún no hay registros en este periodo"
-            description="Registra tu ánimo, energía, estrés y sueño en la entrada diaria del calendario. Aquí verás cómo cambian con el tiempo."
-            action={<Button asChild size="sm"><Link href={`/calendar?view=day&date=${today}`}>Ir a la entrada de hoy</Link></Button>}
+            title="No entries in this period yet"
+            description="Log your mood, energy, stress and sleep in the calendar's daily entry. You'll see how they change over time here."
+            action={<Button asChild size="sm"><Link href={`/calendar?view=day&date=${today}`}>Go to today's entry</Link></Button>}
           />
         </Card>
       ) : (
@@ -135,8 +135,8 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
           <Card className="xl:col-span-2">
             <CardHeader>
               <div>
-                <CardTitle>Ánimo, energía y estrés</CardTitle>
-                <CardDescription>Escala de 1 a 10, tal como lo registraste cada día.</CardDescription>
+                <CardTitle>Mood, energy and stress</CardTitle>
+                <CardDescription>1 to 10 scale, just as you logged it each day.</CardDescription>
               </div>
             </CardHeader>
             <CardContent><TrendChart points={data.points} from={period.from} to={period.to} /></CardContent>
@@ -145,8 +145,8 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
           <Card>
             <CardHeader>
               <div>
-                <CardTitle>Calendario de ánimo</CardTitle>
-                <CardDescription>Más intenso = valor más alto. Toca un día para abrir su entrada.</CardDescription>
+                <CardTitle>Mood calendar</CardTitle>
+                <CardDescription>More intense = higher value. Tap a day to open its entry.</CardDescription>
               </div>
             </CardHeader>
             <CardContent><MoodCalendar points={data.points} from={period.from} to={period.to} weekStartsOn={prefs.weekStartsOn} /></CardContent>
@@ -155,8 +155,8 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
           <Card>
             <CardHeader>
               <div>
-                <CardTitle>Sueño</CardTitle>
-                <CardDescription>Horas dormidas y calidad percibida.</CardDescription>
+                <CardTitle>Sleep</CardTitle>
+                <CardDescription>Hours slept and perceived quality.</CardDescription>
               </div>
             </CardHeader>
             <CardContent><SleepChart points={data.points} from={period.from} to={period.to} /></CardContent>
@@ -165,8 +165,8 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
           <Card>
             <CardHeader>
               <div>
-                <CardTitle>Distribución</CardTitle>
-                <CardDescription>Cuántos días registraste cada valor.</CardDescription>
+                <CardTitle>Distribution</CardTitle>
+                <CardDescription>How many days you logged each value.</CardDescription>
               </div>
             </CardHeader>
             <CardContent><DistributionChart points={data.points} /></CardContent>
@@ -175,8 +175,8 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
           <Card>
             <CardHeader>
               <div>
-                <CardTitle>Promedios</CardTitle>
-                <CardDescription>Por semana o por mes, solo con los días registrados.</CardDescription>
+                <CardTitle>Averages</CardTitle>
+                <CardDescription>By week or by month, using only logged days.</CardDescription>
               </div>
             </CardHeader>
             <CardContent><AveragesTable points={data.points} weekStartsOn={prefs.weekStartsOn} /></CardContent>
@@ -185,8 +185,8 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
           <Card className="xl:col-span-2">
             <CardHeader>
               <div>
-                <CardTitle>Relaciones exploratorias</CardTitle>
-                <CardDescription>Si dos medidas tienden a subir o bajar juntas en tus días registrados.</CardDescription>
+                <CardTitle>Exploratory relationships</CardTitle>
+                <CardDescription>Whether two measures tend to rise or fall together on your logged days.</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -196,14 +196,14 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
                   const enough = r != null && n >= MIN_CORRELATION_N;
                   return (
                     <li key={`${a}-${b}`} className="rounded-md border border-border p-3">
-                      <p className="text-sm font-medium">{METRIC_LABEL[a]} y {METRIC_LABEL[b].toLowerCase()}</p>
+                      <p className="text-sm font-medium">{METRIC_LABEL[a]} and {METRIC_LABEL[b].toLowerCase()}</p>
                       {enough ? (
                         <p className="mt-1 text-xs text-muted">
-                          <span className="text-foreground">{describeR(r)}</span> · r = {formatNumber(r, 2)} · {n} días
+                          <span className="text-foreground">{describeR(r)}</span> · r = {formatNumber(r, 2)} · {n} days
                         </p>
                       ) : (
                         <p className="mt-1 text-xs text-muted">
-                          Datos insuficientes: {n} {n === 1 ? "día tiene" : "días tienen"} ambos valores (se necesitan al menos {MIN_CORRELATION_N} y que varíen).
+                          Not enough data: {n} {n === 1 ? "day has" : "days have"} both values (at least {MIN_CORRELATION_N} are needed, and they must vary).
                         </p>
                       )}
                     </li>
@@ -212,7 +212,7 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
               </ul>
               <p className="flex items-start gap-1.5 text-[11px] text-muted">
                 <Info className="mt-px size-3.5 shrink-0" aria-hidden />
-                Es solo exploratorio: una relación no implica causalidad, y con pocos días puede ser casualidad.
+                This is only exploratory: a relationship doesn't imply causation, and with few days it may be chance.
               </p>
             </CardContent>
           </Card>
@@ -223,8 +223,8 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
         <Card>
           <CardHeader>
             <div>
-              <CardTitle>Emociones de hoy</CardTitle>
-              <CardDescription>{formatDay(today, "EEEE d 'de' MMMM")}. Todo es opcional.</CardDescription>
+              <CardTitle>Today's emotions</CardTitle>
+              <CardDescription>{formatDay(today, "EEEE, MMMM d")}. Everything is optional.</CardDescription>
             </div>
           </CardHeader>
           <CardContent><EmotionsToday key={today} date={today} initial={data.today} known={data.emotionNames} /></CardContent>
@@ -233,38 +233,38 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
         <Card>
           <CardHeader>
             <div>
-              <CardTitle>Lo más frecuente del periodo</CardTitle>
-              <CardDescription>Emociones y factores de estrés que registraste.</CardDescription>
+              <CardTitle>Most frequent this period</CardTitle>
+              <CardDescription>Emotions and stress factors you logged.</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="grid gap-5 sm:grid-cols-2">
             <div>
-              <h3 className="mb-2 text-xs font-medium text-muted">Emociones</h3>
+              <h3 className="mb-2 text-xs font-medium text-muted">Emotions</h3>
               {data.emotions.length ? (
                 <ul className="space-y-1 text-sm">
                   {data.emotions.slice(0, 10).map((e) => (
                     <li key={e.name} className="flex justify-between gap-2">
                       <span className="min-w-0 truncate">{e.name}</span>
                       <span className="shrink-0 text-xs text-muted tabular-nums">
-                        {e.days} {e.days === 1 ? "día" : "días"}{e.avgIntensity != null && ` · int. ${formatNumber(e.avgIntensity, 1)}`}
+                        {e.days} {e.days === 1 ? "day" : "days"}{e.avgIntensity != null && ` · int. ${formatNumber(e.avgIntensity, 1)}`}
                       </span>
                     </li>
                   ))}
                 </ul>
-              ) : <p className="text-sm text-muted">Sin emociones registradas.</p>}
+              ) : <p className="text-sm text-muted">No emotions logged.</p>}
             </div>
             <div>
-              <h3 className="mb-2 text-xs font-medium text-muted">Factores de estrés</h3>
+              <h3 className="mb-2 text-xs font-medium text-muted">Stress factors</h3>
               {data.factors.length ? (
                 <ul className="space-y-1 text-sm">
                   {data.factors.slice(0, 10).map((f) => (
                     <li key={f.description} className="flex justify-between gap-2">
                       <span className="min-w-0 break-words">{f.description}</span>
-                      <span className="shrink-0 text-xs text-muted tabular-nums">{f.days} {f.days === 1 ? "vez" : "veces"}</span>
+                      <span className="shrink-0 text-xs text-muted tabular-nums">{f.days} {f.days === 1 ? "time" : "times"}</span>
                     </li>
                   ))}
                 </ul>
-              ) : <p className="text-sm text-muted">Sin factores registrados.</p>}
+              ) : <p className="text-sm text-muted">No factors logged.</p>}
             </div>
           </CardContent>
         </Card>
@@ -274,8 +274,8 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
         <Card>
           <CardHeader>
             <div>
-              <CardTitle>Diario emocional</CardTitle>
-              <CardDescription>Emociones, pensamientos, experiencias difíciles y lo que te ayudó.</CardDescription>
+              <CardTitle>Emotional journal</CardTitle>
+              <CardDescription>Emotions, thoughts, difficult experiences and what helped you.</CardDescription>
             </div>
             <NewJournalButton today={today} />
           </CardHeader>
@@ -285,8 +285,8 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
         <Card>
           <CardHeader>
             <div>
-              <CardTitle>Estrategias que te ayudan</CardTitle>
-              <CardDescription>Lo que haces para cuidarte y cuánto te sirvió, según tú.</CardDescription>
+              <CardTitle>Strategies that help you</CardTitle>
+              <CardDescription>What you do to take care of yourself and how much it helped, in your own words.</CardDescription>
             </div>
           </CardHeader>
           <CardContent><Strategies strategies={data.strategies} logs={data.logs} today={today} /></CardContent>
@@ -294,7 +294,7 @@ export default async function MentalHealthPage({ searchParams }: { searchParams:
       </div>
 
       <p className="mt-6 text-[11px] text-muted">
-        LIFE OS no reemplaza a un profesional de salud mental. Si estás pasando por un momento difícil, buscar apoyo es una buena decisión.
+        LIFE OS doesn't replace a mental health professional. If you're going through a hard time, reaching out for support is a good choice.
       </p>
     </>
   );

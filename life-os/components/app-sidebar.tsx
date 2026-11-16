@@ -66,19 +66,19 @@ export function AppSidebar({ name, email }: Props) {
     const compact = collapsed && !isMobile;
     return (
       <div className={cn("flex items-center gap-2 border-t border-border p-3", compact && "flex-col")}>
-        <Link href="/settings" className="flex min-w-0 flex-1 items-center gap-2 rounded-md p-1 hover:bg-card" title="Ajustes de perfil">
+        <Link href="/settings" className="flex min-w-0 flex-1 items-center gap-2 rounded-md p-1 hover:bg-card" title="Profile settings">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-xs font-semibold text-accent">
             {initials}
           </span>
           {!compact && (
             <span className="min-w-0">
-              <span className="block truncate text-sm">{name || "Tu perfil"}</span>
+              <span className="block truncate text-sm">{name || "Your profile"}</span>
               <span className="block truncate text-xs text-muted">{email}</span>
             </span>
           )}
         </Link>
         <form action="/auth/signout" method="post">
-          <button type="submit" className="rounded-md p-2 text-muted hover:bg-card hover:text-foreground" aria-label="Cerrar sesión" title="Cerrar sesión">
+          <button type="submit" className="rounded-md p-2 text-muted hover:bg-card hover:text-foreground" aria-label="Sign out" title="Sign out">
             <LogOut className="size-4" />
           </button>
         </form>
@@ -90,7 +90,7 @@ export function AppSidebar({ name, email }: Props) {
     <>
       {/* Barra superior en móvil */}
       <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur md:hidden">
-        <button onClick={() => setMobileOpen(true)} className="rounded-md p-1.5 text-muted hover:text-foreground" aria-label="Abrir menú">
+        <button onClick={() => setMobileOpen(true)} className="rounded-md p-1.5 text-muted hover:text-foreground" aria-label="Open menu">
           <Menu className="size-5" />
         </button>
         <span className="text-sm font-semibold tracking-wide">LIFE OS</span>
@@ -98,12 +98,12 @@ export function AppSidebar({ name, email }: Props) {
 
       {/* Panel móvil */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true" aria-label="Menú">
-          <button className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} aria-label="Cerrar menú" />
+        <div className="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+          <button className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} aria-label="Close menu" />
           <aside className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-border bg-surface">
             <div className="flex h-14 items-center justify-between px-4">
               <span className="text-sm font-semibold tracking-wide">LIFE OS</span>
-              <button onClick={() => setMobileOpen(false)} className="rounded-md p-1.5 text-muted hover:text-foreground" aria-label="Cerrar menú">
+              <button onClick={() => setMobileOpen(false)} className="rounded-md p-1.5 text-muted hover:text-foreground" aria-label="Close menu">
                 <X className="size-5" />
               </button>
             </div>
@@ -125,7 +125,7 @@ export function AppSidebar({ name, email }: Props) {
           <button
             onClick={toggle}
             className="rounded-md p-1.5 text-muted hover:bg-card hover:text-foreground"
-            aria-label={collapsed ? "Expandir barra lateral" : "Contraer barra lateral"}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}
           </button>

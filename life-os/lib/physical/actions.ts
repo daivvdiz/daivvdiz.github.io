@@ -14,7 +14,7 @@ import { isImportMarker } from "./markers";
 
 type Result = { ok: true } | { ok: false; error: string };
 const uuid = z.string().uuid();
-const issue = (e: z.ZodError) => ({ ok: false as const, error: e.issues[0]?.message ?? "Datos no válidos" });
+const issue = (e: z.ZodError) => ({ ok: false as const, error: e.issues[0]?.message ?? "Invalid data" });
 const done = (): Result => {
   revalidatePath("/physical");
   revalidatePath("/overview");
@@ -51,7 +51,7 @@ export async function saveWorkout(input: WorkoutInput, id?: string): Promise<Res
     const measure: Measure = it.weight_kg != null ? "weight" : it.distance_km != null ? "distance" : parseDuration(it.time) != null ? "time" : "reps";
     await supabase.from("exercises").upsert({ user_id: user.id, name, measure }, { onConflict: "user_id,name", ignoreDuplicates: true });
     const ex = await supabase.from("exercises").select("id").eq("user_id", user.id).eq("name", name).single();
-    if (ex.error || !ex.data) return { ok: false, error: `No se pudo crear el ejercicio “${name}”.` };
+    if (ex.error || !ex.data) return { ok: false, error: `Couldn't create the exercise “${name}”.` };
     exerciseIds.push(ex.data.id);
   }
 
@@ -65,7 +65,7 @@ export async function saveWorkout(input: WorkoutInput, id?: string): Promise<Res
   const w = id
     ? await supabase.from("workouts").update(row).eq("id", uuid.parse(id)).eq("user_id", user.id).select("id").single()
     : await supabase.from("workouts").insert({ ...row, user_id: user.id }).select("id").single();
-  if (w.error || !w.data) return { ok: false, error: "No se pudo guardar el entrenamiento." };
+  if (w.error || !w.data) return { ok: false, error: "Couldn't save the workout." };
   const workoutId = id ? uuid.parse(id) : (w.data.id as string);
 
   // Ejercicios del entrenamiento: actualiza los que siguen, agrega los nuevos y quita los eliminados.
@@ -74,7 +74,7 @@ export async function saveWorkout(input: WorkoutInput, id?: string): Promise<Res
   const toDelete = (existing.data ?? []).map((r) => r.id as string).filter((x) => !keep.has(x));
   if (toDelete.length) {
     const d = await supabase.from("workout_exercises").delete().in("id", toDelete).eq("user_id", user.id);
-    if (d.error) return { ok: false, error: "No se pudieron actualizar los ejercicios." };
+    if (d.error) return { ok: false, error: "Couldn't update the exercises." };
   }
   for (const [i, it] of v.items.entries()) {
     const r = {
@@ -89,14 +89,14 @@ export async function saveWorkout(input: WorkoutInput, id?: string): Promise<Res
     const res = it.id
       ? await supabase.from("workout_exercises").update(r).eq("id", it.id).eq("user_id", user.id)
       : await supabase.from("workout_exercises").insert({ ...r, workout_id: workoutId, user_id: user.id });
-    if (res.error) return { ok: false, error: "No se pudieron guardar los ejercicios." };
+    if (res.error) return { ok: false, error: "Couldn't save the exercises." };
   }
 
   if (!id && v.add_to_calendar) {
     const { timeZone } = await getPrefs(supabase, user.id);
     await supabase.from("calendar_events").insert({
       user_id: user.id,
-      title: WORKOUT_TYPES[v.activity_type] ?? "Entrenamiento",
+      title: WORKOUT_TYPES[v.activity_type] ?? "Workout",
       category: "fitness",
       starts_at: zonedToUtc(v.performed_on, "00:00", timeZone),
       ends_at: zonedToUtc(addDays(v.performed_on, 1), "00:00", timeZone),
@@ -108,7 +108,7 @@ export async function saveWorkout(input: WorkoutInput, id?: string): Promise<Res
 }
 
 export async function deleteWorkout(id: string) {
-  return remove("workouts", id, "No se pudo eliminar el entrenamiento.");
+  return remove("workouts", id, "Couldn't delete the workout.");
 }
 
 // ---------------------------------------------------------------- Ejercicios
@@ -120,12 +120,12 @@ export async function saveExercise(input: ExerciseInput, id?: string): Promise<R
   const r = id
     ? await supabase.from("exercises").update(p.data).eq("id", uuid.parse(id)).eq("user_id", user.id)
     : await supabase.from("exercises").insert({ ...p.data, user_id: user.id });
-  if (r.error) return { ok: false, error: r.error.code === "23505" ? "Ya tienes un ejercicio con ese nombre." : "No se pudo guardar el ejercicio." };
+  if (r.error) return { ok: false, error: r.error.code === "23505" ? "You already have an exercise with that name." : "Couldn't save the exercise." };
   return done();
 }
 
 export async function deleteExercise(id: string) {
-  return remove("exercises", id, "No se pudo eliminar el ejercicio.");
+  return remove("exercises", id, "Couldn't delete the exercise.");
 }
 
 // ---------------------------------------------------------------- Cuerpo
@@ -150,12 +150,12 @@ export async function saveBodyMetric(input: BodyInput, id?: string): Promise<Res
   const r = id
     ? await supabase.from("body_metrics").update(row).eq("id", uuid.parse(id)).eq("user_id", user.id)
     : await supabase.from("body_metrics").insert({ ...row, user_id: user.id });
-  if (r.error) return { ok: false, error: "No se pudo guardar el registro." };
+  if (r.error) return { ok: false, error: "Couldn't save the entry." };
   return done();
 }
 
 export async function deleteBodyMetric(id: string) {
-  return remove("body_metrics", id, "No se pudo eliminar el registro.");
+  return remove("body_metrics", id, "Couldn't delete the entry.");
 }
 
 // ---------------------------------------------------------------- Nutrición
@@ -169,10 +169,10 @@ export async function saveNutrition(input: NutritionInput, id?: string): Promise
   const r = id
     ? await supabase.from("nutrition_logs").update(row).eq("id", uuid.parse(id)).eq("user_id", user.id)
     : await supabase.from("nutrition_logs").insert({ ...row, user_id: user.id });
-  if (r.error) return { ok: false, error: r.error.code === "23505" ? "Ya tienes un registro ese día; edítalo desde la lista." : "No se pudo guardar el registro." };
+  if (r.error) return { ok: false, error: r.error.code === "23505" ? "You already have an entry for that day; edit it from the list." : "Couldn't save the entry." };
   return done();
 }
 
 export async function deleteNutrition(id: string) {
-  return remove("nutrition_logs", id, "No se pudo eliminar el registro.");
+  return remove("nutrition_logs", id, "Couldn't delete the entry.");
 }

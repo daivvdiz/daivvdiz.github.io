@@ -41,26 +41,26 @@ export function LifeRadar({ assessments, today }: { assessments: LifeAssessment[
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Balance de vida</CardTitle>
-          <CardDescription>Tu propia valoración de 1 a 10. Sin puntaje global.</CardDescription>
+          <CardTitle>Life balance</CardTitle>
+          <CardDescription>Your own rating from 1 to 10. No overall score.</CardDescription>
         </div>
         <Button size="sm" variant="secondary" onClick={() => setEditing("new")}>
-          <Plus /> Autoevaluar
+          <Plus /> Self-assess
         </Button>
       </CardHeader>
       <CardContent>
         {!current ? (
           <EmptyState
             icon={RadarIcon}
-            title="Aún no tienes autoevaluaciones"
-            description="Valora cómo te sientes en cada área. Podrás comparar cómo cambia con el tiempo."
-            action={<Button size="sm" onClick={() => setEditing("new")}>Crear la primera</Button>}
+            title="No self-assessments yet"
+            description="Rate how you feel in each area. You'll be able to compare how it changes over time."
+            action={<Button size="sm" onClick={() => setEditing("new")}>Create the first one</Button>}
           />
         ) : (
           <>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="space-y-1 text-xs text-muted">
-                Evaluación
+                Assessment
                 <Select value={current.id} onChange={(e) => setSelectedId(e.target.value)}>
                   {assessments.map((a) => (
                     <option key={a.id} value={a.id}>{formatDay(a.assessed_on)}</option>
@@ -68,16 +68,16 @@ export function LifeRadar({ assessments, today }: { assessments: LifeAssessment[
                 </Select>
               </label>
               <label className="space-y-1 text-xs text-muted">
-                Comparar con
+                Compare with
                 <Select value={compare?.id ?? ""} onChange={(e) => setCompareId(e.target.value)}>
-                  <option value="">Sin comparación</option>
+                  <option value="">No comparison</option>
                   {assessments.filter((a) => a.id !== current.id).map((a) => (
                     <option key={a.id} value={a.id}>{formatDay(a.assessed_on)}</option>
                   ))}
                 </Select>
               </label>
             </div>
-            <div className="h-80 w-full" role="img" aria-label="Gráfico de radar con tus seis dimensiones de vida">
+            <div className="h-80 w-full" role="img" aria-label="Radar chart of your six life dimensions">
               <ResponsiveContainer>
                 <RadarChart data={data} outerRadius="78%">
                   <PolarGrid stroke="var(--border)" />
@@ -97,19 +97,19 @@ export function LifeRadar({ assessments, today }: { assessments: LifeAssessment[
             </div>
             {current.notes && <p className="mt-1 text-sm text-muted">“{current.notes}”</p>}
             <div className="mt-3 flex items-center justify-between text-xs text-muted">
-              <span>{assessments.length} {assessments.length === 1 ? "autoevaluación" : "autoevaluaciones"} en total</span>
+              <span>{assessments.length} {assessments.length === 1 ? "self-assessment" : "self-assessments"} in total</span>
               <span className="flex gap-1">
                 <Button size="sm" variant="ghost" onClick={() => setEditing(current)}>
-                  <Pencil /> Editar
+                  <Pencil /> Edit
                 </Button>
                 <ConfirmDialog
-                  trigger={<Button size="sm" variant="ghost"><Trash2 /> Eliminar</Button>}
-                  title="¿Eliminar esta autoevaluación?"
-                  description={`Se eliminará la del ${formatDay(current.assessed_on)}. Esta acción no se puede deshacer.`}
+                  trigger={<Button size="sm" variant="ghost"><Trash2 /> Delete</Button>}
+                  title="Delete this self-assessment?"
+                  description={`The one from ${formatDay(current.assessed_on)} will be deleted. This can't be undone.`}
                   onConfirm={async () => {
                     const res = await deleteAssessment(current.id);
                     if (!res.ok) return void toast.error(res.error);
-                    toast.success("Autoevaluación eliminada");
+                    toast.success("Self-assessment deleted");
                     setSelectedId("");
                   }}
                 />
@@ -122,8 +122,8 @@ export function LifeRadar({ assessments, today }: { assessments: LifeAssessment[
       <Dialog open={editing !== null} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing === "new" ? "Nueva autoevaluación" : "Editar autoevaluación"}</DialogTitle>
-            <DialogDescription>No hay respuestas correctas: es una foto de cómo lo vives hoy.</DialogDescription>
+            <DialogTitle>{editing === "new" ? "New self-assessment" : "Edit self-assessment"}</DialogTitle>
+            <DialogDescription>There are no right answers: it's a snapshot of how you feel today.</DialogDescription>
           </DialogHeader>
           {editing !== null && (
             <AssessmentForm initial={editing === "new" ? undefined : editing} today={today} onDone={close} />

@@ -13,17 +13,17 @@ import { DIMENSIONS } from "@/lib/types";
 import { formatDay, todayISO } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Archivo de vida" };
+export const metadata: Metadata = { title: "Life archive" };
 export const dynamic = "force-dynamic";
 
 const TABS = [
-  { key: "timeline", label: "Línea de tiempo" },
-  { key: "gallery", label: "Galería" },
-  { key: "categories", label: "Categorías" },
-  { key: "chapters", label: "Capítulos" },
-  { key: "onthisday", label: "Un día como hoy" },
-  { key: "documents", label: "Documentos" },
-  { key: "radar", label: "Balance de vida" },
+  { key: "timeline", label: "Timeline" },
+  { key: "gallery", label: "Gallery" },
+  { key: "categories", label: "Categories" },
+  { key: "chapters", label: "Chapters" },
+  { key: "onthisday", label: "On this day" },
+  { key: "documents", label: "Documents" },
+  { key: "radar", label: "Life balance" },
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 
@@ -41,9 +41,9 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader title="Archivo de vida" description="Tus recuerdos, personas, etapas y momentos importantes, en un solo lugar." />
+      <PageHeader title="Life archive" description="Your memories, people, life stages and important moments, in one place." />
 
-      <nav aria-label="Secciones del Archivo" className="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <nav aria-label="Archive sections" className="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         <div className="flex w-max gap-1 rounded-md border border-border p-0.5">
           {TABS.map((t) => (
             <Link key={t.key} href={href(t.key)} aria-current={tab === t.key ? "page" : undefined}
@@ -56,7 +56,7 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
 
       {d.error && (
         <Card className="mb-5 flex items-center gap-2 border-danger/40 px-4 py-3 text-sm">
-          <AlertTriangle className="size-4 text-danger" aria-hidden /> No se pudieron cargar tus recuerdos. Intenta recargar la página.
+          <AlertTriangle className="size-4 text-danger" aria-hidden /> Couldn't load your memories. Try reloading the page.
         </Card>
       )}
 
@@ -66,23 +66,23 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
         <div className="grid gap-5 lg:grid-cols-2">
           <LifeRadar assessments={d.assessments} today={today} />
           <Card>
-            <CardHeader><div><CardTitle>Historial</CardTitle><CardDescription>Todas tus autoevaluaciones, de 1 a 10. Sin puntaje global.</CardDescription></div></CardHeader>
+            <CardHeader><div><CardTitle>History</CardTitle><CardDescription>All your self-assessments, from 1 to 10. No overall score.</CardDescription></div></CardHeader>
             <CardContent>
               {!d.assessments.length ? (
-                <p className="text-sm text-muted">Aún no tienes autoevaluaciones.</p>
+                <p className="text-sm text-muted">You don't have any self-assessments yet.</p>
               ) : (
                 <div className="max-h-[26rem] overflow-auto rounded-md border border-border">
                   <table className="w-full text-xs">
                     <thead className="sticky top-0 bg-surface text-muted">
                       <tr>
-                        <th scope="col" className="px-2 py-2 text-left font-medium">Fecha</th>
+                        <th scope="col" className="px-2 py-2 text-left font-medium">Date</th>
                         {DIMENSIONS.map((x) => <th key={x.key} scope="col" className="px-2 py-2 text-right font-medium">{x.label}</th>)}
                       </tr>
                     </thead>
                     <tbody>
                       {d.assessments.map((a) => (
                         <tr key={a.id} className="border-t border-border">
-                          <th scope="row" className="whitespace-nowrap px-2 py-1.5 text-left font-normal">{formatDay(a.assessed_on, "d MMM yy")}</th>
+                          <th scope="row" className="whitespace-nowrap px-2 py-1.5 text-left font-normal">{formatDay(a.assessed_on, "MMM d, yy")}</th>
                           {DIMENSIONS.map((x) => <td key={x.key} className="px-2 py-1.5 text-right tabular-nums">{a[x.key]}</td>)}
                         </tr>
                       ))}

@@ -1,10 +1,10 @@
 import { addDays, daysBetween, isISODate } from "@/lib/dates";
 
 export const PERIODS = [
-  { key: "7d", label: "7 días", days: 7 },
-  { key: "30d", label: "30 días", days: 30 },
-  { key: "90d", label: "90 días", days: 90 },
-  { key: "180d", label: "6 meses", days: 182 },
+  { key: "7d", label: "7 days", days: 7 },
+  { key: "30d", label: "30 days", days: 30 },
+  { key: "90d", label: "90 days", days: 90 },
+  { key: "180d", label: "6 months", days: 182 },
 ] as const;
 
 export type PeriodKey = (typeof PERIODS)[number]["key"] | "custom";

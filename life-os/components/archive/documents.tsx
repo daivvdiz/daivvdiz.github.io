@@ -16,8 +16,8 @@ const PLACEHOLDER = ".emptyFolderPlaceholder";
 const MAX = 50 * 1024 * 1024;
 const join = (...p: string[]) => p.filter(Boolean).join("/");
 const clean = (n: string) => n.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.\-() ]+/g, "_").replace(/\s+/g, " ").trim();
-const size = (b: number) => (b > 1e6 ? `${(b / 1e6).toFixed(1).replace(".", ",")} MB` : `${Math.max(1, Math.round(b / 1e3))} KB`);
-const cmp = (a: string, b: string) => a.localeCompare(b, "es", { sensitivity: "base", numeric: true });
+const size = (b: number) => (b > 1e6 ? `${(b / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1e3))} KB`);
+const cmp = (a: string, b: string) => a.localeCompare(b, "en", { sensitivity: "base", numeric: true });
 
 type Listing = { folders: string[]; files: { name: string; size: number; created_at: string | null }[] };
 
@@ -33,7 +33,7 @@ export function Documents({ userId }: { userId: string }) {
     setError(null);
     const { data: rows, error: e } = await createBrowserSupabase().storage.from(BUCKET).list(join(userId, p), { limit: 1000, sortBy: { column: "name", order: "asc" } });
     if (e) {
-      setError("No se pudieron cargar tus documentos.");
+      setError("Couldn't load your documents.");
       setData({ folders: [], files: [] });
       return;
     }
@@ -52,7 +52,7 @@ export function Documents({ userId }: { userId: string }) {
 
   const openFile = async (name: string) => {
     const { data: s, error: e } = await createBrowserSupabase().storage.from(BUCKET).createSignedUrl(join(userId, path, name), 300);
-    if (e || !s) return void toast.error("No se pudo abrir el archivo.");
+    if (e || !s) return void toast.error("Couldn't open the file.");
     window.open(s.signedUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -62,39 +62,39 @@ export function Documents({ userId }: { userId: string }) {
     let ok = 0;
     for (const f of Array.from(list)) {
       if (f.size > MAX) {
-        toast.error(`${f.name} supera 50 MB`);
+        toast.error(`${f.name} is over 50 MB`);
         continue;
       }
       // Sin sobrescribir: si ya existe un archivo con ese nombre, no se toca.
       const { error: e } = await createBrowserSupabase().storage.from(BUCKET).upload(join(userId, path, clean(f.name)), f, { upsert: false, contentType: f.type || undefined });
-      if (e) toast.error(/exist|duplicate/i.test(e.message) ? `Ya existe “${clean(f.name)}” en esta carpeta` : `No se pudo subir ${f.name}`);
+      if (e) toast.error(/exist|duplicate/i.test(e.message) ? `“${clean(f.name)}” already exists in this folder` : `Couldn't upload ${f.name}`);
       else ok++;
     }
     setBusy(false);
     if (input.current) input.current.value = "";
-    if (ok) toast.success(ok === 1 ? "Archivo subido" : `${ok} archivos subidos`);
+    if (ok) toast.success(ok === 1 ? "File uploaded" : `${ok} files uploaded`);
     void load(path);
   };
 
   const createFolder = async () => {
     const name = clean(newFolder ?? "");
     if (!name) return;
-    if (data?.folders.includes(name)) return void toast.error("Ya existe una carpeta con ese nombre");
+    if (data?.folders.includes(name)) return void toast.error("A folder with that name already exists");
     const { error: e } = await createBrowserSupabase().storage.from(BUCKET).upload(join(userId, path, name, PLACEHOLDER), new Blob([""], { type: "text/plain" }));
-    if (e) return void toast.error("No se pudo crear la carpeta.");
+    if (e) return void toast.error("Couldn't create the folder.");
     setNewFolder(null);
-    toast.success("Carpeta creada");
+    toast.success("Folder created");
     void load(path);
   };
 
   const removeFile = async (name: string) => {
     const supabase = createBrowserSupabase();
     const { error: e } = await supabase.storage.from(BUCKET).remove([join(userId, path, name)]);
-    if (e) return void toast.error("No se pudo eliminar el archivo.");
+    if (e) return void toast.error("Couldn't delete the file.");
     // Si la carpeta quedó vacía, se conserva como en Segundo Cerebro.
     if (path && data && data.files.length === 1 && !data.folders.length)
       await supabase.storage.from(BUCKET).upload(join(userId, path, PLACEHOLDER), new Blob([""], { type: "text/plain" }), { upsert: true });
-    toast.success("Archivo eliminado");
+    toast.success("File deleted");
     void load(path);
   };
 
@@ -102,8 +102,8 @@ export function Documents({ userId }: { userId: string }) {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <nav aria-label="Ruta de la carpeta" className="flex min-w-0 flex-wrap items-center gap-0.5 text-sm">
-          <button type="button" className="rounded px-1.5 py-0.5 hover:bg-surface" onClick={() => setPath("")} aria-current={!path ? "page" : undefined}>Documentos</button>
+        <nav aria-label="Folder path" className="flex min-w-0 flex-wrap items-center gap-0.5 text-sm">
+          <button type="button" className="rounded px-1.5 py-0.5 hover:bg-surface" onClick={() => setPath("")} aria-current={!path ? "page" : undefined}>Documents</button>
           {parts.map((p, i) => (
             <span key={i} className="inline-flex min-w-0 items-center gap-0.5">
               <ChevronRight className="size-3.5 shrink-0 text-muted" aria-hidden />
@@ -113,24 +113,24 @@ export function Documents({ userId }: { userId: string }) {
           ))}
         </nav>
         <div className="flex gap-1">
-          <Button size="sm" variant="ghost" onClick={() => setNewFolder("")}><FolderPlus /> Carpeta</Button>
-          <Button size="sm" variant="secondary" disabled={busy} onClick={() => input.current?.click()}><Upload /> {busy ? "Subiendo…" : "Subir archivos"}</Button>
+          <Button size="sm" variant="ghost" onClick={() => setNewFolder("")}><FolderPlus /> Folder</Button>
+          <Button size="sm" variant="secondary" disabled={busy} onClick={() => input.current?.click()}><Upload /> {busy ? "Uploading…" : "Upload files"}</Button>
           <input ref={input} type="file" multiple hidden onChange={(e) => upload(e.target.files)} />
         </div>
       </div>
       {newFolder !== null && (
         <div className="flex gap-2">
-          <Input aria-label="Nombre de la carpeta nueva" placeholder="Nombre de la carpeta" maxLength={80} autoFocus value={newFolder}
+          <Input aria-label="New folder name" placeholder="Folder name" maxLength={80} autoFocus value={newFolder}
             onChange={(e) => setNewFolder(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void createFolder(); if (e.key === "Escape") setNewFolder(null); }} />
-          <Button size="sm" onClick={createFolder}>Crear</Button>
-          <Button size="sm" variant="ghost" onClick={() => setNewFolder(null)}>Cancelar</Button>
+          <Button size="sm" onClick={createFolder}>Create</Button>
+          <Button size="sm" variant="ghost" onClick={() => setNewFolder(null)}>Cancel</Button>
         </div>
       )}
       {error && <p className="text-sm text-danger">{error}</p>}
       {!data ? (
-        <p className="py-4 text-sm text-muted">Cargando…</p>
+        <p className="py-4 text-sm text-muted">Loading…</p>
       ) : !data.folders.length && !data.files.length ? (
-        <p className="py-4 text-center text-sm text-muted">{path ? "Carpeta vacía. Sube un archivo o crea una subcarpeta." : "Aún no hay documentos."}</p>
+        <p className="py-4 text-center text-sm text-muted">{path ? "Empty folder. Upload a file or create a subfolder." : "No documents yet."}</p>
       ) : (
         <ul className="divide-y divide-border rounded-md border border-border">
           {data.folders.map((f) => (
@@ -145,18 +145,18 @@ export function Documents({ userId }: { userId: string }) {
               <button type="button" className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left text-sm hover:bg-surface/60" onClick={() => openFile(f.name)}>
                 <FileText className="size-4 shrink-0 text-muted" aria-hidden />
                 <span className="min-w-0 flex-1 truncate">{f.name}</span>
-                <span className="shrink-0 text-[11px] tabular-nums text-muted">{size(f.size)}{f.created_at && ` · ${formatDay(f.created_at.slice(0, 10), "d MMM yy")}`}</span>
+                <span className="shrink-0 text-[11px] tabular-nums text-muted">{size(f.size)}{f.created_at && ` · ${formatDay(f.created_at.slice(0, 10), "MMM d, yy")}`}</span>
               </button>
               <ConfirmDialog
-                trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Eliminar ${f.name}`}><Trash2 /></Button>}
-                title={`¿Eliminar “${f.name}”?`} description="Se borrará de forma permanente de tus documentos. Esta acción no se puede deshacer."
+                trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Delete ${f.name}`}><Trash2 /></Button>}
+                title={`Delete “${f.name}”?`} description="It will be permanently removed from your documents. This can't be undone."
                 onConfirm={() => removeFile(f.name)}
               />
             </li>
           ))}
         </ul>
       )}
-      <p className="text-[11px] text-muted">Son los mismos documentos de Segundo Cerebro, en el mismo lugar privado. Subir un archivo con un nombre que ya existe no lo reemplaza.</p>
+      <p className="text-[11px] text-muted">These are the same documents from Segundo Cerebro, in the same private place. Uploading a file with a name that already exists doesn't replace it.</p>
     </div>
   );
 }

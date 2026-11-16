@@ -11,17 +11,17 @@ import { getOverview, getRecentActivity } from "@/lib/overview/queries";
 import { getUser } from "@/lib/supabase/server";
 import { currentHour, greeting, longToday, TIMEZONE } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Resumen" };
+export const metadata: Metadata = { title: "Overview" };
 export const dynamic = "force-dynamic";
 
 const PROMPTS = [
-  "¿Qué pasó hoy que quieras recordar?",
-  "¿Cuál fue el momento más importante de tu día?",
-  "¿Qué aprendiste hoy?",
-  "¿Qué te retó hoy y cómo lo viviste?",
-  "¿Por qué cosa pequeña te sientes agradecido hoy?",
-  "¿Qué te dio energía hoy?",
-  "¿Qué necesitas en este momento?",
+  "What happened today that you want to remember?",
+  "What was the most important moment of your day?",
+  "What did you learn today?",
+  "What challenged you today, and how did you handle it?",
+  "What small thing are you grateful for today?",
+  "What gave you energy today?",
+  "What do you need right now?",
 ];
 
 export default async function OverviewPage() {
@@ -40,7 +40,7 @@ export default async function OverviewPage() {
         description={`${longToday(tz)} · ${PROMPTS[dayOfYear % PROMPTS.length]}`}
         actions={
           <Button asChild>
-            <Link href={`/calendar?view=day&date=${data.today}`}>{data.daily ? "Continuar el día de hoy" : "Escribir el día de hoy"}</Link>
+            <Link href={`/calendar?view=day&date=${data.today}`}>{data.daily ? "Continue today's entry" : "Write about today"}</Link>
           </Button>
         }
       />
@@ -50,11 +50,11 @@ export default async function OverviewPage() {
           <div className="flex items-start gap-3">
             <DatabaseZap className="mt-0.5 size-4 text-accent" aria-hidden />
             <div>
-              <p className="text-sm font-medium">Tienes {data.legacyPending} registros de Segundo Cerebro por traer</p>
-              <p className="text-xs text-muted">Se copian a LIFE OS sin borrar nada de la app anterior.</p>
+              <p className="text-sm font-medium">You have {data.legacyPending} Segundo Cerebro records to bring over</p>
+              <p className="text-xs text-muted">They're copied to LIFE OS without deleting anything from the previous app.</p>
             </div>
           </div>
-          <Button asChild size="sm"><Link href="/settings#datos">Revisar e importar</Link></Button>
+          <Button asChild size="sm"><Link href="/settings#datos">Review and import</Link></Button>
         </div>
       )}
 
