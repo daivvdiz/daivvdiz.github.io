@@ -77,7 +77,7 @@ middleware.ts           Redirige a /login si no hay sesión
 - [x] Fase 5a: finanzas (movimientos, categorías, presupuesto mensual, metas de ahorro, activos, deudas con el apartamento importado, patrimonio neto)
 - [x] Fase 5b: carrera (cargos y evolución salarial, aplicaciones con entrevistas, skills con historial de nivel, proyectos de portafolio, aprendizaje)
 - [x] Fase 6: físico (entrenamientos con ejercicios, progresión por ejercicio, medidas corporales, nutrición opcional, frecuencia, volumen, tipos de actividad y sueño)
-- [ ] Fase 7: analítica de vida
+- [x] Fase 7: analítica de vida (bienestar, físico, hábitos, metas, finanzas, carrera y actividad por periodo; comparaciones entre periodos y correlaciones exploratorias)
 - [ ] Fase 8: pulido, accesibilidad, seguridad, CSV, pruebas, eliminación de cuenta
 
 Los módulos de fases futuras muestran una página que lo indica, sin controles falsos.
