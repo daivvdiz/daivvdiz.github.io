@@ -11,6 +11,7 @@ const uuid = z.string().uuid();
 function revalidate() {
   revalidatePath("/calendar");
   revalidatePath("/overview");
+  revalidatePath("/archive");
 }
 
 /**

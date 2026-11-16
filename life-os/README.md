@@ -42,7 +42,7 @@ Entra con el mismo correo y contraseña de Segundo Cerebro → **Ajustes → Imp
 | `fitness` / `gimnasio` (kg) | Entrenamiento de fuerza del día + ejercicio con peso, series y reps |
 | `fitness` (tiempo) | Entrenamiento con duración |
 | Otras categorías | "Sin clasificar", para decidir después |
-| Bucket `documentos` | Se queda donde está; se mostrará en Archivo de vida |
+| Bucket `documentos` | Se queda donde está; se ve y se usa en Archivo de vida → Documentos |
 
 Cada copia guarda `legacy_registro_id`: repetir la importación no duplica nada. Lo que registres después con el **Atajo de iOS** se copia solo (trigger en `registros`); si la copia falla, el registro original se guarda igual.
 
@@ -72,7 +72,7 @@ middleware.ts           Redirige a /login si no hay sesión
 - [x] Fase 1: base, diseño, login, sidebar, esquema completo con RLS, Resumen, Ajustes, importador
 - [x] Fase 2: calendario (mes, semana, día, filtros), eventos y entrada diaria (ánimo, energía, estrés, sueño, diario, gratitud, recuerdo, logros, etiquetas, conexiones, adjuntos)
 - [x] Fase 3a: salud mental (tendencias, calendario de ánimo, sueño, distribución, promedios, relaciones exploratorias, emociones y factores de estrés, diario emocional, estrategias)
-- [ ] Fase 3b: archivo de vida (incluye Documentos)
+- [x] Fase 3b: archivo de vida (línea de tiempo con búsqueda, galería, categorías, capítulos, un día como hoy, balance de vida histórico y los Documentos de siempre)
 - [x] Fase 4: metas (hitos, estados, avance, vínculos con diario, logros y eventos) y hábitos (frecuencias, registro semanal, cumplimiento sin rachas)
 - [x] Fase 5a: finanzas (movimientos, categorías, presupuesto mensual, metas de ahorro, activos, deudas con el apartamento importado, patrimonio neto)
 - [x] Fase 5b: carrera (cargos y evolución salarial, aplicaciones con entrevistas, skills con historial de nivel, proyectos de portafolio, aprendizaje)

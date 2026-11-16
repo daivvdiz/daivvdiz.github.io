@@ -7,12 +7,27 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import { deleteAttachment, registerAttachment } from "@/lib/journal/actions";
-import type { DayEntry } from "@/lib/calendar/queries";
+
+type Result = { ok: true } | { ok: false; error: string };
+export type AttachmentFile = { id: string; name: string; mime: string | null; url: string | null };
 
 const MAX = 10 * 1024 * 1024;
 const safe = (n: string) => n.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.\-]+/g, "_").slice(-120);
 
-export function Attachments({ userId, entryId, files }: { userId: string; entryId: string; files: DayEntry["attachments"] }) {
+/** Adjuntos de la entrada del día. */
+export function Attachments({ userId, entryId, files }: { userId: string; entryId: string; files: AttachmentFile[] }) {
+  return (
+    <FileAttachments pathPrefix={`${userId}/daily_entries/${entryId}/`} files={files}
+      onRegister={(f) => registerAttachment({ entryId, ...f })} onDelete={deleteAttachment} />
+  );
+}
+
+/** Subida al bucket privado (desde el navegador, con RLS de Storage) y registro del archivo. */
+export function FileAttachments({ pathPrefix, files, onRegister, onDelete }: {
+  pathPrefix: string; files: AttachmentFile[];
+  onRegister: (f: { path: string; name: string; mime: string; size: number }) => Promise<Result>;
+  onDelete: (id: string) => Promise<Result>;
+}) {
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -30,13 +45,13 @@ export function Attachments({ userId, entryId, files }: { userId: string; entryI
         toast.error(`${f.name}: solo imágenes o PDF`);
         continue;
       }
-      const path = `${userId}/daily_entries/${entryId}/${Date.now()}-${safe(f.name)}`;
+      const path = `${pathPrefix}${Date.now()}-${safe(f.name)}`;
       const up = await supabase.storage.from("life-os").upload(path, f, { contentType: f.type });
       if (up.error) {
         toast.error(`No se pudo subir ${f.name}`);
         continue;
       }
-      const r = await registerAttachment({ entryId, path, name: f.name, mime: f.type, size: f.size });
+      const r = await onRegister({ path, name: f.name, mime: f.type, size: f.size });
       if (!r.ok) {
         await supabase.storage.from("life-os").remove([path]);
         toast.error(r.error);
@@ -76,7 +91,7 @@ export function Attachments({ userId, entryId, files }: { userId: string; entryI
                 title="¿Eliminar este archivo?"
                 description={`"${f.name}" se borrará de forma permanente.`}
                 onConfirm={async () => {
-                  const r = await deleteAttachment(f.id);
+                  const r = await onDelete(f.id);
                   if (!r.ok) return void toast.error(r.error);
                   toast.success("Archivo eliminado");
                 }}
