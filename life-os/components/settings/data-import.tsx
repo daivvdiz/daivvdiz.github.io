@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { previewImport, runImport, type PreviewRow } from "@/lib/import/actions";
 
 const LABELS: Record<string, string> = {
-  transactions: "pagos",
-  career_positions: "cargos",
-  daily_accomplishments: "logros",
-  skill_levels: "niveles de skills",
-  workouts: "registros de entrenamiento",
-  legacy_unmapped: "sin clasificar",
-  skipped: "ya estaban importados",
-  error: "con error (quedaron sin clasificar)",
+  transactions: "payments",
+  career_positions: "positions",
+  daily_accomplishments: "accomplishments",
+  skill_levels: "skill levels",
+  workouts: "workout entries",
+  legacy_unmapped: "unclassified",
+  skipped: "already imported",
+  error: "with errors (left unclassified)",
 };
 
 export function DataImport() {
@@ -44,25 +44,25 @@ export function DataImport() {
         .filter(([k]) => k !== "skipped")
         .map(([k, n]) => `${n} ${LABELS[k] ?? k}`)
         .join(", ");
-      toast.success(summary ? `Importado: ${summary}` : "No había nada nuevo por importar");
+      toast.success(summary ? `Imported: ${summary}` : "There was nothing new to import");
       await load();
     });
 
   if (error) return <p className="text-sm text-danger" role="alert">{error}</p>;
-  if (!rows) return <p className="text-sm text-muted">Revisando Segundo Cerebro…</p>;
-  if (total === 0) return <p className="text-sm text-muted">No se encontraron registros de Segundo Cerebro en tu cuenta.</p>;
+  if (!rows) return <p className="text-sm text-muted">Checking Segundo Cerebro…</p>;
+  if (total === 0) return <p className="text-sm text-muted">No Segundo Cerebro records were found in your account.</p>;
 
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="w-full text-sm">
-          <caption className="sr-only">Vista previa de la importación</caption>
+          <caption className="sr-only">Import preview</caption>
           <thead className="bg-surface text-left text-xs text-muted">
             <tr>
-              <th scope="col" className="px-3 py-2 font-medium">Categoría original</th>
-              <th scope="col" className="px-3 py-2 font-medium">Destino en LIFE OS</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">Registros</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">Ya copiados</th>
+              <th scope="col" className="px-3 py-2 font-medium">Original category</th>
+              <th scope="col" className="px-3 py-2 font-medium">Destination in LIFE OS</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">Records</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">Already copied</th>
             </tr>
           </thead>
           <tbody>
@@ -80,11 +80,11 @@ export function DataImport() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted">
           {pendingCount > 0
-            ? `${pendingCount} de ${total} registros por copiar. Los originales no se modifican y repetir la importación no duplica nada.`
-            : `Los ${total} registros ya están en LIFE OS. Lo nuevo que registres con el Atajo de iOS se copia solo.`}
+            ? `${pendingCount} of ${total} records left to copy. The originals aren't changed, and running the import again won't duplicate anything.`
+            : `All ${total} records are already in LIFE OS. Anything new you log with the iOS Shortcut is copied automatically.`}
         </p>
         <Button onClick={doImport} disabled={pending || pendingCount === 0}>
-          {pending ? "Importando…" : "Importar ahora"}
+          {pending ? "Importing…" : "Import now"}
         </Button>
       </div>
     </div>

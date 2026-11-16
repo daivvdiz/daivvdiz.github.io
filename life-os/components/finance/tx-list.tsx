@@ -32,37 +32,37 @@ export function TxList({ txs, refs, today }: { txs: Tx[]; refs: TxRefs; today: s
   const totals = shown.reduce((a, t) => ({ ...a, [t.type]: a[t.type] + t.amount }), { income: 0, expense: 0, transfer: 0 });
 
   if (!txs.length)
-    return <EmptyState icon={Receipt} title="Sin movimientos este mes" description="Registra ingresos, gastos o aportes a tus ahorros." />;
+    return <EmptyState icon={Receipt} title="No transactions this month" description="Log income, expenses or contributions to your savings." />;
 
   return (
     <div className="space-y-3">
       <div className="grid gap-2 sm:grid-cols-[1fr_10rem_12rem]">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
-          <Input aria-label="Buscar movimientos" placeholder="Buscar" className="pl-9" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Input aria-label="Search transactions" placeholder="Search" className="pl-9" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
-        <Select aria-label="Filtrar por tipo" value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="">Todos los tipos</option>
+        <Select aria-label="Filter by type" value={type} onChange={(e) => setType(e.target.value)}>
+          <option value="">All types</option>
           {Object.entries(TX_TYPES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
         </Select>
-        <Select aria-label="Filtrar por categoría" value={cat} onChange={(e) => setCat(e.target.value)}>
-          <option value="">Todas las categorías</option>
-          <option value="none">Sin categoría</option>
-          {refs.categories.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.kind === "income" ? "ingreso" : "gasto"})</option>)}
+        <Select aria-label="Filter by category" value={cat} onChange={(e) => setCat(e.target.value)}>
+          <option value="">All categories</option>
+          <option value="none">Uncategorized</option>
+          {refs.categories.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.kind === "income" ? "income" : "expense"})</option>)}
         </Select>
       </div>
       <p className="text-xs text-muted tabular-nums">
-        {shown.length} {shown.length === 1 ? "movimiento" : "movimientos"} · Ingresos {formatMoney(totals.income)} · Gastos {formatMoney(totals.expense)}
-        {totals.transfer > 0 && ` · Ahorro ${formatMoney(totals.transfer)}`}
+        {shown.length} {shown.length === 1 ? "transaction" : "transactions"} · Income {formatMoney(totals.income)} · Expenses {formatMoney(totals.expense)}
+        {totals.transfer > 0 && ` · Savings ${formatMoney(totals.transfer)}`}
       </p>
       {shown.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted">Ningún movimiento coincide con los filtros.</p>
+        <p className="py-6 text-center text-sm text-muted">No transactions match the filters.</p>
       ) : (
         <ul className="divide-y divide-border rounded-md border border-border">
           {shown.map((t) => {
             const detail = t.type === "transfer"
-              ? `Ahorro · ${savName.get(t.savings_goal_id ?? "") ?? "—"}`
-              : [t.category_id ? catName.get(t.category_id) : "Sin categoría", t.liability_id ? `Pago a ${liabName.get(t.liability_id) ?? "deuda"}` : null, t.payment_method]
+              ? `Savings · ${savName.get(t.savings_goal_id ?? "") ?? "—"}`
+              : [t.category_id ? catName.get(t.category_id) : "Uncategorized", t.liability_id ? `Payment to ${liabName.get(t.liability_id) ?? "debt"}` : null, t.payment_method]
                   .filter(Boolean).join(" · ");
             return (
               <li key={t.id}>
@@ -74,7 +74,7 @@ export function TxList({ txs, refs, today }: { txs: Tx[]; refs: TxRefs; today: s
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm">{t.description}</p>
                     <p className="truncate text-[11px] text-muted">
-                      {TX_TYPES[t.type]} · {detail}{t.imported && " · Importado"}
+                      {TX_TYPES[t.type]} · {detail}{t.imported && " · Imported"}
                     </p>
                   </div>
                   <span className={cn("shrink-0 text-sm tabular-nums", t.type === "income" && "text-foreground", t.type !== "income" && "text-muted")}>

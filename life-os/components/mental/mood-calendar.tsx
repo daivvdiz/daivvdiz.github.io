@@ -3,7 +3,7 @@ import { addDays, startOfWeek } from "@/lib/dates";
 import { formatDay } from "@/lib/format";
 import type { DayPoint } from "@/lib/mental/stats";
 
-const WEEKDAYS = ["D", "L", "M", "X", "J", "V", "S"];
+const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
 /** Un solo tono: más intenso = valor más alto. No es "bueno" ni "malo", solo el número que registraste. */
 export function shade(v: number) {
@@ -32,7 +32,7 @@ export function MoodCalendar({ points, from, to, weekStartsOn }: { points: DayPo
                 const inRange = d >= from && d <= to;
                 const v = mood.get(d);
                 if (!inRange) return <span key={d} className="size-5" aria-hidden />;
-                const label = `${formatDay(d, "EEEE d MMM")}: ${v == null ? "sin registro" : `ánimo ${v}/10`}`;
+                const label = `${formatDay(d, "EEEE, MMM d")}: ${v == null ? "no entry" : `mood ${v}/10`}`;
                 return (
                   <Link
                     key={d}
@@ -55,9 +55,9 @@ export function MoodCalendar({ points, from, to, weekStartsOn }: { points: DayPo
           10
         </span>
         <span className="flex items-center gap-1">
-          <span className="size-3 rounded-[2px] border border-dashed border-border" aria-hidden /> Sin registro
+          <span className="size-3 rounded-[2px] border border-dashed border-border" aria-hidden /> No entry
         </span>
-        <span>{mood.size} {mood.size === 1 ? "día registrado" : "días registrados"}</span>
+        <span>{mood.size} {mood.size === 1 ? "day logged" : "days logged"}</span>
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ type SaveResult = { ok: true } | { ok: false; error: string };
 
 /** Diálogo de formulario genérico para entidades simples (finanzas, carrera…). */
 export function EntityDialog<T extends FieldValues>({
-  open, onOpenChange, title, description, schema, defaults, fields, onSave, footer, children, successMessage = "Guardado", wide,
+  open, onOpenChange, title, description, schema, defaults, fields, onSave, footer, children, successMessage = "Saved", wide,
 }: {
   open: boolean; onOpenChange: (o: boolean) => void; title: string; description?: string; schema: ZodTypeAny;
   defaults: T; fields: Field[]; onSave: (v: T) => Promise<SaveResult>; footer?: React.ReactNode; children?: React.ReactNode;
@@ -100,7 +100,7 @@ export function EntityDialog<T extends FieldValues>({
                         <fieldset className="space-y-1.5">
                           <legend className="text-xs font-medium text-muted">{f.label}</legend>
                           {Object.keys(f.options ?? {}).length === 0 ? (
-                            <p className="text-xs text-muted">{f.hint ?? "No hay opciones todavía."}</p>
+                            <p className="text-xs text-muted">{f.hint ?? "No options yet."}</p>
                           ) : (
                             <div className="flex flex-wrap gap-1.5">
                               {Object.entries(f.options ?? {}).map(([k, l]) => {
@@ -135,8 +135,8 @@ export function EntityDialog<T extends FieldValues>({
           <DialogFooter className="sm:col-span-2 sm:justify-between">
             {footer ?? <span />}
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
-              <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Cancelar</Button>
-              <Button type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? "Guardando…" : "Guardar"}</Button>
+              <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Cancel</Button>
+              <Button type="submit" disabled={formState.isSubmitting}>{formState.isSubmitting ? "Saving…" : "Save"}</Button>
             </div>
           </DialogFooter>
         </form>

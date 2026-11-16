@@ -13,14 +13,14 @@ export interface ModuleDef {
 }
 
 export const MODULES: ModuleDef[] = [
-  { href: "/overview", label: "Resumen", icon: LayoutDashboard, description: "Tu contexto de vida hoy." },
-  { href: "/calendar", label: "Calendario y diario", icon: CalendarDays, description: "Eventos, entrada diaria, gratitud, recuerdos y logros." },
-  { href: "/mental-health", label: "Salud mental", icon: Brain, description: "Ánimo, energía, estrés, sueño y estrategias que te ayudan." },
-  { href: "/goals", label: "Metas y hábitos", icon: Target, description: "Metas, hitos y hábitos sin presión de rachas." },
-  { href: "/finances", label: "Finanzas", icon: Wallet, description: "Movimientos, presupuesto, ahorro y patrimonio en COP." },
-  { href: "/career", label: "Carrera", icon: Briefcase, description: "Aplicaciones, skills, proyectos y aprendizaje." },
-  { href: "/physical", label: "Entrenamiento", icon: Dumbbell, description: "Entrenamiento físico y de estudio: sesiones, simulacros, progresión y medidas." },
-  { href: "/archive", label: "Archivo de vida", icon: Archive, description: "Recuerdos, capítulos, documentos y un día como hoy." },
-  { href: "/analytics", label: "Analítica de vida", icon: LineChart, description: "Tu evolución en todas las áreas, sin juicios." },
-  { href: "/settings", label: "Ajustes", icon: Settings, description: "Perfil, apariencia, privacidad y tus datos." },
+  { href: "/overview", label: "Overview", icon: LayoutDashboard, description: "Your life context today." },
+  { href: "/calendar", label: "Calendar & journal", icon: CalendarDays, description: "Events, daily entry, gratitude, memories and accomplishments." },
+  { href: "/mental-health", label: "Mental health", icon: Brain, description: "Mood, energy, stress, sleep and strategies that help you." },
+  { href: "/goals", label: "Goals & habits", icon: Target, description: "Goals, milestones and habits without streak pressure." },
+  { href: "/finances", label: "Finances", icon: Wallet, description: "Transactions, budget, savings and net worth in COP." },
+  { href: "/career", label: "Career", icon: Briefcase, description: "Applications, skills, projects and learning." },
+  { href: "/physical", label: "Training", icon: Dumbbell, description: "Physical and study training: sessions, practice exams, progress and measurements." },
+  { href: "/archive", label: "Life archive", icon: Archive, description: "Memories, chapters, documents and on this day." },
+  { href: "/analytics", label: "Life analytics", icon: LineChart, description: "How every area of your life changes, without judgment." },
+  { href: "/settings", label: "Settings", icon: Settings, description: "Profile, appearance, privacy and your data." },
 ];

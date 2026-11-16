@@ -16,7 +16,7 @@ export const FORMATS: Record<FormatKind, (v: number) => string> = {
   pct: (v) => `${formatNumber(v, 0)}%`,
   score: (v) => formatNumber(v, Number.isInteger(v) ? 0 : 2),
 };
-const compact = new Intl.NumberFormat("es-CO", { notation: "compact", maximumFractionDigits: 1 });
+const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
 /** Etiquetas cortas del eje (la unidad va en el título, la tabla y el tooltip). */
 const axisFormat = (kind: FormatKind) => (v: number) => (kind === "time" ? `${Math.round(v / 60)} min` : kind === "pct" ? `${v}%` : compact.format(v));
 
@@ -26,12 +26,12 @@ export function WeeklyBars({ data, label, format: kind, ariaLabel, note }: {
 }) {
   const format = FORMATS[kind];
   const [table, setTable] = useState(false);
-  const rows = data.map((d) => ({ ...d, label: formatDay(d.week, "d MMM") }));
+  const rows = data.map((d) => ({ ...d, label: formatDay(d.week, "MMM d") }));
   return (
     <div className="space-y-2">
       <div className="flex justify-end"><ViewToggle table={table} onChange={setTable} /></div>
       {table ? (
-        <DataTable rows={rows.map((r) => ({ w: `Semana del ${formatDay(r.week)}`, v: format(r.value) }))} cols={[{ key: "w", label: "Semana" }, { key: "v", label }]} />
+        <DataTable rows={rows.map((r) => ({ w: `Week of ${formatDay(r.week)}`, v: format(r.value) }))} cols={[{ key: "w", label: "Week" }, { key: "v", label }]} />
       ) : (
         <div className="h-48 w-full" role="img" aria-label={ariaLabel}>
           <ResponsiveContainer>
@@ -39,7 +39,7 @@ export function WeeklyBars({ data, label, format: kind, ariaLabel, note }: {
               <CartesianGrid stroke="var(--grid)" vertical={false} />
               <XAxis dataKey="label" tick={axisTick} tickLine={false} axisLine={{ stroke: "var(--border)" }} minTickGap={16} />
               <YAxis allowDecimals={false} tick={axisTick} tickLine={false} axisLine={false} tickFormatter={axisFormat(kind)} width={48} />
-              <Tooltip {...tooltipStyle} cursor={{ fill: "var(--accent-soft)" }} labelFormatter={(l: string) => `Semana del ${l}`} formatter={(v: number) => [format(v), label]} />
+              <Tooltip {...tooltipStyle} cursor={{ fill: "var(--accent-soft)" }} labelFormatter={(l: string) => `Week of ${l}`} formatter={(v: number) => [format(v), label]} />
               <Bar dataKey="value" name={label} fill="var(--series-1)" radius={[4, 4, 0, 0]} maxBarSize={28} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
@@ -58,8 +58,8 @@ export function ValueLine({ points, label, format: kind, ariaLabel, tableExtra, 
   const format = FORMATS[kind];
   const [table, setTable] = useState(false);
   if (points.length < 2)
-    return <p className="py-4 text-sm text-muted">{points.length === 1 ? `Un solo registro (${format(points[0].value)} el ${formatDay(points[0].date)}). Con dos o más verás la evolución.` : "Sin registros todavía."}</p>;
-  const data = points.map((p) => ({ ...p, label: formatDay(p.date, "d MMM yy") }));
+    return <p className="py-4 text-sm text-muted">{points.length === 1 ? `Only one entry (${format(points[0].value)} on ${formatDay(points[0].date)}). With two or more you'll see the trend.` : "No entries yet."}</p>;
+  const data = points.map((p) => ({ ...p, label: formatDay(p.date, "MMM d, yy") }));
   const values = points.map((p) => p.value);
   const min = Math.min(...values), max = Math.max(...values);
   const pad = (max - min) * 0.15 || Math.max(1, max * 0.05);
@@ -74,7 +74,7 @@ export function ValueLine({ points, label, format: kind, ariaLabel, tableExtra, 
       {table ? (
         <DataTable
           rows={[...data].reverse().map((p) => ({ d: formatDay(p.date), v: format(p.value), x: p.detail ?? null }))}
-          cols={[{ key: "d", label: "Fecha" }, { key: "v", label }, ...(tableExtra ? [{ key: "x", label: tableExtra }] : [])]}
+          cols={[{ key: "d", label: "Date" }, { key: "v", label }, ...(tableExtra ? [{ key: "x", label: tableExtra }] : [])]}
         />
       ) : (
         <div className="h-48 w-full" role="img" aria-label={ariaLabel}>
@@ -90,14 +90,14 @@ export function ValueLine({ points, label, format: kind, ariaLabel, tableExtra, 
           </ResponsiveContainer>
         </div>
       )}
-      <p className="text-[11px] text-muted">{points.length} registros. Solo se muestran los días en que registraste un valor.</p>
+      <p className="text-[11px] text-muted">{points.length} entries. Only days when you logged a value are shown.</p>
     </div>
   );
 }
 
 /** Distribución por tipo de actividad como barras horizontales con su conteo (una sola tonalidad). */
 export function DistributionBars({ items, total }: { items: { label: string; n: number }[]; total: number }) {
-  if (!total) return <p className="text-sm text-muted">Sin entrenamientos en este periodo.</p>;
+  if (!total) return <p className="text-sm text-muted">No workouts in this period.</p>;
   const max = Math.max(...items.map((i) => i.n));
   return (
     <ul className="space-y-2">

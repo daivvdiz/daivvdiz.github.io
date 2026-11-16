@@ -20,7 +20,7 @@ function Interviews({ app, today, timeZone }: { app: Application; today: string;
   const [pending, setPending] = useState(false);
   return (
     <div className="space-y-2 rounded-md border border-border p-3">
-      <p className="text-xs font-medium text-muted">Entrevistas ({app.interviews.length})</p>
+      <p className="text-xs font-medium text-muted">Interviews ({app.interviews.length})</p>
       {app.interviews.length > 0 && (
         <ul className="space-y-1">
           {app.interviews.map((i) => {
@@ -28,8 +28,8 @@ function Interviews({ app, today, timeZone }: { app: Application; today: string;
             return (
               <li key={i.id} className="flex items-center gap-2 text-sm">
                 <CalendarClock className="size-3.5 shrink-0 text-muted" aria-hidden />
-                <span className="min-w-0 flex-1 truncate">{formatDay(z.date, "EEE d MMM yyyy")} · {z.time}{i.kind && ` · ${i.kind}`}</span>
-                <Button type="button" size="icon" variant="ghost" className="size-7" aria-label="Eliminar entrevista" onClick={async () => {
+                <span className="min-w-0 flex-1 truncate">{formatDay(z.date, "EEE, MMM d, yyyy")} · {z.time}{i.kind && ` · ${i.kind}`}</span>
+                <Button type="button" size="icon" variant="ghost" className="size-7" aria-label="Delete interview" onClick={async () => {
                   const r = await deleteInterview(i.id);
                   if (!r.ok) toast.error(r.error);
                 }}><Trash2 /></Button>
@@ -39,17 +39,17 @@ function Interviews({ app, today, timeZone }: { app: Application; today: string;
         </ul>
       )}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_9rem_6rem_auto]">
-        <Input aria-label="Tipo de entrevista" placeholder="Ej. Técnica" className="col-span-2 sm:col-span-1" value={form.kind} maxLength={100} onChange={(e) => setForm({ ...form, kind: e.target.value })} />
-        <Input aria-label="Fecha de la entrevista" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-        <Input aria-label="Hora de la entrevista" type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
+        <Input aria-label="Interview type" placeholder="E.g. Technical" className="col-span-2 sm:col-span-1" value={form.kind} maxLength={100} onChange={(e) => setForm({ ...form, kind: e.target.value })} />
+        <Input aria-label="Interview date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+        <Input aria-label="Interview time" type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
         <Button type="button" variant="secondary" className="col-span-2 sm:col-span-1" disabled={pending} onClick={async () => {
           setPending(true);
           const r = await saveInterview({ application_id: app.id, ...form, notes: "" });
           setPending(false);
           if (!r.ok) return void toast.error(r.error);
           setForm({ ...form, kind: "" });
-          toast.success("Entrevista agregada");
-        }}><Plus /> Agregar</Button>
+          toast.success("Interview added");
+        }}><Plus /> Add</Button>
       </div>
     </div>
   );
@@ -68,21 +68,21 @@ export function Applications({ apps, today, timeZone }: { apps: Application[]; t
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar aplicaciones">
-          {([["open", "Abiertas"], ["closed", "Cerradas"], ["all", "Todas"]] as const).map(([k, l]) => (
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter applications">
+          {([["open", "Open"], ["closed", "Closed"], ["all", "All"]] as const).map(([k, l]) => (
             <button key={k} type="button" aria-pressed={filter === k} onClick={() => setFilter(k)}
               className={cn("rounded-md border px-3 py-1.5 text-xs", filter === k ? "border-accent bg-accent-soft text-foreground" : "border-border text-muted hover:text-foreground")}>
               {l} <span className="tabular-nums text-muted">{counts[k]}</span>
             </button>
           ))}
         </div>
-        <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> Nueva aplicación</Button>
+        <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> New application</Button>
       </div>
 
       {!apps.length ? (
-        <EmptyState icon={Send} title="Sin aplicaciones" description="Lleva el seguimiento de cada proceso: etapa, entrevistas, prueba técnica y retroalimentación." />
+        <EmptyState icon={Send} title="No applications" description="Track each process: stage, interviews, technical test and feedback." />
       ) : !shown.length ? (
-        <p className="py-4 text-center text-sm text-muted">No hay aplicaciones en este filtro.</p>
+        <p className="py-4 text-center text-sm text-muted">No applications match this filter.</p>
       ) : (
         <div className="space-y-4">
           {byStage.map((g) => (
@@ -96,21 +96,21 @@ export function Applications({ apps, today, timeZone }: { apps: Application[]; t
                       <button type="button" className="min-w-0 flex-1 text-left" onClick={() => ed.setEditing(a)}>
                         <p className="break-words text-sm font-medium hover:underline">{a.position} · {a.company}</p>
                         <p className="text-[11px] text-muted">
-                          {[a.applied_on && `Aplicaste el ${formatDay(a.applied_on)}`, a.work_mode && WORK_MODES[a.work_mode], a.location, a.salary_expectation != null && `Aspiración ${formatMoney(a.salary_expectation)}`]
-                            .filter(Boolean).join(" · ") || "Sin detalles"}
+                          {[a.applied_on && `Applied ${formatDay(a.applied_on)}`, a.work_mode && WORK_MODES[a.work_mode], a.location, a.salary_expectation != null && `Expected ${formatMoney(a.salary_expectation)}`]
+                            .filter(Boolean).join(" · ") || "No details"}
                         </p>
-                        {next && <p className="mt-0.5 flex items-center gap-1 text-[11px] text-foreground"><CalendarClock className="size-3" aria-hidden /> Próxima entrevista: {formatDay(next.date, "EEE d MMM")} · {next.time}</p>}
+                        {next && <p className="mt-0.5 flex items-center gap-1 text-[11px] text-foreground"><CalendarClock className="size-3" aria-hidden /> Next interview: {formatDay(next.date, "EEE, MMM d")} · {next.time}</p>}
                       </button>
                       <div className="flex shrink-0 items-center gap-1">
                         {a.job_url && (
-                          <Button asChild size="icon" variant="ghost" className="size-8" aria-label="Abrir la vacante">
+                          <Button asChild size="icon" variant="ghost" className="size-8" aria-label="Open the job posting">
                             <a href={a.job_url} target="_blank" rel="noopener noreferrer"><ExternalLink /></a>
                           </Button>
                         )}
-                        <Select aria-label={`Etapa de ${a.company}`} className="h-8 w-48 text-xs" value={a.stage} onChange={async (e) => {
+                        <Select aria-label={`Stage for ${a.company}`} className="h-8 w-48 text-xs" value={a.stage} onChange={async (e) => {
                           const r = await setApplicationStage(a.id, e.target.value as Stage);
                           if (!r.ok) return void toast.error(r.error);
-                          toast.success("Etapa actualizada");
+                          toast.success("Stage updated");
                         }}>
                           {Object.entries(STAGES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
                         </Select>
@@ -126,7 +126,7 @@ export function Applications({ apps, today, timeZone }: { apps: Application[]; t
 
       <EntityDialog<ApplicationInput>
         open={ed.open} onOpenChange={(o) => !o && ed.close()} wide
-        title={it ? `${it.position} · ${it.company}` : "Nueva aplicación"}
+        title={it ? `${it.position} · ${it.company}` : "New application"}
         schema={applicationSchema}
         defaults={it
           ? {
@@ -139,35 +139,35 @@ export function Applications({ apps, today, timeZone }: { apps: Application[]; t
               contact_person: "", job_url: "", technical_test: "", feedback: "", notes: "",
             }}
         fields={[
-          { name: "company", label: "Empresa", kind: "text", half: true },
-          { name: "position", label: "Cargo", kind: "text", half: true },
-          { name: "stage", label: "Etapa", kind: "select", options: STAGES, half: true },
-          { name: "applied_on", label: "Fecha de aplicación", kind: "date", half: true },
-          { name: "work_mode", label: "Modalidad", kind: "select", options: WORK_MODES, half: true },
-          { name: "location", label: "Ubicación", kind: "text", half: true },
-          { name: "salary_expectation", label: "Aspiración salarial mensual", kind: "money", half: true },
-          { name: "contact_person", label: "Contacto", kind: "text", half: true },
-          { name: "job_url", label: "Enlace a la vacante", kind: "url", placeholder: "https://…" },
-          { name: "technical_test", label: "Prueba técnica", kind: "textarea" },
-          { name: "feedback", label: "Retroalimentación recibida", kind: "textarea" },
-          { name: "notes", label: "Notas", kind: "textarea" },
+          { name: "company", label: "Company", kind: "text", half: true },
+          { name: "position", label: "Role", kind: "text", half: true },
+          { name: "stage", label: "Stage", kind: "select", options: STAGES, half: true },
+          { name: "applied_on", label: "Application date", kind: "date", half: true },
+          { name: "work_mode", label: "Work mode", kind: "select", options: WORK_MODES, half: true },
+          { name: "location", label: "Location", kind: "text", half: true },
+          { name: "salary_expectation", label: "Expected monthly salary", kind: "money", half: true },
+          { name: "contact_person", label: "Contact", kind: "text", half: true },
+          { name: "job_url", label: "Job posting link", kind: "url", placeholder: "https://…" },
+          { name: "technical_test", label: "Technical test", kind: "textarea" },
+          { name: "feedback", label: "Feedback received", kind: "textarea" },
+          { name: "notes", label: "Notes", kind: "textarea" },
         ]}
         onSave={(v) => saveApplication(v, it?.id)}
         footer={it && (
           <ConfirmDialog
-            trigger={<Button type="button" variant="ghost"><Trash2 /> Eliminar</Button>}
-            title="¿Eliminar esta aplicación?"
-            description="Se eliminarán la aplicación y sus entrevistas. Si el proceso terminó, puedes marcarlo como “No continuó” o “Me retiré”."
+            trigger={<Button type="button" variant="ghost"><Trash2 /> Delete</Button>}
+            title="Delete this application?"
+            description="The application and its interviews will be deleted. If the process ended, you can mark it as “Didn't move forward” or “Withdrew”."
             onConfirm={async () => {
               const r = await deleteApplication(it.id);
               if (!r.ok) return void toast.error(r.error);
-              toast.success("Aplicación eliminada");
+              toast.success("Application deleted");
               setTimeout(() => ed.close(), 0);
             }}
           />
         )}
       >
-        {it ? <Interviews app={it} today={today} timeZone={timeZone} /> : <p className="text-[11px] text-muted">Podrás agregar entrevistas después de guardarla.</p>}
+        {it ? <Interviews app={it} today={today} timeZone={timeZone} /> : <p className="text-[11px] text-muted">You can add interviews after saving it.</p>}
       </EntityDialog>
     </div>
   );

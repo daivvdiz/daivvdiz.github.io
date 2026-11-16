@@ -25,28 +25,28 @@ function Metric({ icon: Icon, label, value, hint }: { icon: typeof Smile; label:
 
 export function DailySummary({ data }: { data: Overview }) {
   const d = data.daily;
-  const scale = (v: number | null | undefined) => (v == null ? "Sin registrar" : `${v}/10`);
+  const scale = (v: number | null | undefined) => (v == null ? "Not logged" : `${v}/10`);
   return (
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Hoy</CardTitle>
-          <CardDescription>{formatDay(data.today, "EEEE d 'de' MMMM")}</CardDescription>
+          <CardTitle>Today</CardTitle>
+          <CardDescription>{formatDay(data.today, "EEEE, MMMM d")}</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3">
-        <Metric icon={Smile} label="Ánimo" value={scale(d?.mood)} />
-        <Metric icon={Zap} label="Energía" value={scale(d?.energy)} />
-        <Metric icon={Moon} label="Sueño" value={d?.sleepHours != null ? `${formatNumber(d.sleepHours)} h` : "Sin registrar"} />
-        <Metric icon={Sparkles} label="Logro principal" value={d?.mainAccomplishment ?? "Sin registrar"}
-          hint={d && d.accomplishmentCount > 1 ? `${d.accomplishmentCount} logros hoy` : undefined} />
-        <Metric icon={CheckCircle2} label="Hábitos completados" value={String(data.habitsDone)} />
-        <Metric icon={CalendarDays} label="Próximos eventos" value={String(data.events.length)} hint="en los próximos 14 días" />
+        <Metric icon={Smile} label="Mood" value={scale(d?.mood)} />
+        <Metric icon={Zap} label="Energy" value={scale(d?.energy)} />
+        <Metric icon={Moon} label="Sleep" value={d?.sleepHours != null ? `${formatNumber(d.sleepHours)} h` : "Not logged"} />
+        <Metric icon={Sparkles} label="Main accomplishment" value={d?.mainAccomplishment ?? "Not logged"}
+          hint={d && d.accomplishmentCount > 1 ? `${d.accomplishmentCount} accomplishments today` : undefined} />
+        <Metric icon={CheckCircle2} label="Habits completed" value={String(data.habitsDone)} />
+        <Metric icon={CalendarDays} label="Upcoming events" value={String(data.events.length)} hint="in the next 14 days" />
       </CardContent>
       {!d && (
         <p className="border-t border-border px-5 py-3 text-xs text-muted">
-          Aún no hay entrada para hoy.{" "}
-          <Link href={`/calendar?view=day&date=${data.today}`} className="text-accent hover:underline">Registrar cómo va el día</Link>
+          No entry for today yet.{" "}
+          <Link href={`/calendar?view=day&date=${data.today}`} className="text-accent hover:underline">Log how your day is going</Link>
         </p>
       )}
     </Card>
@@ -69,12 +69,12 @@ export function LifeCards({ data }: { data: Overview }) {
   const f = data.finance;
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      <Stat href="/goals" icon={Target} label="Metas activas" value={String(data.activeGoals)} />
-      <Stat href="/finances" icon={Wallet} label="Ingresos del mes" value={formatMoney(f.income)} hint={`${f.incomeCount} movimientos`} />
-      <Stat href="/finances" icon={Wallet} label="Gastos del mes" value={formatMoney(f.expenses)} hint={`${f.expenseCount} movimientos`} />
-      <Stat href="/finances" icon={Wallet} label="Ahorro del mes" value={formatMoney(f.net)} hint="Ingresos menos gastos" />
-      <Stat href="/career" icon={Briefcase} label="Aplicaciones en curso" value={String(data.activeApplications)} />
-      <Stat href="/physical" icon={Dumbbell} label="Entrenamientos del mes" value={String(data.monthWorkouts)} />
+      <Stat href="/goals" icon={Target} label="Active goals" value={String(data.activeGoals)} />
+      <Stat href="/finances" icon={Wallet} label="Income this month" value={formatMoney(f.income)} hint={`${f.incomeCount} ${f.incomeCount === 1 ? "transaction" : "transactions"}`} />
+      <Stat href="/finances" icon={Wallet} label="Expenses this month" value={formatMoney(f.expenses)} hint={`${f.expenseCount} ${f.expenseCount === 1 ? "transaction" : "transactions"}`} />
+      <Stat href="/finances" icon={Wallet} label="Saved this month" value={formatMoney(f.net)} hint="Income minus expenses" />
+      <Stat href="/career" icon={Briefcase} label="Active applications" value={String(data.activeApplications)} />
+      <Stat href="/physical" icon={Dumbbell} label="Workouts this month" value={String(data.monthWorkouts)} />
     </div>
   );
 }
@@ -85,8 +85,8 @@ export function LiabilitiesCard({ data }: { data: Overview }) {
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Deudas en curso</CardTitle>
-          <CardDescription>Lo pagado se calcula con tus pagos registrados.</CardDescription>
+          <CardTitle>Active debts</CardTitle>
+          <CardDescription>The amount paid is calculated from your logged payments.</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -97,17 +97,17 @@ export function LiabilitiesCard({ data }: { data: Overview }) {
               <div className="flex items-baseline justify-between gap-2 text-sm">
                 <span className="font-medium">{l.name}</span>
                 <span className="text-xs text-muted tabular-nums">
-                  {formatMoney(l.paid)} {l.original > 0 && <>de {formatMoney(l.original)}</>}
+                  {formatMoney(l.paid)} {l.original > 0 && <>of {formatMoney(l.original)}</>}
                 </span>
               </div>
               {pct != null ? (
-                <div className="h-1.5 rounded-full bg-surface" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label={`Pagado de ${l.name}`}>
+                <div className="h-1.5 rounded-full bg-surface" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label={`Paid toward ${l.name}`}>
                   <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
                 </div>
               ) : (
-                <p className="text-xs text-muted">Sin monto total registrado.</p>
+                <p className="text-xs text-muted">No total amount logged.</p>
               )}
-              {pct != null && <p className="text-xs text-muted">{formatNumber(pct)}% pagado · faltan {formatMoney(Math.max(0, l.original - l.paid))}</p>}
+              {pct != null && <p className="text-xs text-muted">{formatNumber(pct)}% paid · {formatMoney(Math.max(0, l.original - l.paid))} left</p>}
             </div>
           );
         })}
@@ -120,12 +120,12 @@ export function UpcomingEvents({ events }: { events: CalendarEvent[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Próximos eventos</CardTitle>
-        <Link href="/calendar" className="text-xs text-accent hover:underline">Ver calendario</Link>
+        <CardTitle>Upcoming events</CardTitle>
+        <Link href="/calendar" className="text-xs text-accent hover:underline">View calendar</Link>
       </CardHeader>
       <CardContent>
         {events.length === 0 ? (
-          <EmptyState icon={CalendarDays} title="Nada en los próximos 14 días" description="Los eventos y fechas límite del calendario aparecerán aquí." />
+          <EmptyState icon={CalendarDays} title="Nothing in the next 14 days" description="Calendar events and deadlines will show up here." />
         ) : (
           <ul className="space-y-3">
             {events.map((e) => (
@@ -134,7 +134,7 @@ export function UpcomingEvents({ events }: { events: CalendarEvent[] }) {
                   <span className="block truncate font-medium">{e.title}</span>
                   <span className="text-xs text-muted">{EVENT_CATEGORIES[e.category] ?? e.category}</span>
                 </span>
-                <span className="shrink-0 text-xs text-muted">{e.all_day ? formatDay(e.starts_at.slice(0, 10), "EEE d MMM") : formatDateTime(e.starts_at)}</span>
+                <span className="shrink-0 text-xs text-muted">{e.all_day ? formatDay(e.starts_at.slice(0, 10), "EEE, MMM d") : formatDateTime(e.starts_at)}</span>
               </li>
             ))}
           </ul>
@@ -147,10 +147,10 @@ export function UpcomingEvents({ events }: { events: CalendarEvent[] }) {
 export function RecentWorkouts({ workouts }: { workouts: Overview["workouts"] }) {
   return (
     <Card>
-      <CardHeader><CardTitle>Actividad física reciente</CardTitle></CardHeader>
+      <CardHeader><CardTitle>Recent physical activity</CardTitle></CardHeader>
       <CardContent>
         {workouts.length === 0 ? (
-          <EmptyState icon={Dumbbell} title="Sin entrenamientos registrados" description="Tus sesiones aparecerán aquí, incluidas las que importes de Segundo Cerebro." />
+          <EmptyState icon={Dumbbell} title="No workouts logged" description="Your sessions will show up here, including the ones you import from Segundo Cerebro." />
         ) : (
           <ul className="space-y-3">
             {workouts.map((w) => (
@@ -158,10 +158,10 @@ export function RecentWorkouts({ workouts }: { workouts: Overview["workouts"] })
                 <span>
                   <span className="block font-medium">{w.type}</span>
                   <span className="text-xs text-muted">
-                    {w.duration != null ? formatDuration(w.duration) : `${w.exercises} ${w.exercises === 1 ? "ejercicio" : "ejercicios"}`}
+                    {w.duration != null ? formatDuration(w.duration) : `${w.exercises} ${w.exercises === 1 ? "exercise" : "exercises"}`}
                   </span>
                 </span>
-                <span className="text-xs text-muted">{formatDay(w.date, "d MMM")}</span>
+                <span className="text-xs text-muted">{formatDay(w.date, "MMM d")}</span>
               </li>
             ))}
           </ul>
@@ -174,10 +174,10 @@ export function RecentWorkouts({ workouts }: { workouts: Overview["workouts"] })
 export function RecentMemories({ memories }: { memories: Overview["memories"] }) {
   return (
     <Card>
-      <CardHeader><CardTitle>Recuerdos recientes</CardTitle></CardHeader>
+      <CardHeader><CardTitle>Recent memories</CardTitle></CardHeader>
       <CardContent>
         {memories.length === 0 ? (
-          <EmptyState icon={Archive} title="Aún no hay recuerdos" description="Los momentos que quieras guardar vivirán en tu Archivo de vida." />
+          <EmptyState icon={Archive} title="No memories yet" description="The moments you want to keep will live in your Life archive." />
         ) : (
           <ul className="space-y-3">
             {memories.map((m) => (
@@ -198,13 +198,13 @@ export function RecentActivity({ items }: { items: ActivityItem[] }) {
     <Card>
       <CardHeader>
         <div>
-          <CardTitle>Actividad reciente</CardTitle>
-          <CardDescription>Lo último que registraste en todos los módulos.</CardDescription>
+          <CardTitle>Recent activity</CardTitle>
+          <CardDescription>The latest things you logged across all modules.</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
         {items.length === 0 ? (
-          <EmptyState icon={Activity} title="Todavía no hay actividad" description="Cada registro nuevo, en cualquier módulo, aparecerá en esta línea de tiempo." />
+          <EmptyState icon={Activity} title="No activity yet" description="Every new entry, in any module, will show up on this timeline." />
         ) : (
           <ol className="relative space-y-4 border-l border-border pl-4">
             {items.map((i) => (

@@ -2,10 +2,10 @@ import { addDays, addMonths, daysBetween, isISODate, startOfMonth, startOfWeek }
 import { formatDay } from "@/lib/format";
 
 export const ANALYTICS_PERIODS = [
-  { key: "3m", label: "3 meses" },
-  { key: "6m", label: "6 meses" },
-  { key: "12m", label: "12 meses" },
-  { key: "ytd", label: "Este año" },
+  { key: "3m", label: "3 months" },
+  { key: "6m", label: "6 months" },
+  { key: "12m", label: "12 months" },
+  { key: "ytd", label: "This year" },
 ] as const;
 export type AnalyticsPeriodKey = (typeof ANALYTICS_PERIODS)[number]["key"] | "custom";
 
@@ -34,7 +34,7 @@ export function makeBuckets(from: string, to: string, weekStartsOn: number): { b
   const buckets: Bucket[] = [];
   if (by === "week") {
     for (let w = startOfWeek(from, weekStartsOn); w <= to; w = addDays(w, 7))
-      buckets.push({ key: w, from: w < from ? from : w, to: addDays(w, 6) > to ? to : addDays(w, 6), label: formatDay(w, "d MMM") });
+      buckets.push({ key: w, from: w < from ? from : w, to: addDays(w, 6) > to ? to : addDays(w, 6), label: formatDay(w, "MMM d") });
   } else {
     for (let m = startOfMonth(from); m <= to; m = addMonths(m, 1)) {
       const end = addDays(addMonths(m, 1), -1);
@@ -54,9 +54,9 @@ export function comparePresets(today: string) {
   const monthEnd = (s: string) => addDays(addMonths(s, 1), -1);
   const label = (s: string) => formatDay(s, "MMMM yyyy");
   return [
-    { key: "month", label: "Este mes vs. el anterior", a: { from: m, to: today, label: `${label(m)} (hasta hoy)` }, b: { from: prev, to: monthEnd(prev), label: label(prev) } },
-    { key: "month-ly", label: "Este mes vs. el mismo mes del año pasado", a: { from: m, to: today, label: `${label(m)} (hasta hoy)` }, b: { from: lastYearSame, to: monthEnd(lastYearSame), label: label(lastYearSame) } },
-    { key: "year", label: "Este año vs. el anterior", a: { from: `${y}-01-01`, to: today, label: `${y} (hasta hoy)` }, b: { from: `${py}-01-01`, to: `${py}-12-31`, label: py } },
-    { key: "jan-dec", label: `Enero de ${y} vs. diciembre de ${py}`, a: { from: `${y}-01-01`, to: `${y}-01-31` < today ? `${y}-01-31` : today, label: `Enero de ${y}` }, b: { from: `${py}-12-01`, to: `${py}-12-31`, label: `Diciembre de ${py}` } },
+    { key: "month", label: "This month vs. last month", a: { from: m, to: today, label: `${label(m)} (to date)` }, b: { from: prev, to: monthEnd(prev), label: label(prev) } },
+    { key: "month-ly", label: "This month vs. the same month last year", a: { from: m, to: today, label: `${label(m)} (to date)` }, b: { from: lastYearSame, to: monthEnd(lastYearSame), label: label(lastYearSame) } },
+    { key: "year", label: "This year vs. last year", a: { from: `${y}-01-01`, to: today, label: `${y} (to date)` }, b: { from: `${py}-01-01`, to: `${py}-12-31`, label: py } },
+    { key: "jan-dec", label: `January ${y} vs. December ${py}`, a: { from: `${y}-01-01`, to: `${y}-01-31` < today ? `${y}-01-31` : today, label: `January ${y}` }, b: { from: `${py}-12-01`, to: `${py}-12-31`, label: `December ${py}` } },
   ] as const;
 }

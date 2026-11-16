@@ -16,15 +16,15 @@ import { addMonths } from "@/lib/dates";
 import { formatDay, formatMoney, todayISO } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Finanzas" };
+export const metadata: Metadata = { title: "Finances" };
 export const dynamic = "force-dynamic";
 
 const TABS = [
-  { key: "summary", label: "Resumen" },
-  { key: "transactions", label: "Movimientos" },
-  { key: "budget", label: "Presupuesto" },
-  { key: "savings", label: "Ahorro" },
-  { key: "networth", label: "Patrimonio y deudas" },
+  { key: "summary", label: "Overview" },
+  { key: "transactions", label: "Transactions" },
+  { key: "budget", label: "Budget" },
+  { key: "savings", label: "Savings" },
+  { key: "networth", label: "Net worth & debts" },
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 
@@ -81,7 +81,7 @@ export default async function FinancesPage({ searchParams }: { searchParams: SP 
     spentBy.set(k, { amount: s.amount + t.amount, n: s.n + 1 });
   }
   const categoryRows = [...spentBy.entries()]
-    .map(([k, v]) => ({ name: k === "none" ? "Sin categoría" : catName.get(k) ?? "Categoría eliminada", ...v }))
+    .map(([k, v]) => ({ name: k === "none" ? "Uncategorized" : catName.get(k) ?? "Deleted category", ...v }))
     .sort((a, b) => b.amount - a.amount);
 
   const assetsTotal = data.assets.reduce((a, x) => a + x.value, 0);
@@ -92,12 +92,12 @@ export default async function FinancesPage({ searchParams }: { searchParams: SP 
   return (
     <>
       <PageHeader
-        title="Finanzas"
-        description="Ingresos, gastos, presupuesto, ahorro y patrimonio en pesos colombianos."
+        title="Finances"
+        description="Income, expenses, budget, savings and net worth in Colombian pesos."
         actions={<NewTxButton today={today} refs={refs} />}
       />
 
-      <nav aria-label="Secciones de Finanzas" className="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <nav aria-label="Finance sections" className="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         <div className="flex w-max gap-1 rounded-md border border-border p-0.5">
           {TABS.map((t) => (
             <Link key={t.key} href={href({ tab: t.key })} aria-current={tab === t.key ? "page" : undefined}
@@ -110,45 +110,45 @@ export default async function FinancesPage({ searchParams }: { searchParams: SP 
 
       {showMonth && (
         <div className="mb-4 flex items-center gap-2">
-          <Button asChild size="icon" variant="ghost" aria-label="Mes anterior"><Link href={href({ month: addMonths(month, -1) })}><ChevronLeft /></Link></Button>
+          <Button asChild size="icon" variant="ghost" aria-label="Previous month"><Link href={href({ month: addMonths(month, -1) })}><ChevronLeft /></Link></Button>
           <h2 className="min-w-36 text-center text-sm font-medium capitalize">{monthLabel}</h2>
-          <Button asChild size="icon" variant="ghost" aria-label="Mes siguiente"><Link href={href({ month: addMonths(month, 1) })}><ChevronRight /></Link></Button>
-          {month !== thisMonth && <Button asChild size="sm" variant="secondary"><Link href={href({ month: thisMonth })}>Este mes</Link></Button>}
+          <Button asChild size="icon" variant="ghost" aria-label="Next month"><Link href={href({ month: addMonths(month, 1) })}><ChevronRight /></Link></Button>
+          {month !== thisMonth && <Button asChild size="sm" variant="secondary"><Link href={href({ month: thisMonth })}>This month</Link></Button>}
         </div>
       )}
 
       {data.error && (
         <Card className="mb-5 flex items-center gap-2 border-danger/40 px-4 py-3 text-sm">
-          <AlertTriangle className="size-4 text-danger" aria-hidden /> No se pudieron cargar tus datos. Intenta recargar la página.
+          <AlertTriangle className="size-4 text-danger" aria-hidden /> Couldn't load your data. Try reloading the page.
         </Card>
       )}
 
       {tab === "summary" && (
         <>
           <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Tile label="Ingresos" value={formatMoney(income)} hint={plural(count("income"), "movimiento", "movimientos")} />
-            <Tile label="Gastos" value={formatMoney(expense)} hint={plural(count("expense"), "movimiento", "movimientos")} />
-            <Tile label="Ingresos − gastos" value={formatMoney(income - expense)} hint={data.txs.length ? undefined : "Sin movimientos este mes"} />
-            <Tile label="Aportes a ahorro" value={formatMoney(saved)} hint={plural(count("transfer"), "aporte", "aportes")} />
+            <Tile label="Income" value={formatMoney(income)} hint={plural(count("income"), "transaction", "transactions")} />
+            <Tile label="Expenses" value={formatMoney(expense)} hint={plural(count("expense"), "transaction", "transactions")} />
+            <Tile label="Income − expenses" value={formatMoney(income - expense)} hint={data.txs.length ? undefined : "No transactions this month"} />
+            <Tile label="Savings contributions" value={formatMoney(saved)} hint={plural(count("transfer"), "contribution", "contributions")} />
           </div>
           <div className="grid gap-5 lg:grid-cols-2">
             <Card>
-              <CardHeader><div><CardTitle>Gastos por categoría</CardTitle><CardDescription className="capitalize">{monthLabel}</CardDescription></div></CardHeader>
+              <CardHeader><div><CardTitle>Expenses by category</CardTitle><CardDescription className="capitalize">{monthLabel}</CardDescription></div></CardHeader>
               <CardContent><CategoryBars rows={categoryRows} /></CardContent>
             </Card>
             <Card>
-              <CardHeader><div><CardTitle>Últimos 6 meses</CardTitle><CardDescription>Ingresos y gastos por mes.</CardDescription></div></CardHeader>
+              <CardHeader><div><CardTitle>Last 6 months</CardTitle><CardDescription>Income and expenses per month.</CardDescription></div></CardHeader>
               <CardContent><MonthlyTrend data={data.trend} /></CardContent>
             </Card>
             <Card className="lg:col-span-2">
               <CardHeader>
-                <div><CardTitle>Patrimonio</CardTitle><CardDescription>Activos menos el saldo de tus deudas, con los valores que registraste.</CardDescription></div>
-                <Button asChild size="sm" variant="ghost"><Link href={href({ tab: "networth" })}>Ver detalle</Link></Button>
+                <div><CardTitle>Net worth</CardTitle><CardDescription>Assets minus your debt balances, using the values you logged.</CardDescription></div>
+                <Button asChild size="sm" variant="ghost"><Link href={href({ tab: "networth" })}>View details</Link></Button>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-3">
-                <div><p className="text-xs text-muted">Activos ({data.assets.length})</p><p className="text-lg font-semibold tabular-nums">{formatMoney(assetsTotal)}</p></div>
-                <div><p className="text-xs text-muted">Deudas ({data.liabilities.length})</p><p className="text-lg font-semibold tabular-nums">{formatMoney(debtTotal)}</p></div>
-                <div><p className="text-xs text-muted">Patrimonio neto</p><p className="text-lg font-semibold tabular-nums">{data.assets.length || data.liabilities.length ? formatMoney(assetsTotal - debtTotal) : "—"}</p></div>
+                <div><p className="text-xs text-muted">Assets ({data.assets.length})</p><p className="text-lg font-semibold tabular-nums">{formatMoney(assetsTotal)}</p></div>
+                <div><p className="text-xs text-muted">Debts ({data.liabilities.length})</p><p className="text-lg font-semibold tabular-nums">{formatMoney(debtTotal)}</p></div>
+                <div><p className="text-xs text-muted">Net worth</p><p className="text-lg font-semibold tabular-nums">{data.assets.length || data.liabilities.length ? formatMoney(assetsTotal - debtTotal) : "—"}</p></div>
               </CardContent>
             </Card>
           </div>
@@ -157,7 +157,7 @@ export default async function FinancesPage({ searchParams }: { searchParams: SP 
 
       {tab === "transactions" && (
         <Card>
-          <CardHeader><div><CardTitle>Movimientos</CardTitle><CardDescription>Toca uno para editarlo o eliminarlo.</CardDescription></div></CardHeader>
+          <CardHeader><div><CardTitle>Transactions</CardTitle><CardDescription>Tap one to edit or delete it.</CardDescription></div></CardHeader>
           <CardContent><TxList txs={data.txs} refs={refs} today={today} /></CardContent>
         </Card>
       )}
@@ -165,7 +165,7 @@ export default async function FinancesPage({ searchParams }: { searchParams: SP 
       {tab === "budget" && (
         <div className="space-y-5">
           <Card>
-            <CardHeader><div><CardTitle>Presupuesto del mes</CardTitle><CardDescription>Deja vacía una categoría para no presupuestarla.</CardDescription></div></CardHeader>
+            <CardHeader><div><CardTitle>This month's budget</CardTitle><CardDescription>Leave a category empty to skip budgeting it.</CardDescription></div></CardHeader>
             <CardContent>
               <BudgetEditor
                 key={month}
@@ -178,7 +178,7 @@ export default async function FinancesPage({ searchParams }: { searchParams: SP 
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><div><CardTitle>Categorías</CardTitle><CardDescription>Compartidas por todos los meses.</CardDescription></div></CardHeader>
+            <CardHeader><div><CardTitle>Categories</CardTitle><CardDescription>Shared across all months.</CardDescription></div></CardHeader>
             <CardContent><CategoryManager categories={data.categories} /></CardContent>
           </Card>
         </div>
@@ -186,7 +186,7 @@ export default async function FinancesPage({ searchParams }: { searchParams: SP 
 
       {tab === "savings" && (
         <Card>
-          <CardHeader><div><CardTitle>Metas de ahorro</CardTitle><CardDescription>Lo ahorrado es la suma de los aportes registrados.</CardDescription></div></CardHeader>
+          <CardHeader><div><CardTitle>Savings goals</CardTitle><CardDescription>The amount saved is the sum of logged contributions.</CardDescription></div></CardHeader>
           <CardContent><SavingsList goals={data.savings} today={today} refs={refs} /></CardContent>
         </Card>
       )}
@@ -194,17 +194,17 @@ export default async function FinancesPage({ searchParams }: { searchParams: SP 
       {tab === "networth" && (
         <>
           <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Tile label="Activos" value={formatMoney(assetsTotal)} hint={plural(data.assets.length, "registrado", "registrados")} />
-            <Tile label="Saldo de deudas" value={formatMoney(debtTotal)} hint={plural(data.liabilities.length, "registrada", "registradas")} />
-            <Tile label="Patrimonio neto" value={data.assets.length || data.liabilities.length ? formatMoney(assetsTotal - debtTotal) : "—"} hint="Con los valores que registraste" />
+            <Tile label="Assets" value={formatMoney(assetsTotal)} hint={plural(data.assets.length, "logged", "logged")} />
+            <Tile label="Debt balance" value={formatMoney(debtTotal)} hint={plural(data.liabilities.length, "logged", "logged")} />
+            <Tile label="Net worth" value={data.assets.length || data.liabilities.length ? formatMoney(assetsTotal - debtTotal) : "—"} hint="Using the values you logged" />
           </div>
           <div className="grid gap-5 lg:grid-cols-2">
             <Card>
-              <CardHeader><div><CardTitle>Activos</CardTitle><CardDescription>Lo que tienes y su valor más reciente.</CardDescription></div></CardHeader>
+              <CardHeader><div><CardTitle>Assets</CardTitle><CardDescription>What you own and its latest value.</CardDescription></div></CardHeader>
               <CardContent><AssetsList assets={data.assets} today={today} /></CardContent>
             </Card>
             <Card>
-              <CardHeader><div><CardTitle>Deudas</CardTitle><CardDescription>Incluye el apartamento importado de Segundo Cerebro.</CardDescription></div></CardHeader>
+              <CardHeader><div><CardTitle>Debts</CardTitle><CardDescription>Includes the apartment imported from Segundo Cerebro.</CardDescription></div></CardHeader>
               <CardContent><LiabilitiesList liabilities={data.liabilities} today={today} refs={refs} /></CardContent>
             </Card>
           </div>

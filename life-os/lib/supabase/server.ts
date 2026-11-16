@@ -31,6 +31,6 @@ export async function getUser() {
 /** Para Server Actions: lanza error si no hay sesión. */
 export async function requireUser() {
   const { supabase, user } = await getUser();
-  if (!user) throw new Error("Tu sesión expiró. Vuelve a iniciar sesión.");
+  if (!user) throw new Error("Your session expired. Please sign in again.");
   return { supabase, user };
 }

@@ -5,7 +5,7 @@ import { date, durationField, optNum, parseDuration, text } from "@/lib/physical
 export const examSchema = z
   .object({
     taken_on: date,
-    exam: z.string().trim().min(1, "Escribe el nombre del simulacro").max(120, "Máximo 120 caracteres"),
+    exam: z.string().trim().min(1, "Enter the practice exam name").max(120, "Maximum 120 characters"),
     subject: text(120),
     score: optNum(-100000, 100000),
     max_score: optNum(0.01, 100000),
@@ -17,11 +17,11 @@ export const examSchema = z
     notes: text(2000),
   })
   .refine((v) => v.total_questions == null || (v.correct ?? 0) + (v.incorrect ?? 0) <= v.total_questions, {
-    message: "Correctas más incorrectas no pueden superar las preguntas totales",
+    message: "Correct plus incorrect can't exceed total questions",
     path: ["incorrect"],
   })
   .refine((v) => v.score == null || v.max_score == null || v.score <= v.max_score, {
-    message: "El puntaje no puede superar el máximo",
+    message: "The score can't exceed the maximum",
     path: ["score"],
   });
 export type ExamInput = z.input<typeof examSchema>;
@@ -59,12 +59,12 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 export function examSummary(e: Exam) {
   const s = examStats(e);
   return [
-    e.score != null && `Puntaje ${fmtScore(e.score)}${e.max_score != null ? ` de ${fmtScore(e.max_score)}` : ""}`,
-    e.level && `Nivel ${e.level}`,
-    e.correct != null && (e.total_questions ? `${n0(e.correct)} de ${n0(e.total_questions)} correctas (${n0(s.accuracy!)}%)` : `${n0(e.correct)} correctas`),
-    e.correct == null && e.total_questions != null && `${n0(e.total_questions)} preguntas`,
-    e.incorrect != null && plural(e.incorrect, "incorrecta", "incorrectas"),
-    s.blank ? `${n0(s.blank)} sin responder` : null,
+    e.score != null && `Score ${fmtScore(e.score)}${e.max_score != null ? ` of ${fmtScore(e.max_score)}` : ""}`,
+    e.level && `Level ${e.level}`,
+    e.correct != null && (e.total_questions ? `${n0(e.correct)} of ${n0(e.total_questions)} correct (${n0(s.accuracy!)}%)` : `${n0(e.correct)} correct`),
+    e.correct == null && e.total_questions != null && `${n0(e.total_questions)} questions`,
+    e.incorrect != null && `${n0(e.incorrect)} incorrect`,
+    s.blank ? `${n0(s.blank)} unanswered` : null,
     e.duration_seconds != null && formatDuration(e.duration_seconds),
   ].filter(Boolean) as string[];
 }

@@ -11,14 +11,14 @@ const idSchema = z.string().uuid();
 
 export async function saveAssessment(input: AssessmentInput, id?: string): Promise<ActionResult> {
   const parsed = assessmentSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos no válidos" };
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid data" };
   const { supabase, user } = await requireUser();
   const row = { ...parsed.data, notes: parsed.data.notes || null };
 
   const { error } = id
     ? await supabase.from("life_assessments").update(row).eq("id", idSchema.parse(id)).eq("user_id", user.id)
     : await supabase.from("life_assessments").insert({ ...row, user_id: user.id });
-  if (error) return { ok: false, error: "No se pudo guardar la autoevaluación." };
+  if (error) return { ok: false, error: "Couldn't save the self-assessment." };
 
   revalidatePath("/overview");
   revalidatePath("/archive");
@@ -28,7 +28,7 @@ export async function saveAssessment(input: AssessmentInput, id?: string): Promi
 export async function deleteAssessment(id: string): Promise<ActionResult> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("life_assessments").delete().eq("id", idSchema.parse(id)).eq("user_id", user.id);
-  if (error) return { ok: false, error: "No se pudo eliminar." };
+  if (error) return { ok: false, error: "Couldn't delete it." };
   revalidatePath("/overview");
   revalidatePath("/archive");
   return { ok: true };

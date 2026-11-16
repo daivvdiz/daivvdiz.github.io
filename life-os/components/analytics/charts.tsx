@@ -15,7 +15,7 @@ const FORMAT: Record<Fmt, (v: number) => string> = {
   minutes: (v) => (v >= 60 ? `${formatNumber(v / 60, 1)} h` : `${formatNumber(v, 0)} min`),
   pct: (v) => `${formatNumber(v, 0)}%`,
 };
-const compact = new Intl.NumberFormat("es-CO", { notation: "compact", maximumFractionDigits: 1 });
+const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
 const AXIS: Record<Fmt, (v: number) => string> = {
   count: (v) => compact.format(v), score: (v) => String(v), hours: (v) => String(v), money: (v) => `$${compact.format(v)}`,
   minutes: (v) => (v >= 60 ? `${compact.format(v / 60)} h` : `${v}`), pct: (v) => `${v}%`,
@@ -38,13 +38,13 @@ export function SeriesChart({ rows, series, kind = "bar", format, ariaLabel, not
   const visible = series.filter((s) => !hidden[s.key]);
   const fmt = FORMAT[format];
 
-  if (!total) return <p className="py-6 text-center text-sm text-muted">Sin registros en este periodo.</p>;
+  if (!total) return <p className="py-6 text-center text-sm text-muted">No entries in this period.</p>;
 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         {series.length > 1 ? (
-          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Series visibles">
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Visible series">
             {series.map((s, i) => (
               <button key={s.key} type="button" aria-pressed={!hidden[s.key]} onClick={() => setHidden((h) => ({ ...h, [s.key]: !h[s.key] }))}
                 className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs", !hidden[s.key] ? "border-border text-foreground" : "border-transparent text-muted line-through")}>
@@ -61,7 +61,7 @@ export function SeriesChart({ rows, series, kind = "bar", format, ariaLabel, not
             p: r.period,
             ...Object.fromEntries(series.map((s) => [s.key, r.values[s.key] == null ? null : `${fmt(r.values[s.key]!)}${r.n?.[s.key] != null ? ` (${r.n[s.key]})` : ""}`])),
           }))}
-          cols={[{ key: "p", label: "Periodo" }, ...series.map((s) => ({ key: s.key, label: s.label }))]}
+          cols={[{ key: "p", label: "Period" }, ...series.map((s) => ({ key: s.key, label: s.label }))]}
         />
       ) : (
         <div className="h-56 w-full" role="img" aria-label={ariaLabel}>
@@ -75,7 +75,7 @@ export function SeriesChart({ rows, series, kind = "bar", format, ariaLabel, not
                   formatter={(v, name, item) => {
                     const key = item?.dataKey as string;
                     const n = item?.payload?.n?.[key];
-                    return [`${fmt(Number(v))}${n != null ? ` · ${n} reg.` : ""}`, name];
+                    return [`${fmt(Number(v))}${n != null ? ` · ${n} ${n === 1 ? "entry" : "entries"}` : ""}`, name];
                   }} />
                 {series.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
                 {visible.map((s) => (
@@ -91,7 +91,7 @@ export function SeriesChart({ rows, series, kind = "bar", format, ariaLabel, not
                   formatter={(v, name, item) => {
                     const key = item?.dataKey as string;
                     const n = item?.payload?.n?.[key];
-                    return [`${fmt(Number(v))}${n != null ? ` · ${n} ${n === 1 ? "día" : "días"}` : ""}`, name];
+                    return [`${fmt(Number(v))}${n != null ? ` · ${n} ${n === 1 ? "day" : "days"}` : ""}`, name];
                   }} />
                 {series.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
                 {visible.map((s) => (

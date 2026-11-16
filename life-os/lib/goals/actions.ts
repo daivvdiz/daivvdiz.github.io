@@ -11,7 +11,7 @@ import {
 type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 const uuid = z.string().uuid();
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
-const issue = (e: z.ZodError) => ({ ok: false as const, error: e.issues[0]?.message ?? "Datos no válidos" });
+const issue = (e: z.ZodError) => ({ ok: false as const, error: e.issues[0]?.message ?? "Invalid data" });
 
 function revalidate() {
   revalidatePath("/goals", "layout");
@@ -46,20 +46,20 @@ export async function saveGoal(input: GoalInput, id?: string): Promise<Result<{ 
   const r = id
     ? await supabase.from("goals").update(row).eq("id", uuid.parse(id)).eq("user_id", user.id).select("id").single()
     : await supabase.from("goals").insert({ ...row, user_id: user.id }).select("id").single();
-  if (r.error || !r.data) return { ok: false, error: "No se pudo guardar la meta." };
+  if (r.error || !r.data) return { ok: false, error: "Couldn't save the goal." };
   const goalId = r.data.id as string;
-  if (!(await syncLinks(supabase, user.id, "goal_id", goalId, habit_ids))) return { ok: false, error: "La meta se guardó, pero no sus hábitos." };
+  if (!(await syncLinks(supabase, user.id, "goal_id", goalId, habit_ids))) return { ok: false, error: "The goal was saved, but not its habits." };
   revalidate();
   return { ok: true, id: goalId };
 }
 
 export async function setGoalStatus(id: string, status: GoalStatus): Promise<Result> {
-  if (!(status in GOAL_STATUS)) return { ok: false, error: "Estado no válido" };
+  if (!(status in GOAL_STATUS)) return { ok: false, error: "Invalid status" };
   const { supabase, user } = await requireUser();
   const patch: Record<string, unknown> = { status };
   if (status === "completed") patch.progress = 100;
   const r = await supabase.from("goals").update(patch).eq("id", uuid.parse(id)).eq("user_id", user.id);
-  if (r.error) return { ok: false, error: "No se pudo cambiar el estado." };
+  if (r.error) return { ok: false, error: "Couldn't change the status." };
   revalidate();
   return { ok: true };
 }
@@ -67,7 +67,7 @@ export async function setGoalStatus(id: string, status: GoalStatus): Promise<Res
 export async function deleteGoal(id: string): Promise<Result> {
   const { supabase, user } = await requireUser();
   const r = await supabase.from("goals").delete().eq("id", uuid.parse(id)).eq("user_id", user.id);
-  if (r.error) return { ok: false, error: "No se pudo eliminar la meta." };
+  if (r.error) return { ok: false, error: "Couldn't delete the goal." };
   revalidate();
   return { ok: true };
 }
@@ -84,7 +84,7 @@ export async function saveMilestone(input: MilestoneInput, id?: string): Promise
     const { count } = await supabase.from("milestones").select("id", { count: "exact", head: true }).eq("goal_id", p.data.goal_id);
     r = await supabase.from("milestones").insert({ ...row, goal_id: p.data.goal_id, user_id: user.id, position: count ?? 0 });
   }
-  if (r.error) return { ok: false, error: "No se pudo guardar el hito." };
+  if (r.error) return { ok: false, error: "Couldn't save the milestone." };
   revalidate();
   return { ok: true };
 }
@@ -96,7 +96,7 @@ export async function toggleMilestone(id: string, completedOn: string | null): P
     .update({ completed_at: completedOn == null ? null : isoDate.parse(completedOn) })
     .eq("id", uuid.parse(id))
     .eq("user_id", user.id);
-  if (r.error) return { ok: false, error: "No se pudo actualizar el hito." };
+  if (r.error) return { ok: false, error: "Couldn't update the milestone." };
   revalidate();
   return { ok: true };
 }
@@ -104,7 +104,7 @@ export async function toggleMilestone(id: string, completedOn: string | null): P
 export async function deleteMilestone(id: string): Promise<Result> {
   const { supabase, user } = await requireUser();
   const r = await supabase.from("milestones").delete().eq("id", uuid.parse(id)).eq("user_id", user.id);
-  if (r.error) return { ok: false, error: "No se pudo eliminar el hito." };
+  if (r.error) return { ok: false, error: "Couldn't delete the milestone." };
   revalidate();
   return { ok: true };
 }
@@ -124,9 +124,9 @@ export async function saveHabit(input: HabitInput, id?: string): Promise<Result<
   const r = id
     ? await supabase.from("habits").update(row).eq("id", uuid.parse(id)).eq("user_id", user.id).select("id").single()
     : await supabase.from("habits").insert({ ...row, user_id: user.id }).select("id").single();
-  if (r.error || !r.data) return { ok: false, error: "No se pudo guardar el hábito." };
+  if (r.error || !r.data) return { ok: false, error: "Couldn't save the habit." };
   const habitId = r.data.id as string;
-  if (!(await syncLinks(supabase, user.id, "habit_id", habitId, goal_ids))) return { ok: false, error: "El hábito se guardó, pero no sus metas." };
+  if (!(await syncLinks(supabase, user.id, "habit_id", habitId, goal_ids))) return { ok: false, error: "The habit was saved, but not its goals." };
   revalidate();
   return { ok: true, id: habitId };
 }
@@ -134,7 +134,7 @@ export async function saveHabit(input: HabitInput, id?: string): Promise<Result<
 export async function deleteHabit(id: string): Promise<Result> {
   const { supabase, user } = await requireUser();
   const r = await supabase.from("habits").delete().eq("id", uuid.parse(id)).eq("user_id", user.id);
-  if (r.error) return { ok: false, error: "No se pudo eliminar el hábito." };
+  if (r.error) return { ok: false, error: "Couldn't delete the habit." };
   revalidate();
   return { ok: true };
 }
@@ -147,7 +147,7 @@ export async function logHabit(input: HabitLogInput): Promise<Result> {
   const r = await supabase
     .from("habit_logs")
     .upsert({ ...p.data, notes: p.data.notes || null, user_id: user.id }, { onConflict: "habit_id,logged_on" });
-  if (r.error) return { ok: false, error: "No se pudo registrar." };
+  if (r.error) return { ok: false, error: "Couldn't log it." };
   revalidate();
   return { ok: true };
 }
@@ -160,7 +160,7 @@ export async function unlogHabit(habitId: string, date: string): Promise<Result>
     .eq("habit_id", uuid.parse(habitId))
     .eq("logged_on", isoDate.parse(date))
     .eq("user_id", user.id);
-  if (r.error) return { ok: false, error: "No se pudo quitar el registro." };
+  if (r.error) return { ok: false, error: "Couldn't remove the entry." };
   revalidate();
   return { ok: true };
 }

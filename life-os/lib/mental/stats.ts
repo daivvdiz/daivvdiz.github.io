@@ -73,14 +73,14 @@ export const MIN_CORRELATION_N = 7;
 
 export function describeR(r: number) {
   const a = Math.abs(r);
-  const strength = a < 0.1 ? "sin relación clara" : a < 0.3 ? "relación débil" : a < 0.5 ? "relación moderada" : "relación fuerte";
+  const strength = a < 0.1 ? "no clear relationship" : a < 0.3 ? "weak relationship" : a < 0.5 ? "moderate relationship" : "strong relationship";
   if (a < 0.1) return strength;
-  return `${strength} ${r > 0 ? "en la misma dirección" : "en dirección opuesta"}`;
+  return `${strength} ${r > 0 ? "in the same direction" : "in opposite directions"}`;
 }
 
 export const METRIC_LABEL: Record<Metric, string> = {
-  mood: "Ánimo",
-  energy: "Energía",
-  stress: "Estrés",
-  sleep_hours: "Horas de sueño",
+  mood: "Mood",
+  energy: "Energy",
+  stress: "Stress",
+  sleep_hours: "Sleep hours",
 };

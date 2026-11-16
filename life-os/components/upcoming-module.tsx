@@ -12,12 +12,12 @@ export function UpcomingModule({ module }: { module: ModuleDef }) {
       <PageHeader title={module.label} description={module.description} />
       <Card className="flex flex-col items-center gap-3 px-6 py-14 text-center">
         <Icon className="size-6 text-muted" aria-hidden />
-        <p className="text-sm font-medium">Este módulo llega en la fase {module.phase}</p>
+        <p className="text-sm font-medium">This module arrives in phase {module.phase}</p>
         <p className="max-w-md text-sm text-muted">
-          La base de datos ya está lista para él, y lo que importes de Segundo Cerebro se mostrará aquí cuando esté construido.
+          The database is already ready for it, and whatever you import from Segundo Cerebro will show up here once it's built.
         </p>
         <Button asChild variant="secondary" size="sm" className="mt-2">
-          <Link href="/overview">Volver al resumen</Link>
+          <Link href="/overview">Back to overview</Link>
         </Button>
       </Card>
     </>

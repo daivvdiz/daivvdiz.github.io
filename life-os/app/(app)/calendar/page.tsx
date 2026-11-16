@@ -17,7 +17,7 @@ import { CATEGORY_COLORS, EVENT_CATEGORIES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CalendarDays } from "lucide-react";
 
-export const metadata: Metadata = { title: "Calendario y diario" };
+export const metadata: Metadata = { title: "Calendar & journal" };
 export const dynamic = "force-dynamic";
 
 type View = "month" | "week" | "day";
@@ -60,17 +60,17 @@ export default async function CalendarPage({ searchParams }: { searchParams: SP 
     view === "month"
       ? formatDay(date, "MMMM yyyy")
       : view === "week"
-        ? `${formatDay(range.start, "d MMM")} – ${formatDay(range.end, "d MMM yyyy")}`
-        : formatDay(date, "EEEE d 'de' MMMM yyyy");
+        ? `${formatDay(range.start, "MMM d")} – ${formatDay(range.end, "MMM d, yyyy")}`
+        : formatDay(date, "EEEE, MMMM d, yyyy");
 
   return (
     <>
       <PageHeader
-        title="Calendario y diario"
-        description="Tus eventos y tu entrada de cada día, en un solo lugar."
+        title="Calendar & journal"
+        description="Your events and your daily entry, all in one place."
         actions={
           <>
-            <Button asChild variant="secondary"><Link href={hrefForDay(today)}>Escribir hoy</Link></Button>
+            <Button asChild variant="secondary"><Link href={hrefForDay(today)}>Write today</Link></Button>
             <NewEventButton date={view === "day" ? date : today} goals={goals} />
           </>
         }
@@ -78,14 +78,14 @@ export default async function CalendarPage({ searchParams }: { searchParams: SP 
 
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="icon"><Link href={href({ date: step(-1) })} aria-label="Anterior"><ChevronLeft /></Link></Button>
-          <Button asChild variant="ghost" size="icon"><Link href={href({ date: step(1) })} aria-label="Siguiente"><ChevronRight /></Link></Button>
-          <Button asChild variant="secondary" size="sm"><Link href={href({ date: today })}>Hoy</Link></Button>
+          <Button asChild variant="ghost" size="icon"><Link href={href({ date: step(-1) })} aria-label="Previous"><ChevronLeft /></Link></Button>
+          <Button asChild variant="ghost" size="icon"><Link href={href({ date: step(1) })} aria-label="Next"><ChevronRight /></Link></Button>
+          <Button asChild variant="secondary" size="sm"><Link href={href({ date: today })}>Today</Link></Button>
           <h2 className="ml-1 text-base font-semibold first-letter:uppercase">{title}</h2>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <nav aria-label="Vista" className="flex rounded-md border border-border p-0.5">
-            {([["month", "Mes"], ["week", "Semana"], ["day", "Día"]] as const).map(([v, l]) => (
+          <nav aria-label="View" className="flex rounded-md border border-border p-0.5">
+            {([["month", "Month"], ["week", "Week"], ["day", "Day"]] as const).map(([v, l]) => (
               <Link key={v} href={href({ view: v })} aria-current={view === v ? "page" : undefined}
                 className={cn("rounded px-3 py-1 text-xs", view === v ? "bg-accent-soft text-foreground" : "text-muted hover:text-foreground")}>
                 {l}
@@ -95,7 +95,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: SP 
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-1.5" aria-label="Filtrar por categoría">
+      <div className="mb-4 flex flex-wrap gap-1.5" aria-label="Filter by category">
         {Object.entries(EVENT_CATEGORIES).map(([k, l]) => {
           const on = cats.includes(k);
           return (
@@ -105,10 +105,10 @@ export default async function CalendarPage({ searchParams }: { searchParams: SP 
             </Link>
           );
         })}
-        {cats.length > 0 && <Link href={href({ cats: [] })} className="px-2 py-1 text-xs text-accent">Quitar filtros</Link>}
+        {cats.length > 0 && <Link href={href({ cats: [] })} className="px-2 py-1 text-xs text-accent">Clear filters</Link>}
       </div>
 
-      {cal.error && <p role="alert" className="mb-4 text-sm text-danger">No se pudo cargar el calendario. Intenta de nuevo.</p>}
+      {cal.error && <p role="alert" className="mb-4 text-sm text-danger">Couldn't load the calendar. Please try again.</p>}
 
       {view === "month" && (
         <MonthView days={range.days} month={date} today={today} events={cal.events} summaries={cal.days} goals={goals} hrefForDay={hrefForDay} weekStartsOn={prefs.weekStartsOn} />
@@ -122,10 +122,10 @@ export default async function CalendarPage({ searchParams }: { searchParams: SP 
             <DailyEntryForm key={date} date={date} entry={dayEntry} events={dayEventsAll} goals={goals} tagSuggestions={tagNames} userId={user!.id} />
           </div>
           <Card className="order-1 h-fit lg:sticky lg:top-6 lg:order-2">
-            <CardHeader><CardTitle>Eventos del día</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Events this day</CardTitle></CardHeader>
             <CardContent>
               {cal.events.length === 0 ? (
-                <EmptyState icon={CalendarDays} title="Sin eventos" action={<NewEventButton date={date} goals={goals} label="Agregar evento" variant="secondary" />} />
+                <EmptyState icon={CalendarDays} title="No events" action={<NewEventButton date={date} goals={goals} label="Add event" variant="secondary" />} />
               ) : (
                 <div className="space-y-1">
                   {cal.events.map((e) => (
@@ -133,7 +133,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: SP 
                       <EventChip event={e} goals={goals} wrap />
                       {(e.all_day || e.end_time || e.location) && (
                         <p className="pl-4 text-[11px] text-muted">
-                          {e.all_day ? "Todo el día" : e.end_time ? `${e.start_time}–${e.end_time}` : ""}
+                          {e.all_day ? "All day" : e.end_time ? `${e.start_time}–${e.end_time}` : ""}
                           {e.location ? ` · ${e.location}` : ""}
                         </p>
                       )}

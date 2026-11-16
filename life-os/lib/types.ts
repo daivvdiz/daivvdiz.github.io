@@ -1,12 +1,12 @@
 // Tipos de filas usados por la interfaz. Las columnas siguen las migraciones en ../supabase/migrations.
 
 export const DIMENSIONS = [
-  { key: "professional", label: "Profesional" },
-  { key: "financial", label: "Financiera" },
-  { key: "physical", label: "Física" },
-  { key: "emotional", label: "Emocional" },
+  { key: "professional", label: "Professional" },
+  { key: "financial", label: "Financial" },
+  { key: "physical", label: "Physical" },
+  { key: "emotional", label: "Emotional" },
   { key: "social", label: "Social" },
-  { key: "intellectual", label: "Intelectual" },
+  { key: "intellectual", label: "Intellectual" },
 ] as const;
 
 export type DimensionKey = (typeof DIMENSIONS)[number]["key"];
@@ -34,24 +34,24 @@ export interface ActivityItem {
 }
 
 export const WORKOUT_TYPES: Record<string, string> = {
-  calisthenics: "Calistenia",
-  strength: "Fuerza",
-  beach_volleyball: "Vóley playa",
+  calisthenics: "Calisthenics",
+  strength: "Strength",
+  beach_volleyball: "Beach volleyball",
   running: "Running",
-  mobility: "Movilidad",
-  other_sport: "Otro deporte",
-  other: "Otra actividad",
+  mobility: "Mobility",
+  other_sport: "Other sport",
+  other: "Other activity",
 };
 
 export const EVENT_CATEGORIES: Record<string, string> = {
   personal: "Personal",
-  work: "Trabajo",
-  health: "Salud",
-  fitness: "Ejercicio",
-  finance: "Finanzas",
+  work: "Work",
+  health: "Health",
+  fitness: "Exercise",
+  finance: "Finances",
   social: "Social",
-  learning: "Aprendizaje",
-  other: "Otro",
+  learning: "Learning",
+  other: "Other",
 };
 
 /** Colores de categoría de eventos (tokens del tema). */

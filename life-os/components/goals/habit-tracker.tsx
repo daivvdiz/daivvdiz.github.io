@@ -48,12 +48,12 @@ function ValueDialog({
 
   const save = async () => {
     const n = value.trim() === "" ? null : Number(value.replace(",", "."));
-    if (!isCheck && (n == null || !Number.isFinite(n) || n < 0)) return void toast.error("Escribe un número válido");
+    if (!isCheck && (n == null || !Number.isFinite(n) || n < 0)) return void toast.error("Enter a valid number");
     setPending(true);
     const r = await logHabit({ habit_id: habit.id, logged_on: date, value: isCheck ? null : n, notes });
     setPending(false);
     if (!r.ok) return void toast.error(r.error);
-    toast.success("Registrado");
+    toast.success("Logged");
     onClose();
   };
   const remove = async () => {
@@ -61,7 +61,7 @@ function ValueDialog({
     const r = await unlogHabit(habit.id, date);
     setPending(false);
     if (!r.ok) return void toast.error(r.error);
-    toast.success("Registro quitado");
+    toast.success("Entry removed");
     onClose();
   };
 
@@ -70,24 +70,24 @@ function ValueDialog({
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>{habit.name}</DialogTitle>
-          <DialogDescription>{formatDay(date, "EEEE d 'de' MMMM")}</DialogDescription>
+          <DialogDescription>{formatDay(date, "EEEE, MMMM d")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           {!isCheck && (
             <div className="space-y-1.5">
-              <Label htmlFor="hv-value">{habit.tracking_method === "duration" ? "Minutos" : "Cantidad"}</Label>
+              <Label htmlFor="hv-value">{habit.tracking_method === "duration" ? "Minutes" : "Amount"}</Label>
               <Input id="hv-value" inputMode="decimal" autoFocus value={value} onChange={(e) => setValue(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && save()} />
             </div>
           )}
           <div className="space-y-1.5">
-            <Label htmlFor="hv-notes">Nota (opcional)</Label>
+            <Label htmlFor="hv-notes">Note (optional)</Label>
             <Input id="hv-notes" maxLength={1000} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
         </div>
         <DialogFooter className="sm:justify-between">
-          {log ? <Button variant="ghost" onClick={remove} disabled={pending}><Trash2 /> Quitar registro</Button> : <span />}
-          <Button onClick={save} disabled={pending}>{pending ? "Guardando…" : "Guardar"}</Button>
+          {log ? <Button variant="ghost" onClick={remove} disabled={pending}><Trash2 /> Remove entry</Button> : <span />}
+          <Button onClick={save} disabled={pending}>{pending ? "Saving…" : "Save"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -123,15 +123,15 @@ export function HabitTracker({
     return (
       <EmptyState
         icon={ListChecks}
-        title="Aún no tienes hábitos"
-        description="Crea uno con la frecuencia que te sirva: todos los días, días específicos o algunas veces por semana."
+        title="No habits yet"
+        description="Create one with whatever frequency works for you: every day, specific days or a few times a week."
       />
     );
 
   return (
     <div className="space-y-2">
       <div className="hidden text-[11px] text-muted sm:flex" aria-hidden>
-        <span className="flex-1">Hábito</span>
+        <span className="flex-1">Habit</span>
         <DayHeader days={days} today={today} />
       </div>
       <ul className="divide-y divide-border border-t border-border sm:border-t-0">
@@ -143,30 +143,30 @@ export function HabitTracker({
                 <div className="min-w-0 flex-1">
                   <p className="break-words text-sm font-medium">{h.name}</p>
                   <p className="text-[11px] text-muted">
-                    {describeFrequency(h)} · {statsLabel}: {s.expected ? `${s.done} de ${s.expected} ${s.expected === 1 ? s.unit.slice(0, -1) : s.unit}` : (s.unit === "semanas" ? "aún sin semanas completas" : "aún sin días planeados")}
+                    {describeFrequency(h)} · {statsLabel}: {s.expected ? `${s.done} of ${s.expected} ${s.expected === 1 ? s.unit.slice(0, -1) : s.unit}` : (s.unit === "weeks" ? "no full weeks yet" : "no planned days yet")}
                     {h.tracking_method !== "check" && s.total > 0 && ` · total ${formatNumber(s.total, 1)}${UNIT[h.tracking_method]}`}
                   </p>
                 </div>
-                <Button size="icon" variant="ghost" className="size-7 shrink-0" aria-label={`Editar ${h.name}`} onClick={() => setEditing(h)}><Pencil /></Button>
+                <Button size="icon" variant="ghost" className="size-7 shrink-0" aria-label={`Edit ${h.name}`} onClick={() => setEditing(h)}><Pencil /></Button>
                 <ConfirmDialog
-                  trigger={<Button size="icon" variant="ghost" className="size-7 shrink-0" aria-label={`Eliminar ${h.name}`}><Trash2 /></Button>}
-                  title={`¿Eliminar “${h.name}”?`}
-                  description="Se eliminará el hábito con todo su historial. Si solo quieres pausarlo, edítalo y desmarca “Activo”."
+                  trigger={<Button size="icon" variant="ghost" className="size-7 shrink-0" aria-label={`Delete ${h.name}`}><Trash2 /></Button>}
+                  title={`Delete “${h.name}”?`}
+                  description="The habit and its full history will be deleted. If you just want to pause it, edit it and uncheck “Active”."
                   onConfirm={async () => {
                     const r = await deleteHabit(h.id);
                     if (!r.ok) return void toast.error(r.error);
-                    toast.success("Hábito eliminado");
+                    toast.success("Habit deleted");
                   }}
                 />
               </div>
               <div className="sm:hidden" aria-hidden><DayHeader days={days} today={today} /></div>
-              <div className="grid grid-cols-7 gap-1 sm:w-[17.5rem] sm:shrink-0" role="group" aria-label={`Últimos 7 días de ${h.name}`}>
+              <div className="grid grid-cols-7 gap-1 sm:w-[17.5rem] sm:shrink-0" role="group" aria-label={`Last 7 days of ${h.name}`}>
                 {days.map((d) => {
                   const log = logMap.get(`${h.id}|${d}`);
                   const done = isDone(h, log);
                   const planned = isScheduled(h, d) || (h.frequency === "weekly" && d >= h.start_date);
                   const before = d < h.start_date;
-                  const label = `${h.name}, ${formatDay(d, "EEEE d MMM")}: ${done ? "hecho" : log ? "registrado en 0" : before ? "antes de empezar" : planned ? "sin registrar" : "no planeado"}`;
+                  const label = `${h.name}, ${formatDay(d, "EEEE, MMM d")}: ${done ? "done" : log ? "logged as 0" : before ? "before start" : planned ? "not logged" : "not planned"}`;
                   return (
                     <button
                       key={d}
@@ -190,7 +190,7 @@ export function HabitTracker({
           );
         })}
       </ul>
-      <p className="text-[11px] text-muted">Las casillas punteadas son días no planeados; también puedes registrarlas. Sin rachas: un día sin registrar no borra nada.</p>
+      <p className="text-[11px] text-muted">Dotted boxes are unplanned days; you can log them too. No streaks: a day without an entry doesn't erase anything.</p>
       <HabitDialog open={editing !== null} onOpenChange={(o) => !o && setEditing(null)} habit={editing ?? undefined} goals={goals} today={today} />
       <ValueDialog target={valueFor} onClose={() => setValueFor(null)} />
     </div>

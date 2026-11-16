@@ -6,7 +6,7 @@ import type { CalEvent, DaySummary } from "@/lib/calendar/queries";
 import { CATEGORY_COLORS } from "@/lib/types";
 import { EventChip, type GoalOption } from "./event-dialog";
 
-const WEEKDAYS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function groupByDay(events: CalEvent[]) {
   const m = new Map<string, CalEvent[]>();
@@ -18,10 +18,10 @@ function groupByDay(events: CalEvent[]) {
 function EntryMark({ s }: { s?: DaySummary }) {
   if (!s) return null;
   return (
-    <span className="hidden items-center gap-1 text-[11px] text-muted sm:inline-flex" title={s.mood != null ? `Ánimo ${s.mood}/10` : "Entrada registrada"}>
+    <span className="hidden items-center gap-1 text-[11px] text-muted sm:inline-flex" title={s.mood != null ? `Mood ${s.mood}/10` : "Entry logged"}>
       <BookOpen className="size-3" aria-hidden />
       {s.mood != null && <span className="tabular-nums">{s.mood}</span>}
-      <span className="sr-only">Entrada registrada</span>
+      <span className="sr-only">Entry logged</span>
     </span>
   );
 }
@@ -53,7 +53,7 @@ export function MonthView({
                     d === today && "bg-accent text-accent-foreground hover:bg-accent",
                     !inMonth && d !== today && "text-muted",
                   )}
-                  aria-label={`Abrir ${formatDay(d, "EEEE d 'de' MMMM")}`}
+                  aria-label={`Open ${formatDay(d, "EEEE, MMMM d")}`}
                 >
                   {Number(d.slice(8))}
                 </Link>
@@ -61,10 +61,10 @@ export function MonthView({
               </div>
               <div className="hidden space-y-0.5 sm:block">
                 {list.slice(0, 3).map((e) => <EventChip key={e.id} event={e} goals={goals} />)}
-                {list.length > 3 && <Link href={hrefForDay(d)} className="block px-1 text-[11px] text-muted hover:text-foreground">+{list.length - 3} más</Link>}
+                {list.length > 3 && <Link href={hrefForDay(d)} className="block px-1 text-[11px] text-muted hover:text-foreground">+{list.length - 3} more</Link>}
               </div>
               {(list.length > 0 || summaries.has(d)) && (
-                <Link href={hrefForDay(d)} className="flex items-center gap-0.5 px-1 sm:hidden" aria-label={`${list.length} eventos${summaries.has(d) ? ", con entrada" : ""}`}>
+                <Link href={hrefForDay(d)} className="flex items-center gap-0.5 px-1 sm:hidden" aria-label={`${list.length} ${list.length === 1 ? "event" : "events"}${summaries.has(d) ? ", with entry" : ""}`}>
                   {summaries.has(d) && <BookOpen className="size-3 text-muted" aria-hidden />}
                   {list.slice(0, 3).map((e) => <span key={e.id} className="size-1.5 rounded-full" style={{ background: CATEGORY_COLORS[e.category] }} />)}
                 </Link>
@@ -96,7 +96,7 @@ export function WeekView({
               <EntryMark s={summaries.get(d)} />
             </div>
             {list.length === 0 ? (
-              <p className="px-1 text-[11px] text-muted">Sin eventos</p>
+              <p className="px-1 text-[11px] text-muted">No events</p>
             ) : (
               <div className="space-y-0.5">{list.map((e) => <EventChip key={e.id} event={e} goals={goals} wrap />)}</div>
             )}

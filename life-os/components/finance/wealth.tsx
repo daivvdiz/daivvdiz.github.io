@@ -23,9 +23,9 @@ export function SavingsList({ goals, today, refs }: { goals: SavingsGoal[]; toda
   const it = ed.item;
   return (
     <div className="space-y-3">
-      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> Nueva meta de ahorro</Button>
+      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> New savings goal</Button>
       {!goals.length ? (
-        <EmptyState icon={PiggyBank} title="Sin metas de ahorro" description="Crea una y registra aportes. Los aportes no cuentan como gasto." />
+        <EmptyState icon={PiggyBank} title="No savings goals" description="Create one and log contributions. Contributions don't count as expenses." />
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {goals.map((g) => {
@@ -36,28 +36,28 @@ export function SavingsList({ goals, today, refs }: { goals: SavingsGoal[]; toda
                   <div className="min-w-0">
                     <p className="break-words text-sm font-medium">{g.name}</p>
                     <p className="text-[11px] text-muted">
-                      {g.contributions} {g.contributions === 1 ? "aporte" : "aportes"}{g.target_date && ` · para el ${formatDay(g.target_date)}`}
+                      {g.contributions} {g.contributions === 1 ? "contribution" : "contributions"}{g.target_date && ` · by ${formatDay(g.target_date)}`}
                     </p>
                   </div>
                   <div className="flex shrink-0">
-                    <Button size="icon" variant="ghost" className="size-7" aria-label={`Editar ${g.name}`} onClick={() => ed.setEditing(g)}><Pencil /></Button>
+                    <Button size="icon" variant="ghost" className="size-7" aria-label={`Edit ${g.name}`} onClick={() => ed.setEditing(g)}><Pencil /></Button>
                     <ConfirmDialog
-                      trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Eliminar ${g.name}`}><Trash2 /></Button>}
-                      title={`¿Eliminar “${g.name}”?`}
-                      description="Los aportes se conservan como movimientos, pero quedan sin meta. Esta acción no se puede deshacer."
+                      trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Delete ${g.name}`}><Trash2 /></Button>}
+                      title={`Delete “${g.name}”?`}
+                      description="Contributions are kept as transactions, but without a goal. This can't be undone."
                       onConfirm={async () => {
                         const r = await deleteSavingsGoal(g.id);
                         if (!r.ok) return void toast.error(r.error);
-                        toast.success("Meta de ahorro eliminada");
+                        toast.success("Savings goal deleted");
                       }}
                     />
                   </div>
                 </div>
                 <p className="mt-2 text-sm tabular-nums">{formatMoney(g.saved)} <span className="text-xs text-muted">de {formatMoney(g.target_amount)} · {pct}%</span></p>
-                <div className="mt-1.5"><ProgressBar value={pct} label={`Ahorro de ${g.name}`} /></div>
+                <div className="mt-1.5"><ProgressBar value={pct} label={`Savings for ${g.name}`} /></div>
                 <div className="mt-3">
-                  <NewTxButton today={today} refs={refs} size="sm" variant="secondary" label="Registrar aporte"
-                    preset={{ type: "transfer", savings_goal_id: g.id, description: `Aporte a ${g.name}` }} />
+                  <NewTxButton today={today} refs={refs} size="sm" variant="secondary" label="Log contribution"
+                    preset={{ type: "transfer", savings_goal_id: g.id, description: `Contribution to ${g.name}` }} />
                 </div>
               </li>
             );
@@ -66,14 +66,14 @@ export function SavingsList({ goals, today, refs }: { goals: SavingsGoal[]; toda
       )}
       <EntityDialog<SavingsInput>
         open={ed.open} onOpenChange={(o) => !o && ed.close()}
-        title={it ? "Editar meta de ahorro" : "Nueva meta de ahorro"} description="Lo ahorrado se calcula con los aportes que registres."
+        title={it ? "Edit savings goal" : "New savings goal"} description="The amount saved is calculated from the contributions you log."
         schema={savingsSchema}
         defaults={it ? { name: it.name, target_amount: it.target_amount, target_date: it.target_date ?? "", notes: it.notes ?? "" } : { name: "", target_amount: undefined as unknown as number, target_date: "", notes: "" }}
         fields={[
-          { name: "name", label: "Nombre", kind: "text", placeholder: "Ej. Fondo de emergencia" },
-          { name: "target_amount", label: "Meta", kind: "money" },
-          { name: "target_date", label: "Fecha objetivo (opcional)", kind: "date" },
-          { name: "notes", label: "Notas (opcional)", kind: "textarea" },
+          { name: "name", label: "Name", kind: "text", placeholder: "E.g. Emergency fund" },
+          { name: "target_amount", label: "Target", kind: "money" },
+          { name: "target_date", label: "Target date (optional)", kind: "date" },
+          { name: "notes", label: "Notes (optional)", kind: "textarea" },
         ]}
         onSave={(v) => saveSavingsGoal(v, it?.id)}
       />
@@ -88,26 +88,26 @@ export function AssetsList({ assets, today }: { assets: Asset[]; today: string }
   const it = ed.item;
   return (
     <div className="space-y-3">
-      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> Nuevo activo</Button>
+      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> New asset</Button>
       {!assets.length ? (
-        <EmptyState icon={Wallet} title="Sin activos" description="Cuentas, inversiones, inmuebles o vehículos, con su valor actual." className="py-4" />
+        <EmptyState icon={Wallet} title="No assets" description="Accounts, investments, real estate or vehicles, with their current value." className="py-4" />
       ) : (
         <ul className="divide-y divide-border rounded-md border border-border">
           {assets.map((a) => (
             <li key={a.id} className="flex items-center gap-2 px-3 py-2">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm">{a.name}</p>
-                <p className="text-[11px] text-muted">{ASSET_KINDS[a.kind as keyof typeof ASSET_KINDS] ?? a.kind ?? "Activo"} · valor al {formatDay(a.valued_on)}</p>
+                <p className="text-[11px] text-muted">{ASSET_KINDS[a.kind as keyof typeof ASSET_KINDS] ?? a.kind ?? "Asset"} · value as of {formatDay(a.valued_on)}</p>
               </div>
               <span className="shrink-0 text-sm tabular-nums">{formatMoney(a.value)}</span>
-              <Button size="icon" variant="ghost" className="size-7" aria-label={`Editar ${a.name}`} onClick={() => ed.setEditing(a)}><Pencil /></Button>
+              <Button size="icon" variant="ghost" className="size-7" aria-label={`Edit ${a.name}`} onClick={() => ed.setEditing(a)}><Pencil /></Button>
               <ConfirmDialog
-                trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Eliminar ${a.name}`}><Trash2 /></Button>}
-                title={`¿Eliminar “${a.name}”?`} description="Esta acción no se puede deshacer."
+                trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Delete ${a.name}`}><Trash2 /></Button>}
+                title={`Delete “${a.name}”?`} description="This can't be undone."
                 onConfirm={async () => {
                   const r = await deleteAsset(a.id);
                   if (!r.ok) return void toast.error(r.error);
-                  toast.success("Activo eliminado");
+                  toast.success("Asset deleted");
                 }}
               />
             </li>
@@ -116,15 +116,15 @@ export function AssetsList({ assets, today }: { assets: Asset[]; today: string }
       )}
       <EntityDialog<AssetInput>
         open={ed.open} onOpenChange={(o) => !o && ed.close()}
-        title={it ? "Editar activo" : "Nuevo activo"} description="Actualiza el valor cuando cambie; la fecha indica a cuándo corresponde."
+        title={it ? "Edit asset" : "New asset"} description="Update the value when it changes; the date shows when it applies."
         schema={assetSchema}
         defaults={it ? { name: it.name, kind: (it.kind ?? "other") as AssetInput["kind"], value: it.value, valued_on: today, notes: it.notes ?? "" } : { name: "", kind: "cash", value: undefined as unknown as number, valued_on: today, notes: "" }}
         fields={[
-          { name: "name", label: "Nombre", kind: "text", placeholder: "Ej. Cuenta de ahorros" },
-          { name: "kind", label: "Tipo", kind: "select", options: ASSET_KINDS },
-          { name: "value", label: "Valor", kind: "money" },
-          { name: "valued_on", label: "Valor a la fecha", kind: "date" },
-          { name: "notes", label: "Notas (opcional)", kind: "textarea" },
+          { name: "name", label: "Name", kind: "text", placeholder: "E.g. Savings account" },
+          { name: "kind", label: "Type", kind: "select", options: ASSET_KINDS },
+          { name: "value", label: "Value", kind: "money" },
+          { name: "valued_on", label: "Value as of", kind: "date" },
+          { name: "notes", label: "Notes (optional)", kind: "textarea" },
         ]}
         onSave={(v) => saveAsset(v, it?.id)}
       />
@@ -137,9 +137,9 @@ export function LiabilitiesList({ liabilities, today, refs }: { liabilities: Lia
   const it = ed.item;
   return (
     <div className="space-y-3">
-      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> Nueva deuda</Button>
+      <Button size="sm" variant="secondary" onClick={() => ed.setEditing("new")}><Plus /> New debt</Button>
       {!liabilities.length ? (
-        <EmptyState icon={Landmark} title="Sin deudas registradas" description="Préstamos, tarjetas o vivienda. Los pagos se registran como gastos vinculados." className="py-4" />
+        <EmptyState icon={Landmark} title="No debts logged" description="Loans, cards or a mortgage. Payments are logged as linked expenses." className="py-4" />
       ) : (
         <ul className="space-y-3">
           {liabilities.map((l) => {
@@ -151,20 +151,20 @@ export function LiabilitiesList({ liabilities, today, refs }: { liabilities: Lia
                   <div className="min-w-0">
                     <p className="break-words text-sm font-medium">{l.name}</p>
                     <p className="text-[11px] text-muted">
-                      {LIABILITY_KINDS[l.kind as keyof typeof LIABILITY_KINDS] ?? l.kind ?? "Deuda"} · {l.payments} {l.payments === 1 ? "pago" : "pagos"}
-                      {l.lastPayment && ` · último el ${formatDay(l.lastPayment)}`}
+                      {LIABILITY_KINDS[l.kind as keyof typeof LIABILITY_KINDS] ?? l.kind ?? "Debt"} · {l.payments} {l.payments === 1 ? "payment" : "payments"}
+                      {l.lastPayment && ` · last on ${formatDay(l.lastPayment)}`}
                     </p>
                   </div>
                   <div className="flex shrink-0">
-                    <Button size="icon" variant="ghost" className="size-7" aria-label={`Editar ${l.name}`} onClick={() => ed.setEditing(l)}><Pencil /></Button>
+                    <Button size="icon" variant="ghost" className="size-7" aria-label={`Edit ${l.name}`} onClick={() => ed.setEditing(l)}><Pencil /></Button>
                     <ConfirmDialog
-                      trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Eliminar ${l.name}`}><Trash2 /></Button>}
-                      title={`¿Eliminar “${l.name}”?`}
-                      description="Los pagos se conservan como gastos, pero quedan sin deuda vinculada. Esta acción no se puede deshacer."
+                      trigger={<Button size="icon" variant="ghost" className="size-7" aria-label={`Delete ${l.name}`}><Trash2 /></Button>}
+                      title={`Delete “${l.name}”?`}
+                      description="Payments are kept as expenses, but without a linked debt. This can't be undone."
                       onConfirm={async () => {
                         const r = await deleteLiability(l.id);
                         if (!r.ok) return void toast.error(r.error);
-                        toast.success("Deuda eliminada");
+                        toast.success("Debt deleted");
                       }}
                     />
                   </div>
@@ -172,18 +172,18 @@ export function LiabilitiesList({ liabilities, today, refs }: { liabilities: Lia
                 {l.original_amount > 0 ? (
                   <>
                     <p className="mt-2 text-sm tabular-nums">
-                      Saldo {formatMoney(balance)} <span className="text-xs text-muted">· pagado {formatMoney(l.paid)} de {formatMoney(l.original_amount)} ({pct}%)</span>
+                      Balance {formatMoney(balance)} <span className="text-xs text-muted">· paid {formatMoney(l.paid)} of {formatMoney(l.original_amount)} ({pct}%)</span>
                     </p>
-                    <div className="mt-1.5"><ProgressBar value={pct} label={`Pagado de ${l.name}`} /></div>
+                    <div className="mt-1.5"><ProgressBar value={pct} label={`Paid toward ${l.name}`} /></div>
                   </>
                 ) : (
                   <p className="mt-2 text-sm tabular-nums">
-                    Pagado {formatMoney(l.paid)} <span className="text-xs text-muted">· falta indicar el valor total para calcular el saldo</span>
+                    Paid {formatMoney(l.paid)} <span className="text-xs text-muted">· add the total amount to calculate the balance</span>
                   </p>
                 )}
                 <div className="mt-3">
-                  <NewTxButton today={today} refs={refs} size="sm" variant="secondary" label="Registrar pago"
-                    preset={{ type: "expense", liability_id: l.id, description: `Pago ${l.name}`, category_id: refs.categories.find((c) => c.kind === "expense" && c.name === "Vivienda" && l.kind === "vivienda")?.id ?? "" }} />
+                  <NewTxButton today={today} refs={refs} size="sm" variant="secondary" label="Log payment"
+                    preset={{ type: "expense", liability_id: l.id, description: `Payment ${l.name}`, category_id: refs.categories.find((c) => c.kind === "expense" && (c.name === "Vivienda" || c.name === "Housing") && l.kind === "vivienda")?.id ?? "" }} />
                 </div>
               </li>
             );
@@ -192,15 +192,15 @@ export function LiabilitiesList({ liabilities, today, refs }: { liabilities: Lia
       )}
       <EntityDialog<LiabilityInput>
         open={ed.open} onOpenChange={(o) => !o && ed.close()}
-        title={it ? "Editar deuda" : "Nueva deuda"} description="El saldo es el valor total menos los pagos registrados."
+        title={it ? "Edit debt" : "New debt"} description="The balance is the total amount minus logged payments."
         schema={liabilitySchema}
         defaults={it ? { name: it.name, kind: it.kind ?? "other", original_amount: it.original_amount, start_date: it.start_date ?? "", notes: it.notes ?? "" } : { name: "", kind: "loan", original_amount: undefined as unknown as number, start_date: "", notes: "" }}
         fields={[
-          { name: "name", label: "Nombre", kind: "text", placeholder: "Ej. Crédito del carro" },
-          { name: "kind", label: "Tipo", kind: "select", options: LIABILITY_KINDS },
-          { name: "original_amount", label: "Valor total", kind: "money" },
-          { name: "start_date", label: "Inicio (opcional)", kind: "date" },
-          { name: "notes", label: "Notas (opcional)", kind: "textarea" },
+          { name: "name", label: "Name", kind: "text", placeholder: "E.g. Car loan" },
+          { name: "kind", label: "Type", kind: "select", options: LIABILITY_KINDS },
+          { name: "original_amount", label: "Total amount", kind: "money" },
+          { name: "start_date", label: "Start (optional)", kind: "date" },
+          { name: "notes", label: "Notes (optional)", kind: "textarea" },
         ]}
         onSave={(v) => saveLiability(v, it?.id)}
       />

@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { formatDay, formatMoney } from "@/lib/format";
 import { tooltipStyle } from "@/components/mental/charts";
 
-const compact = new Intl.NumberFormat("es-CO", { notation: "compact", maximumFractionDigits: 1 });
+const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
 
 /** Gastos por categoría como lista de barras: nombre, valor y porcentaje siempre visibles. */
 export function CategoryBars({ rows }: { rows: { name: string; amount: number; n: number }[] }) {
   const total = rows.reduce((a, r) => a + r.amount, 0);
   const max = Math.max(...rows.map((r) => r.amount), 1);
-  if (!rows.length) return <p className="py-4 text-sm text-muted">Sin gastos registrados este mes.</p>;
+  if (!rows.length) return <p className="py-4 text-sm text-muted">No expenses logged this month.</p>;
   return (
     <ul className="space-y-2.5">
       {rows.map((r) => (
@@ -21,7 +21,7 @@ export function CategoryBars({ rows }: { rows: { name: string; amount: number; n
           <div className="flex items-baseline justify-between gap-2 text-sm">
             <span className="min-w-0 truncate">{r.name}</span>
             <span className="shrink-0 tabular-nums">
-              {formatMoney(r.amount)} <span className="text-xs text-muted">· {Math.round((r.amount / total) * 100)}% · {r.n} mov.</span>
+              {formatMoney(r.amount)} <span className="text-xs text-muted">· {Math.round((r.amount / total) * 100)}% · {r.n} {r.n === 1 ? "transaction" : "transactions"}</span>
             </span>
           </div>
           <div className="mt-1 h-2 rounded-full bg-surface" aria-hidden>
@@ -41,7 +41,7 @@ export function MonthlyTrend({ data }: { data: { month: string; income: number; 
     <div className="space-y-2">
       <div className="flex justify-end">
         <Button size="sm" variant="ghost" onClick={() => setTable(!table)} aria-pressed={table}>
-          {table ? <><ChartIcon /> Ver gráfico</> : <><Table2 /> Ver tabla</>}
+          {table ? <><ChartIcon /> View chart</> : <><Table2 /> View table</>}
         </Button>
       </div>
       {table ? (
@@ -49,10 +49,10 @@ export function MonthlyTrend({ data }: { data: { month: string; income: number; 
           <table className="w-full text-xs">
             <thead className="bg-surface text-muted">
               <tr>
-                <th scope="col" className="px-3 py-2 text-left font-medium">Mes</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">Ingresos</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">Gastos</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">Movimientos</th>
+                <th scope="col" className="px-3 py-2 text-left font-medium">Month</th>
+                <th scope="col" className="px-3 py-2 text-right font-medium">Income</th>
+                <th scope="col" className="px-3 py-2 text-right font-medium">Expenses</th>
+                <th scope="col" className="px-3 py-2 text-right font-medium">Transactions</th>
               </tr>
             </thead>
             <tbody className="tabular-nums">
@@ -68,7 +68,7 @@ export function MonthlyTrend({ data }: { data: { month: string; income: number; 
           </table>
         </div>
       ) : (
-        <div className="h-60 w-full" role="img" aria-label="Ingresos y gastos por mes, últimos 6 meses">
+        <div className="h-60 w-full" role="img" aria-label="Income and expenses per month, last 6 months">
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }} barGap={2}>
               <CartesianGrid stroke="var(--grid)" vertical={false} />
@@ -76,13 +76,13 @@ export function MonthlyTrend({ data }: { data: { month: string; income: number; 
               <YAxis tickFormatter={(v: number) => compact.format(v)} tick={{ fill: "var(--muted)", fontSize: 11 }} tickLine={false} axisLine={false} width={48} />
               <Tooltip {...tooltipStyle} cursor={{ fill: "var(--accent-soft)" }} formatter={(v: number) => formatMoney(v)} />
               <Legend wrapperStyle={{ fontSize: 12, color: "var(--muted)" }} iconType="circle" iconSize={8} />
-              <Bar dataKey="income" name="Ingresos" fill="var(--series-1)" radius={[4, 4, 0, 0]} maxBarSize={22} isAnimationActive={false} />
-              <Bar dataKey="expense" name="Gastos" fill="var(--series-2)" radius={[4, 4, 0, 0]} maxBarSize={22} isAnimationActive={false} />
+              <Bar dataKey="income" name="Income" fill="var(--series-1)" radius={[4, 4, 0, 0]} maxBarSize={22} isAnimationActive={false} />
+              <Bar dataKey="expense" name="Expenses" fill="var(--series-2)" radius={[4, 4, 0, 0]} maxBarSize={22} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       )}
-      <p className="text-[11px] text-muted">Los aportes a ahorro no cuentan como gasto. Los meses sin movimientos aparecen en 0.</p>
+      <p className="text-[11px] text-muted">Savings contributions don't count as expenses. Months without transactions show as 0.</p>
     </div>
   );
 }

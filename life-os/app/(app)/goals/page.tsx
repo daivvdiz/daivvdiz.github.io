@@ -16,15 +16,15 @@ import { targetText } from "@/lib/goals/format";
 import { todayISO } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Metas y hábitos" };
+export const metadata: Metadata = { title: "Goals & habits" };
 export const dynamic = "force-dynamic";
 
 const FILTERS = [
-  { key: "open", label: "En curso", statuses: ["not_started", "active"] },
-  { key: "paused", label: "En pausa", statuses: ["paused"] },
-  { key: "completed", label: "Completadas", statuses: ["completed"] },
-  { key: "abandoned", label: "Soltadas", statuses: ["abandoned"] },
-  { key: "all", label: "Todas", statuses: Object.keys(GOAL_STATUS) },
+  { key: "open", label: "In progress", statuses: ["not_started", "active"] },
+  { key: "paused", label: "Paused", statuses: ["paused"] },
+  { key: "completed", label: "Completed", statuses: ["completed"] },
+  { key: "abandoned", label: "Let go", statuses: ["abandoned"] },
+  { key: "all", label: "All", statuses: Object.keys(GOAL_STATUS) },
 ] as const;
 
 type SP = Promise<{ status?: string; cat?: string }>;
@@ -59,8 +59,8 @@ export default async function GoalsPage({ searchParams }: { searchParams: SP }) 
   return (
     <>
       <PageHeader
-        title="Metas y hábitos"
-        description="Lo que quieres lograr y lo que haces para acercarte. Sin rachas ni puntajes."
+        title="Goals & habits"
+        description="What you want to achieve and what you do to get closer. No streaks or scores."
         actions={
           <>
             <NewHabitButton goals={goalOptions} today={today} />
@@ -71,24 +71,24 @@ export default async function GoalsPage({ searchParams }: { searchParams: SP }) 
 
       {data.error && (
         <Card className="mb-5 flex items-center gap-2 border-danger/40 px-4 py-3 text-sm">
-          <AlertTriangle className="size-4 text-danger" aria-hidden /> No se pudieron cargar tus datos. Intenta recargar la página.
+          <AlertTriangle className="size-4 text-danger" aria-hidden /> Couldn't load your data. Try reloading the page.
         </Card>
       )}
 
       <Card className="mb-5">
         <CardHeader>
           <div>
-            <CardTitle>Hábitos de esta semana</CardTitle>
-            <CardDescription>Últimos 7 días. Toca una casilla para registrar o quitar.</CardDescription>
+            <CardTitle>This week's habits</CardTitle>
+            <CardDescription>Last 7 days. Tap a box to log or remove.</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
-          <HabitTracker habits={active} logs={data.logs} today={today} goals={goalOptions} weekStartsOn={prefs.weekStartsOn} statsFrom={statsFrom} statsLabel="30 días" />
+          <HabitTracker habits={active} logs={data.logs} today={today} goals={goalOptions} weekStartsOn={prefs.weekStartsOn} statsFrom={statsFrom} statsLabel="30 days" />
           {paused.length > 0 && (
             <details className="mt-4 rounded-md border border-border p-3">
-              <summary className="cursor-pointer text-sm text-muted">Hábitos pausados ({paused.length})</summary>
+              <summary className="cursor-pointer text-sm text-muted">Paused habits ({paused.length})</summary>
               <div className="mt-3">
-                <HabitTracker habits={paused} logs={data.logs} today={today} goals={goalOptions} weekStartsOn={prefs.weekStartsOn} statsFrom={statsFrom} statsLabel="30 días" />
+                <HabitTracker habits={paused} logs={data.logs} today={today} goals={goalOptions} weekStartsOn={prefs.weekStartsOn} statsFrom={statsFrom} statsLabel="30 days" />
               </div>
             </details>
           )}
@@ -96,7 +96,7 @@ export default async function GoalsPage({ searchParams }: { searchParams: SP }) 
       </Card>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <nav aria-label="Estado de las metas" className="flex flex-wrap gap-1.5">
+        <nav aria-label="Goal status" className="flex flex-wrap gap-1.5">
           {FILTERS.map((f) => (
             <Link key={f.key} href={href({ status: f.key })} aria-current={filter.key === f.key ? "page" : undefined}
               className={cn("rounded-md border px-3 py-1.5 text-xs transition-colors",
@@ -105,8 +105,8 @@ export default async function GoalsPage({ searchParams }: { searchParams: SP }) 
             </Link>
           ))}
         </nav>
-        <nav aria-label="Área" className="flex flex-wrap gap-1.5">
-          <Link href={href({ cat: "" })} className={cn("rounded-full px-2.5 py-1 text-xs", !cat ? "bg-surface text-foreground" : "text-muted hover:text-foreground")}>Todas las áreas</Link>
+        <nav aria-label="Area" className="flex flex-wrap gap-1.5">
+          <Link href={href({ cat: "" })} className={cn("rounded-full px-2.5 py-1 text-xs", !cat ? "bg-surface text-foreground" : "text-muted hover:text-foreground")}>All areas</Link>
           {Object.entries(GOAL_CATEGORIES).map(([k, l]) => (
             <Link key={k} href={href({ cat: k })} aria-current={cat === k ? "true" : undefined}
               className={cn("rounded-full px-2.5 py-1 text-xs", cat === k ? "bg-surface text-foreground" : "text-muted hover:text-foreground")}>{l}</Link>
@@ -119,9 +119,9 @@ export default async function GoalsPage({ searchParams }: { searchParams: SP }) 
           <EmptyState
             icon={Target}
             className="py-12"
-            title={data.goals.length ? "No hay metas con estos filtros" : "Aún no tienes metas"}
-            description={data.goals.length ? "Prueba con otro estado o área." : "Crea una meta y, si quieres, divídela en hitos y conéctala con hábitos."}
-            action={data.goals.length ? undefined : <GoalButton habits={habitOptions} today={today} label="Crear la primera" size="sm" />}
+            title={data.goals.length ? "No goals match these filters" : "No goals yet"}
+            description={data.goals.length ? "Try another status or area." : "Create a goal and, if you like, break it into milestones and connect it to habits."}
+            action={data.goals.length ? undefined : <GoalButton habits={habitOptions} today={today} label="Create the first one" size="sm" />}
           />
         </Card>
       ) : (
@@ -137,21 +137,21 @@ export default async function GoalsPage({ searchParams }: { searchParams: SP }) 
                     <div className="min-w-0">
                       <p className="break-words font-medium">{g.title}</p>
                       <p className="mt-0.5 text-xs text-muted">
-                        {GOAL_CATEGORIES[g.category]} · {GOAL_STATUS[g.status]} · Prioridad {PRIORITIES[g.priority].toLowerCase()}
+                        {GOAL_CATEGORIES[g.category]} · {GOAL_STATUS[g.status]} · {PRIORITIES[g.priority]} priority
                       </p>
                     </div>
                     <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted group-hover:text-foreground" aria-hidden />
                   </div>
                   <div className="mt-3 space-y-1.5">
                     <div className="flex justify-between text-xs">
-                      <span className="text-muted">Avance</span>
+                      <span className="text-muted">Progress</span>
                       <span className="tabular-nums">{g.progress}%</span>
                     </div>
-                    <ProgressBar value={g.progress} label={`Avance de ${g.title}`} />
+                    <ProgressBar value={g.progress} label={`Progress of ${g.title}`} />
                   </div>
                   <p className="mt-2 text-[11px] text-muted">
-                    {[ms ? `${msDone} de ${ms} hitos` : null, g.habit_ids.length ? `${g.habit_ids.length} ${g.habit_ids.length === 1 ? "hábito" : "hábitos"}` : null, tt]
-                      .filter(Boolean).join(" · ") || "Sin hitos ni fecha objetivo"}
+                    {[ms ? `${msDone} of ${ms} milestones` : null, g.habit_ids.length ? `${g.habit_ids.length} ${g.habit_ids.length === 1 ? "habit" : "habits"}` : null, tt]
+                      .filter(Boolean).join(" · ") || "No milestones or target date"}
                   </p>
                 </Link>
               </li>

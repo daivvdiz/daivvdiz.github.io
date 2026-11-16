@@ -12,7 +12,7 @@ interface Props {
 }
 
 /** Confirmación para acciones destructivas. */
-export function ConfirmDialog({ trigger, title, description, confirmLabel = "Eliminar", onConfirm }: Props) {
+export function ConfirmDialog({ trigger, title, description, confirmLabel = "Delete", onConfirm }: Props) {
   const [pending, setPending] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   return (
@@ -25,7 +25,7 @@ export function ConfirmDialog({ trigger, title, description, confirmLabel = "Eli
           <AlertDialog.Description className="mt-2 text-sm text-muted">{description}</AlertDialog.Description>
           <div className="mt-6 flex justify-end gap-2">
             <AlertDialog.Cancel asChild>
-              <Button variant="secondary">Cancelar</Button>
+              <Button variant="secondary">Cancel</Button>
             </AlertDialog.Cancel>
             <Button
               variant="destructive"

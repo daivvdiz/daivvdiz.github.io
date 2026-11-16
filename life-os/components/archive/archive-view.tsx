@@ -31,10 +31,10 @@ function MemoryCard({ m, onOpen }: { m: Memory; onOpen: (m: Memory) => void }) {
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3">
           <p className="break-words text-sm font-medium">{m.title}</p>
-          <p className="shrink-0 text-xs text-muted">{formatDay(m.occurred_on, "d MMM yyyy")}</p>
+          <p className="shrink-0 text-xs text-muted">{formatDay(m.occurred_on, "MMM d, yyyy")}</p>
         </div>
         <p className="text-[11px] text-muted">
-          {[MEMORY_CATEGORIES[m.category], m.chapter && `Capítulo: ${m.chapter}`, m.importance && `Importancia ${m.importance}/5`, others > 0 && `${others} ${others === 1 ? "archivo" : "archivos"}`]
+          {[MEMORY_CATEGORIES[m.category], m.chapter && `Chapter: ${m.chapter}`, m.importance && `Importance ${m.importance}/5`, others > 0 && `${others} ${others === 1 ? "file" : "files"}`]
             .filter(Boolean).join(" · ")}
         </p>
         {m.description && <p className="mt-1 line-clamp-2 whitespace-pre-line break-words text-xs">{m.description}</p>}
@@ -59,8 +59,8 @@ function DailyCard({ d }: { d: DailyMemory }) {
   return (
     <div className="rounded-md border border-dashed border-border p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-        <p className="inline-flex items-center gap-1 text-[11px] text-muted"><BookOpen className="size-3" aria-hidden /> Del diario · aún no está en el Archivo</p>
-        <p className="text-xs text-muted">{formatDay(d.date, "d MMM yyyy")}</p>
+        <p className="inline-flex items-center gap-1 text-[11px] text-muted"><BookOpen className="size-3" aria-hidden /> From the journal · not in the Archive yet</p>
+        <p className="text-xs text-muted">{formatDay(d.date, "MMM d, yyyy")}</p>
       </div>
       <p className="mt-1 line-clamp-3 whitespace-pre-line break-words text-sm">{d.text}</p>
       <div className="mt-2 flex flex-wrap gap-1">
@@ -69,9 +69,9 @@ function DailyCard({ d }: { d: DailyMemory }) {
           const r = await archiveDailyMemory(d.entryId);
           setBusy(false);
           if (!r.ok) return void toast.error(r.error);
-          toast.success("Guardado en el Archivo");
-        }}>Guardar en el Archivo</Button>
-        <Button asChild size="sm" variant="ghost"><Link href={`/calendar?view=day&date=${d.date}`}>Ver el día</Link></Button>
+          toast.success("Saved to the Archive");
+        }}>Save to the Archive</Button>
+        <Button asChild size="sm" variant="ghost"><Link href={`/calendar?view=day&date=${d.date}`}>View the day</Link></Button>
       </div>
     </div>
   );
@@ -145,7 +145,7 @@ export function ArchiveView({ tab, memories, dailyMemories, options, today, user
     ...dailyShown.map((d) => ({ kind: "daily" as const, date: d.date, d })),
   ].sort((a, b) => b.date.localeCompare(a.date));
 
-  const newButton = <Button size="sm" onClick={() => setEditing({ isNew: true })}><Plus /> Nuevo recuerdo</Button>;
+  const newButton = <Button size="sm" onClick={() => setEditing({ isNew: true })}><Plus /> New memory</Button>;
   const hasAny = memories.length > 0 || dailyMemories.length > 0;
 
   return (
@@ -155,39 +155,39 @@ export function ArchiveView({ tab, memories, dailyMemories, options, today, user
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative min-w-0 flex-1 basis-56">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
-              <Input aria-label="Buscar recuerdos" placeholder="Buscar por título, lugar, persona, etiqueta…" className="pl-8" value={q} onChange={(e) => setQ(e.target.value)} />
+              <Input aria-label="Search memories" placeholder="Search by title, place, person, tag…" className="pl-8" value={q} onChange={(e) => setQ(e.target.value)} />
             </div>
-            <Select aria-label="Categoría" className="w-auto" value={cat} onChange={(e) => setCat(e.target.value)}>
-              <option value="">Todas las categorías</option>
+            <Select aria-label="Category" className="w-auto" value={cat} onChange={(e) => setCat(e.target.value)}>
+              <option value="">All categories</option>
               {Object.entries(MEMORY_CATEGORIES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
             </Select>
             {allTags.length > 0 && (
-              <Select aria-label="Etiqueta" className="w-auto" value={tag} onChange={(e) => setTag(e.target.value)}>
-                <option value="">Todas las etiquetas</option>
+              <Select aria-label="Tag" className="w-auto" value={tag} onChange={(e) => setTag(e.target.value)}>
+                <option value="">All tags</option>
                 {allTags.map((t) => <option key={t} value={t}>{t}</option>)}
               </Select>
             )}
             {allPeople.length > 0 && (
-              <Select aria-label="Persona" className="w-auto" value={person} onChange={(e) => setPerson(e.target.value)}>
-                <option value="">Todas las personas</option>
+              <Select aria-label="Person" className="w-auto" value={person} onChange={(e) => setPerson(e.target.value)}>
+                <option value="">All people</option>
                 {allPeople.map((t) => <option key={t} value={t}>{t}</option>)}
               </Select>
             )}
             {newButton}
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
-            <span>{filtered.length} de {memories.length} {memories.length === 1 ? "recuerdo" : "recuerdos"}{dailyShown.length > 0 && ` · ${dailyShown.length} del diario`}</span>
+            <span>{filtered.length} of {memories.length} {memories.length === 1 ? "memory" : "memories"}{dailyShown.length > 0 && ` · ${dailyShown.length} from the journal`}</span>
             {dailyMemories.length > 0 && (
               <label className="inline-flex items-center gap-1.5">
                 <input type="checkbox" className="size-3.5 accent-[var(--accent)]" checked={withDaily} onChange={(e) => setWithDaily(e.target.checked)} />
-                Mostrar recuerdos del diario que no están en el Archivo ({dailyMemories.length})
+                Show journal memories that aren't in the Archive ({dailyMemories.length})
               </label>
             )}
           </div>
           {!hasAny ? (
-            <EmptyState icon={Archive} title="Tu archivo está vacío" description="Guarda momentos, logros, viajes y personas. También llegan aquí los recuerdos que marques en tu diario." action={newButton} />
+            <EmptyState icon={Archive} title="Your archive is empty" description="Save moments, achievements, trips and people. Memories you mark in your journal also show up here." action={newButton} />
           ) : !timelineItems.length ? (
-            <p className="py-6 text-center text-sm text-muted">Ningún recuerdo coincide con la búsqueda.</p>
+            <p className="py-6 text-center text-sm text-muted">No memories match the search.</p>
           ) : (
             <Grouped items={timelineItems} onOpen={open} />
           )}
@@ -207,7 +207,7 @@ export function ArchiveView({ tab, memories, dailyMemories, options, today, user
                     <p className="text-sm font-medium">{MEMORY_CATEGORIES[k]}</p>
                     <span className="text-xs tabular-nums text-muted">{list.length}</span>
                   </div>
-                  <p className="mt-0.5 truncate text-[11px] text-muted">{list[0] ? `Último: ${list[0].title} · ${formatDay(list[0].occurred_on, "MMM yyyy")}` : "Sin recuerdos"}</p>
+                  <p className="mt-0.5 truncate text-[11px] text-muted">{list[0] ? `Latest: ${list[0].title} · ${formatDay(list[0].occurred_on, "MMM yyyy")}` : "No memories"}</p>
                 </Link>
               </li>
             );
@@ -233,12 +233,12 @@ function Gallery({ memories, onOpen, action }: { memories: Memory[]; onOpen: (m:
   const images = memories.flatMap((m) => m.files.filter((f) => isImage(f.mime) && f.url).map((f) => ({ f, m })));
   const docs = memories.reduce((a, m) => a + m.files.filter((f) => !isImage(f.mime)).length, 0);
   if (!images.length)
-    return <EmptyState icon={ImageIcon} title="Sin fotos todavía" description="Abre un recuerdo y agrégale fotos; aparecerán aquí." action={action} />;
+    return <EmptyState icon={ImageIcon} title="No photos yet" description="Open a memory and add photos to it; they'll show up here." action={action} />;
   return (
     <div className="space-y-2">
       <p className="text-xs text-muted">
-        {images.length} {images.length === 1 ? "foto" : "fotos"} en {new Set(images.map((i) => i.m.id)).size} recuerdos
-        {docs > 0 && <> · <FileText className="inline size-3" aria-hidden /> {docs} {docs === 1 ? "documento" : "documentos"} más en la línea de tiempo</>}
+        {images.length} {images.length === 1 ? "photo" : "photos"} in {new Set(images.map((i) => i.m.id)).size} {new Set(images.map((i) => i.m.id)).size === 1 ? "memory" : "memories"}
+        {docs > 0 && <> · <FileText className="inline size-3" aria-hidden /> {docs} {docs === 1 ? "more document" : "more documents"} in the timeline</>}
       </p>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
         {images.map(({ f, m }) => (
@@ -261,7 +261,7 @@ function Compact({ list, onOpen }: { list: Memory[]; onOpen: (m: Memory) => void
       {list.map((m) => (
         <li key={m.id}>
           <button type="button" onClick={() => onOpen(m)} className="flex w-full min-w-0 gap-2 rounded px-1 py-0.5 text-left text-sm hover:bg-surface/60">
-            <span className="w-20 shrink-0 text-xs tabular-nums text-muted">{formatDay(m.occurred_on, "d MMM yy")}</span>
+            <span className="w-20 shrink-0 text-xs tabular-nums text-muted">{formatDay(m.occurred_on, "MMM d, yy")}</span>
             <span className="min-w-0 truncate">{m.title}</span>
           </button>
         </li>
@@ -280,28 +280,28 @@ function Chapters({ memories, onOpen }: { memories: Memory[]; onOpen: (m: Memory
   const years = new Map<string, Memory[]>();
   for (const m of memories) years.set(m.occurred_on.slice(0, 4), [...(years.get(m.occurred_on.slice(0, 4)) ?? []), m]);
 
-  if (!memories.length) return <EmptyState icon={BookOpen} title="Sin capítulos" description="Asigna un capítulo a tus recuerdos (ej. Universidad, Vida en Bogotá) para agruparlos." />;
+  if (!memories.length) return <EmptyState icon={BookOpen} title="No chapters" description="Give your memories a chapter (e.g. University, Life in Bogotá) to group them." />;
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold">Tus capítulos</h2>
+        <h2 className="text-sm font-semibold">Your chapters</h2>
         {!chapters.length ? (
-          <p className="text-sm text-muted">Aún no has asignado capítulos. Edita un recuerdo y escribe el capítulo al que pertenece.</p>
+          <p className="text-sm text-muted">You haven't assigned any chapters yet. Edit a memory and type the chapter it belongs to.</p>
         ) : chapters.map((c) => (
           <div key={c.name} className="rounded-md border border-border p-3">
             <div className="flex flex-wrap items-baseline justify-between gap-x-3">
               <p className="text-sm font-medium">{c.name}</p>
-              <p className="text-[11px] text-muted">{formatDay(c.from, "MMM yyyy")}{c.to.slice(0, 7) !== c.from.slice(0, 7) && ` – ${formatDay(c.to, "MMM yyyy")}`} · {c.list.length} {c.list.length === 1 ? "recuerdo" : "recuerdos"}</p>
+              <p className="text-[11px] text-muted">{formatDay(c.from, "MMM yyyy")}{c.to.slice(0, 7) !== c.from.slice(0, 7) && ` – ${formatDay(c.to, "MMM yyyy")}`} · {c.list.length} {c.list.length === 1 ? "memory" : "memories"}</p>
             </div>
             <div className="mt-1.5"><Compact list={[...c.list].reverse()} onOpen={onOpen} /></div>
           </div>
         ))}
       </section>
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold">Por año</h2>
+        <h2 className="text-sm font-semibold">By year</h2>
         {[...years.entries()].map(([y, list]) => (
           <details key={y} className="rounded-md border border-border p-3" open={y === [...years.keys()][0]}>
-            <summary className="cursor-pointer text-sm font-medium">{y} <span className="text-xs font-normal text-muted">· {list.length} {list.length === 1 ? "recuerdo" : "recuerdos"}</span></summary>
+            <summary className="cursor-pointer text-sm font-medium">{y} <span className="text-xs font-normal text-muted">· {list.length} {list.length === 1 ? "memory" : "memories"}</span></summary>
             <div className="mt-1.5"><Compact list={list} onOpen={onOpen} /></div>
           </details>
         ))}
@@ -322,12 +322,12 @@ function OnThisDay({ memories, daily, today, onOpen }: { memories: Memory[]; dai
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted">Recuerdos de un {formatDay(today, "d 'de' MMMM")} en años anteriores.</p>
+      <p className="text-sm text-muted">Memories from {formatDay(today, "MMMM d")} in past years.</p>
       {!years.length ? (
-        <EmptyState icon={CalendarHeart} title="Nada en esta fecha todavía" description="Cuando tengas recuerdos de otros años en este mismo día, aparecerán aquí." />
+        <EmptyState icon={CalendarHeart} title="Nothing on this date yet" description="When you have memories from other years on this same day, they'll show up here." />
       ) : years.map((y) => (
         <section key={y}>
-          <h2 className="mb-1.5 text-sm font-semibold">{y} <span className="text-xs font-normal text-muted">· hace {year - y} {year - y === 1 ? "año" : "años"}</span></h2>
+          <h2 className="mb-1.5 text-sm font-semibold">{y} <span className="text-xs font-normal text-muted">· {year - y} {year - y === 1 ? "year" : "years"} ago</span></h2>
           <ul className="space-y-2">
             {byYear.get(y)!.map((it) => (
               <li key={it.kind === "memory" ? it.m.id : `d-${it.d.entryId}`}>{it.kind === "memory" ? <MemoryCard m={it.m} onOpen={onOpen} /> : <DailyCard d={it.d} />}</li>

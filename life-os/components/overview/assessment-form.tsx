@@ -31,14 +31,14 @@ export function AssessmentForm({
   const onSubmit = handleSubmit(async (values) => {
     const res = await saveAssessment(values, initial?.id);
     if (!res.ok) return toast.error(res.error);
-    toast.success(initial ? "Autoevaluación actualizada" : "Autoevaluación guardada");
+    toast.success(initial ? "Self-assessment updated" : "Self-assessment saved");
     onDone();
   });
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <div className="space-y-1.5">
-        <Label htmlFor="assessed_on">Fecha</Label>
+        <Label htmlFor="assessed_on">Date</Label>
         <Input id="assessed_on" type="date" {...register("assessed_on")} aria-invalid={!!formState.errors.assessed_on} />
         <FieldError message={formState.errors.assessed_on?.message} />
       </div>
@@ -63,13 +63,13 @@ export function AssessmentForm({
         ))}
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="notes">Notas (opcional)</Label>
-        <Textarea id="notes" placeholder="¿Qué hay detrás de estos valores hoy?" {...register("notes")} />
+        <Label htmlFor="notes">Notes (optional)</Label>
+        <Textarea id="notes" placeholder="What's behind these values today?" {...register("notes")} />
         <FieldError message={formState.errors.notes?.message} />
       </div>
       <DialogFooter>
         <Button type="submit" disabled={formState.isSubmitting}>
-          {formState.isSubmitting ? "Guardando…" : "Guardar"}
+          {formState.isSubmitting ? "Saving…" : "Save"}
         </Button>
       </DialogFooter>
     </form>
