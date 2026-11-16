@@ -13,7 +13,7 @@ const inRange = (d: string, from: string, to: string) => d >= from && d <= to;
 export async function getRaw(supabase: SupabaseClient, from: string, to: string, timeZone: string) {
   // Margen de un día en las fechas con hora, para convertirlas luego a tu zona horaria.
   const fromTs = `${from}T00:00:00-14:00`, toTs = `${to}T23:59:59+14:00`;
-  const [days, workouts, habits, logs, txs, apps, interviews, levels, projects, memories, journal, accs, events, milestones] = await Promise.all([
+  const [days, workouts, habits, logs, txs, apps, interviews, levels, projects, memories, journal, accs, events, milestones, exams] = await Promise.all([
     supabase.from("daily_entries").select("entry_date, mood, energy, stress, sleep_hours, sleep_quality, journal").gte("entry_date", from).lte("entry_date", to),
     supabase.from("workouts").select("performed_on, duration_seconds, activity_type").gte("performed_on", from).lte("performed_on", to),
     supabase.from("habits").select("id, name, description, category, frequency, times_per_period, weekdays, tracking_method, start_date, is_active"),
@@ -28,6 +28,8 @@ export async function getRaw(supabase: SupabaseClient, from: string, to: string,
     supabase.from("daily_accomplishments").select("id, daily_entries!inner(entry_date)").gte("daily_entries.entry_date", from).lte("daily_entries.entry_date", to),
     supabase.from("calendar_events").select("starts_at, category").gte("starts_at", fromTs).lte("starts_at", toTs),
     supabase.from("milestones").select("completed_at").gte("completed_at", fromTs).lte("completed_at", toTs),
+    // Si aún no existe la tabla de simulacros, simplemente no hay datos de estudio.
+    supabase.from("study_exams").select("taken_on, total_questions, correct").gte("taken_on", from).lte("taken_on", to),
   ]);
   const error = days.error || workouts.error || txs.error;
   const zoned = (iso: string) => utcToZoned(iso, timeZone).date;
@@ -50,6 +52,7 @@ export async function getRaw(supabase: SupabaseClient, from: string, to: string,
     journal: (journal.data ?? []).map((j) => ({ date: j.entry_date as string })),
     accomplishments: ((accs.data ?? []) as unknown as { daily_entries: { entry_date: string } | null }[]).map((a) => ({ date: a.daily_entries?.entry_date ?? "" })).filter((a) => a.date),
     events: (events.data ?? []).map((e) => ({ date: zoned(e.starts_at as string), category: e.category as string })).filter((e) => inRange(e.date, from, to)),
+    exams: (exams.data ?? []).map((e) => ({ date: e.taken_on as string, total: num(e.total_questions), correct: num(e.correct) })),
     milestones: (milestones.data ?? []).map((m) => ({ date: zoned(m.completed_at as string) })).filter((m) => inRange(m.date, from, to)),
   };
 }
@@ -78,6 +81,8 @@ export function summarize(raw: Raw, from: string, to: string, weekStartsOn: numb
     expected += s.expected;
   }
   const memories = f(raw.memories);
+  const exams = f(raw.exams);
+  const scored = exams.filter((e) => e.total && e.correct != null).map((e) => (e.correct! / e.total!) * 100);
   const income = sum("income"), expense = sum("expense");
   return {
     daysRecorded: days.length,
@@ -88,6 +93,8 @@ export function summarize(raw: Raw, from: string, to: string, weekStartsOn: numb
     sleepQuality: avg(days.map((d) => d.sleep_quality)),
     workouts: workouts.length,
     workoutDays: new Set(workouts.map((w) => w.date)).size,
+    exams: exams.length,
+    examAccuracy: { value: mean(scored), n: scored.length },
     workoutMinutes: { value: timed.length ? timed.reduce((a, w) => a + w.seconds!, 0) / 60 : null, n: timed.length },
     habits: { value: expected ? (done / expected) * 100 : null, done, expected },
     income, expense,

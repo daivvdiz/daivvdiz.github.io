@@ -266,6 +266,11 @@ function Personal({ raw, all, rows, unit, goals }: {
             rows={rows((s) => ({ values: { w: s.workouts } }))}
             note={types.length ? types.map(([t, n]) => `${WORKOUT_TYPES[t] ?? t}: ${n}`).join(" · ") : undefined} />
         </ChartCard>
+        <ChartCard title="Estudio" description={`Aciertos promedio en simulacros ${unit}.`}>
+          <SeriesChart kind="line" format="pct" domain={[0, 100]} ariaLabel={`Porcentaje de aciertos promedio en simulacros ${unit}`} series={[{ key: "a", label: "Aciertos" }]}
+            rows={rows((s) => ({ values: { a: s.examAccuracy.value }, n: { a: s.examAccuracy.n } }))}
+            note={`${plural(all.exams, "simulacro", "simulacros")} en el periodo. Mezcla todos tus simulacros; el detalle por simulacro está en Entrenamiento → Estudio.`} />
+        </ChartCard>
         <ChartCard title="Constancia en hábitos" description={`Veces cumplidas frente a planeadas, ${unit}.`}>
           <SeriesChart format="pct" domain={[0, 100]} ariaLabel={`Porcentaje de hábitos cumplidos ${unit}`} series={[{ key: "h", label: "Cumplidos" }]}
             rows={rows((s) => ({ values: { h: s.habits.value }, n: { h: s.habits.expected } }))}
@@ -355,10 +360,12 @@ async function Compare({ sp, today, timeZone, weekStartsOn }: { sp: SP; today: s
       { label: "Horas de sueño promedio", a: a.sleep.value, b: b.sleep.value, fmt: one, na: a.sleep.n, nb: b.sleep.n },
       { label: "Hábitos cumplidos (%)", a: a.habits.value, b: b.habits.value, fmt: int, na: a.habits.expected, nb: b.habits.expected },
     ] },
-    { title: "Físico", lines: [
+    { title: "Entrenamiento", lines: [
       { label: "Entrenamientos", a: a.workouts, b: b.workouts, fmt: int },
       { label: "Días con actividad", a: a.workoutDays, b: b.workoutDays, fmt: int },
       { label: "Minutos registrados", a: a.workoutMinutes.value, b: b.workoutMinutes.value, fmt: int, na: a.workoutMinutes.n, nb: b.workoutMinutes.n },
+      { label: "Simulacros", a: a.exams, b: b.exams, fmt: int },
+      { label: "Aciertos en simulacros (%)", a: a.examAccuracy.value, b: b.examAccuracy.value, fmt: int, na: a.examAccuracy.n, nb: b.examAccuracy.n },
     ] },
     { title: "Finanzas", lines: [
       { label: "Ingresos", a: a.income.n ? a.income.value : null, b: b.income.n ? b.income.value : null, fmt: money, na: a.income.n, nb: b.income.n },

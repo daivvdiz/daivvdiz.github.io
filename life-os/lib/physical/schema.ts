@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { WORKOUT_TYPES } from "@/lib/types";
 
-const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha no válida");
-const text = (max: number) => z.string().trim().max(max, `Máximo ${max} caracteres`).optional().or(z.literal(""));
+export const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha no válida");
+export const text = (max: number) => z.string().trim().max(max, `Máximo ${max} caracteres`).optional().or(z.literal(""));
 const enumOf = <T extends Record<string, string>>(o: T) => z.enum(Object.keys(o) as [keyof T & string, ...(keyof T & string)[]]);
 
 /** Número opcional: vacío o NaN es null; nunca se rellena con un valor inventado. */
-const optNum = (min: number, max: number, opts: { int?: boolean; label?: string } = {}) =>
+export const optNum = (min: number, max: number, opts: { int?: boolean; label?: string } = {}) =>
   z.preprocess(
     (v) => (v === "" || v == null || (typeof v === "number" && Number.isNaN(v)) ? null : typeof v === "string" ? Number(v.replace(",", ".")) : v),
     (opts.int ? z.number({ invalid_type_error: "Escribe un número" }).int("Usa un número entero") : z.number({ invalid_type_error: "Escribe un número" }))
@@ -56,7 +56,7 @@ export function durationText(seconds: number | null | undefined) {
   return s ? `${m}:${p(s)}` : String(m);
 }
 
-const durationField = z
+export const durationField = z
   .string()
   .trim()
   .max(10)
