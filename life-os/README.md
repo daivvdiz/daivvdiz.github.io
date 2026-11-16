@@ -15,8 +15,9 @@ En **Supabase → SQL Editor → New query**, ejecuta en orden:
 
 1. [`supabase/migrations/20261114000100_life_os_schema.sql`](../supabase/migrations/20261114000100_life_os_schema.sql): crea las tablas de LIFE OS con RLS y el bucket privado `life-os`.
 2. [`supabase/migrations/20261114000200_import_segundo_cerebro.sql`](../supabase/migrations/20261114000200_import_segundo_cerebro.sql): crea el importador y la copia automática del Atajo.
+3. [`supabase/migrations/20261116000100_study_exams.sql`](../supabase/migrations/20261116000100_study_exams.sql): crea la tabla de simulacros de estudio (sección Entrenamiento → Estudio).
 
-Ninguna de las dos modifica ni borra `registros`, `ajustes` ni el bucket `documentos`. Se pueden ejecutar más de una vez.
+Ninguna modifica ni borra `registros`, `ajustes` ni el bucket `documentos`. Se pueden ejecutar más de una vez.
 
 ### 2. Vercel
 1. [vercel.com/signup](https://vercel.com/signup) → plan **Hobby** → **Continue with GitHub**.
@@ -76,7 +77,7 @@ middleware.ts           Redirige a /login si no hay sesión
 - [x] Fase 4: metas (hitos, estados, avance, vínculos con diario, logros y eventos) y hábitos (frecuencias, registro semanal, cumplimiento sin rachas)
 - [x] Fase 5a: finanzas (movimientos, categorías, presupuesto mensual, metas de ahorro, activos, deudas con el apartamento importado, patrimonio neto)
 - [x] Fase 5b: carrera (cargos y evolución salarial, aplicaciones con entrevistas, skills con historial de nivel, proyectos de portafolio, aprendizaje)
-- [x] Fase 6: físico (entrenamientos con ejercicios, progresión por ejercicio, medidas corporales, nutrición opcional, frecuencia, volumen, tipos de actividad y sueño)
+- [x] Fase 6: entrenamiento físico y de estudio (simulacros con puntaje, nivel, preguntas, correctas, incorrectas y tiempo; entrenamientos con ejercicios, progresión por ejercicio, medidas corporales, nutrición opcional, frecuencia, volumen, tipos de actividad y sueño)
 - [x] Fase 7: analítica de vida (bienestar, físico, hábitos, metas, finanzas, carrera y actividad por periodo; comparaciones entre periodos y correlaciones exploratorias)
 - [ ] Fase 8: pulido, accesibilidad, seguridad, CSV, pruebas, eliminación de cuenta
 

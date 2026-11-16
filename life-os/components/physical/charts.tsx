@@ -5,7 +5,7 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Too
 import { DataTable, ViewToggle, axisTick, tooltipStyle } from "@/components/mental/charts";
 import { formatDay, formatDuration, formatNumber } from "@/lib/format";
 
-export type FormatKind = "count" | "kg0" | "kg1" | "reps" | "time" | "km";
+export type FormatKind = "count" | "kg0" | "kg1" | "reps" | "time" | "km" | "pct" | "score";
 export const FORMATS: Record<FormatKind, (v: number) => string> = {
   count: (v) => formatNumber(v, 0),
   kg0: (v) => `${formatNumber(v, 0)} kg`,
@@ -13,10 +13,12 @@ export const FORMATS: Record<FormatKind, (v: number) => string> = {
   reps: (v) => `${formatNumber(v, 0)} reps`,
   time: (v) => formatDuration(v),
   km: (v) => `${formatNumber(v, 2)} km`,
+  pct: (v) => `${formatNumber(v, 0)}%`,
+  score: (v) => formatNumber(v, Number.isInteger(v) ? 0 : 2),
 };
 const compact = new Intl.NumberFormat("es-CO", { notation: "compact", maximumFractionDigits: 1 });
 /** Etiquetas cortas del eje (la unidad va en el título, la tabla y el tooltip). */
-const axisFormat = (kind: FormatKind) => (v: number) => (kind === "time" ? `${Math.round(v / 60)} min` : compact.format(v));
+const axisFormat = (kind: FormatKind) => (v: number) => (kind === "time" ? `${Math.round(v / 60)} min` : kind === "pct" ? `${v}%` : compact.format(v));
 
 /** Barras por semana. Un solo eje; una sola serie. */
 export function WeeklyBars({ data, label, format: kind, ariaLabel, note }: {
@@ -49,8 +51,9 @@ export function WeeklyBars({ data, label, format: kind, ariaLabel, note }: {
 }
 
 /** Evolución de un valor en el tiempo: solo los días con registro, sin interpolar valores. */
-export function ValueLine({ points, label, format: kind, ariaLabel, tableExtra }: {
+export function ValueLine({ points, label, format: kind, ariaLabel, tableExtra, domain }: {
   points: { date: string; value: number; detail?: string | null }[]; label: string; format: FormatKind; ariaLabel: string; tableExtra?: string;
+  domain?: [number, number];
 }) {
   const format = FORMATS[kind];
   const [table, setTable] = useState(false);
@@ -60,6 +63,11 @@ export function ValueLine({ points, label, format: kind, ariaLabel, tableExtra }
   const values = points.map((p) => p.value);
   const min = Math.min(...values), max = Math.max(...values);
   const pad = (max - min) * 0.15 || Math.max(1, max * 0.05);
+  // Límites redondeados a un paso "limpio" (1, 2, 5, 10…) para que el eje sea fácil de leer.
+  const raw = (max - min + 2 * pad) / 4;
+  const mag = 10 ** Math.floor(Math.log10(raw || 1));
+  const step = [1, 2, 5, 10].map((k) => k * mag).find((x) => x >= raw) ?? 10 * mag;
+  const auto: [number, number] = [Math.max(0, Math.floor((min - pad) / step) * step), Math.ceil((max + pad) / step) * step];
   return (
     <div className="space-y-2">
       <div className="flex justify-end"><ViewToggle table={table} onChange={setTable} /></div>
@@ -71,10 +79,10 @@ export function ValueLine({ points, label, format: kind, ariaLabel, tableExtra }
       ) : (
         <div className="h-48 w-full" role="img" aria-label={ariaLabel}>
           <ResponsiveContainer>
-            <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+            <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: kind === "pct" ? -8 : -16 }}>
               <CartesianGrid stroke="var(--grid)" vertical={false} />
               <XAxis dataKey="label" tick={axisTick} tickLine={false} axisLine={{ stroke: "var(--border)" }} minTickGap={24} />
-              <YAxis domain={[Math.max(0, Math.floor(min - pad)), Math.ceil(max + pad)]} tick={axisTick} tickLine={false} axisLine={false} tickFormatter={axisFormat(kind)} width={48} />
+              <YAxis domain={domain ?? auto} tick={axisTick} tickLine={false} axisLine={false} tickFormatter={axisFormat(kind)} width={48} />
               <Tooltip {...tooltipStyle} formatter={(v: number, _n, item) => [`${format(v)}${item?.payload?.detail ? ` · ${item.payload.detail}` : ""}`, label]} />
               <Line type="linear" dataKey="value" name={label} stroke="var(--series-1)" strokeWidth={2}
                 dot={{ r: 3, strokeWidth: 0, fill: "var(--series-1)" }} activeDot={{ r: 5, stroke: "var(--card)", strokeWidth: 2 }} isAnimationActive={false} />

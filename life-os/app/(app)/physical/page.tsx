@@ -9,20 +9,24 @@ import { DistributionBars, ValueLine, WeeklyBars } from "@/components/physical/c
 import { NewWorkoutButton, WorkoutList } from "@/components/physical/workouts";
 import { ExerciseProgress } from "@/components/physical/exercises";
 import { BodyList, NutritionList } from "@/components/physical/body-nutrition";
+import { StudyView } from "@/components/physical/study";
+import { examSummary } from "@/lib/study/schema";
 import { getUser } from "@/lib/supabase/server";
 import { getPrefs } from "@/lib/profile/get";
 import { getPhysicalData } from "@/lib/physical/queries";
+import { getExams } from "@/lib/study/queries";
 import { ACTIVITY_TYPES } from "@/lib/physical/schema";
 import { addDays } from "@/lib/dates";
 import { formatDay, formatDuration, formatNumber, todayISO } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Físico" };
+export const metadata: Metadata = { title: "Entrenamiento" };
 export const dynamic = "force-dynamic";
 
 const TABS = [
   { key: "summary", label: "Resumen" },
   { key: "workouts", label: "Entrenamientos" },
+  { key: "study", label: "Estudio" },
   { key: "progress", label: "Progresión" },
   { key: "body", label: "Cuerpo" },
   { key: "nutrition", label: "Nutrición" },
@@ -45,7 +49,7 @@ export default async function PhysicalPage({ searchParams }: { searchParams: Pro
   const { supabase, user } = await getUser();
   const prefs = await getPrefs(supabase, user!.id);
   const today = todayISO(prefs.timeZone);
-  const d = await getPhysicalData(supabase, today, prefs.weekStartsOn);
+  const [d, st] = await Promise.all([getPhysicalData(supabase, today, prefs.weekStartsOn), getExams(supabase)]);
   const href = (t: Tab) => (t === "summary" ? "/physical" : `/physical?tab=${t}`);
 
   const last30 = d.workouts.filter((w) => w.performed_on > addDays(today, -30) && w.performed_on <= today);
@@ -63,9 +67,9 @@ export default async function PhysicalPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader title="Físico" description="Entrenamientos, progresión por ejercicio, medidas corporales y nutrición opcional." />
+      <PageHeader title="Entrenamiento" description="Entrenamiento físico y de estudio: sesiones, progresión, simulacros, medidas corporales y nutrición opcional." />
 
-      <nav aria-label="Secciones de Físico" className="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <nav aria-label="Secciones de Entrenamiento" className="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         <div className="flex w-max gap-1 rounded-md border border-border p-0.5">
           {TABS.map((t) => (
             <Link key={t.key} href={href(t.key)} aria-current={tab === t.key ? "page" : undefined}
@@ -76,7 +80,7 @@ export default async function PhysicalPage({ searchParams }: { searchParams: Pro
         </div>
       </nav>
 
-      {d.error && (
+      {(d.error || st.error) && (
         <Card className="mb-5 flex items-center gap-2 border-danger/40 px-4 py-3 text-sm">
           <AlertTriangle className="size-4 text-danger" aria-hidden /> No se pudieron cargar tus datos. Intenta recargar la página.
         </Card>
@@ -141,6 +145,28 @@ export default async function PhysicalPage({ searchParams }: { searchParams: Pro
           </Card>
           <Card className="lg:col-span-2">
             <CardHeader>
+              <div><CardTitle>Estudio</CardTitle><CardDescription>{st.exams.length ? `${st.exams.length} ${st.exams.length === 1 ? "simulacro registrado" : "simulacros registrados"}.` : "Simulacros y exámenes de práctica."}</CardDescription></div>
+              <Button asChild size="sm" variant="ghost"><Link href={href("study")}>{st.exams.length ? "Ver estudio" : "Registrar simulacro"}</Link></Button>
+            </CardHeader>
+            <CardContent>
+              {st.missing ? (
+                <p className="text-sm text-muted">Falta ejecutar la migración de simulacros en Supabase. Más detalles en la pestaña Estudio.</p>
+              ) : st.exams.length ? (
+                <ul className="space-y-1.5">
+                  {st.exams.slice(0, 3).map((e) => (
+                    <li key={e.id} className="text-sm">
+                      {e.exam}<span className="text-muted"> · {formatDay(e.taken_on)}</span>
+                      <p className="text-[11px] tabular-nums text-muted">{examSummary(e).join(" · ") || "Sin cifras registradas"}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted">Registra tus simulacros para ver la evolución de tu puntaje y tus aciertos.</p>
+              )}
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-2">
+            <CardHeader>
               <div><CardTitle>Recientes</CardTitle></div>
               <Button asChild size="sm" variant="ghost"><Link href={href("workouts")}>Ver todos</Link></Button>
             </CardHeader>
@@ -150,6 +176,7 @@ export default async function PhysicalPage({ searchParams }: { searchParams: Pro
       )}
 
       {tab === "workouts" && <Card><CardContent className="pt-5"><WorkoutList workouts={d.workouts} exercises={d.exercises} today={today} /></CardContent></Card>}
+      {tab === "study" && <Card><CardContent className="pt-5"><StudyView exams={st.exams} today={today} missing={st.missing} /></CardContent></Card>}
       {tab === "progress" && <Card><CardContent className="pt-5"><ExerciseProgress exercises={d.exercises} /></CardContent></Card>}
       {tab === "body" && (
         <div className="grid gap-5 lg:grid-cols-2">

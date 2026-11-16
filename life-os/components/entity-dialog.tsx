@@ -25,6 +25,8 @@ export type Field = {
   step?: number;
   /** Ocupa media fila en pantallas medianas. */
   half?: boolean;
+  /** Sugerencias para un campo de texto (se puede escribir otro valor). */
+  suggestions?: string[];
 };
 
 type SaveResult = { ok: true } | { ok: false; error: string };
@@ -118,7 +120,11 @@ export function EntityDialog<T extends FieldValues>({
                       );
                     }} />
                 ) : (
-                  <Input id={id} type={f.kind === "url" ? "url" : f.kind} placeholder={f.placeholder} aria-invalid={!!err} {...register(name)} />
+                  <>
+                    <Input id={id} type={f.kind === "url" ? "url" : f.kind} placeholder={f.placeholder} aria-invalid={!!err}
+                      list={f.suggestions?.length ? `${id}-list` : undefined} autoComplete={f.suggestions?.length ? "off" : undefined} {...register(name)} />
+                    {!!f.suggestions?.length && <datalist id={`${id}-list`}>{f.suggestions.map((x) => <option key={x} value={x} />)}</datalist>}
+                  </>
                 )}
                 {f.hint && f.kind !== "toggles" && <p className="text-[11px] text-muted">{f.hint}</p>}
                 <FieldError message={err} />
