@@ -21,6 +21,7 @@ export async function saveAssessment(input: AssessmentInput, id?: string): Promi
   if (error) return { ok: false, error: "No se pudo guardar la autoevaluación." };
 
   revalidatePath("/overview");
+  revalidatePath("/archive");
   return { ok: true };
 }
 
@@ -29,5 +30,6 @@ export async function deleteAssessment(id: string): Promise<ActionResult> {
   const { error } = await supabase.from("life_assessments").delete().eq("id", idSchema.parse(id)).eq("user_id", user.id);
   if (error) return { ok: false, error: "No se pudo eliminar." };
   revalidatePath("/overview");
+  revalidatePath("/archive");
   return { ok: true };
 }
