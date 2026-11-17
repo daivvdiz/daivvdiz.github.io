@@ -71,7 +71,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: SP 
         actions={
           <>
             <Button asChild variant="secondary"><Link href={hrefForDay(today)}>Write today</Link></Button>
-            <NewEventButton date={view === "day" ? date : today} goals={goals} />
+            <NewEventButton date={view === "day" ? date : today} goals={goals} recurrenceReady={cal.recurrenceReady} />
           </>
         }
       />
@@ -111,10 +111,10 @@ export default async function CalendarPage({ searchParams }: { searchParams: SP 
       {cal.error && <p role="alert" className="mb-4 text-sm text-danger">Couldn't load the calendar. Please try again.</p>}
 
       {view === "month" && (
-        <MonthView days={range.days} month={date} today={today} events={cal.events} summaries={cal.days} goals={goals} hrefForDay={hrefForDay} weekStartsOn={prefs.weekStartsOn} />
+        <MonthView days={range.days} month={date} today={today} events={cal.events} summaries={cal.days} goals={goals} hrefForDay={hrefForDay} weekStartsOn={prefs.weekStartsOn} recurrenceReady={cal.recurrenceReady} />
       )}
       {view === "week" && (
-        <WeekView days={range.days} today={today} events={cal.events} summaries={cal.days} goals={goals} hrefForDay={hrefForDay} />
+        <WeekView days={range.days} today={today} events={cal.events} summaries={cal.days} goals={goals} hrefForDay={hrefForDay} recurrenceReady={cal.recurrenceReady} />
       )}
       {view === "day" && (
         <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
@@ -125,12 +125,12 @@ export default async function CalendarPage({ searchParams }: { searchParams: SP 
             <CardHeader><CardTitle>Events this day</CardTitle></CardHeader>
             <CardContent>
               {cal.events.length === 0 ? (
-                <EmptyState icon={CalendarDays} title="No events" action={<NewEventButton date={date} goals={goals} label="Add event" variant="secondary" />} />
+                <EmptyState icon={CalendarDays} title="No events" action={<NewEventButton date={date} goals={goals} label="Add event" variant="secondary" recurrenceReady={cal.recurrenceReady} />} />
               ) : (
                 <div className="space-y-1">
                   {cal.events.map((e) => (
-                    <div key={e.id}>
-                      <EventChip event={e} goals={goals} wrap />
+                    <div key={e.key}>
+                      <EventChip event={e} goals={goals} wrap recurrenceReady={cal.recurrenceReady} />
                       {(e.all_day || e.end_time || e.location) && (
                         <p className="pl-4 text-[11px] text-muted">
                           {e.all_day ? "All day" : e.end_time ? `${e.start_time}–${e.end_time}` : ""}
