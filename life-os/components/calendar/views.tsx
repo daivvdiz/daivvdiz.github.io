@@ -27,10 +27,10 @@ function EntryMark({ s }: { s?: DaySummary }) {
 }
 
 export function MonthView({
-  days, month, today, events, summaries, goals, hrefForDay, weekStartsOn,
+  days, month, today, events, summaries, goals, hrefForDay, weekStartsOn, recurrenceReady = true,
 }: {
   days: string[]; month: string; today: string; events: CalEvent[]; summaries: Map<string, DaySummary>;
-  goals: GoalOption[]; hrefForDay: (d: string) => string; weekStartsOn: number;
+  goals: GoalOption[]; hrefForDay: (d: string) => string; weekStartsOn: number; recurrenceReady?: boolean;
 }) {
   const byDay = groupByDay(events);
   const headers = Array.from({ length: 7 }, (_, i) => WEEKDAYS[(i + weekStartsOn) % 7]);
@@ -60,13 +60,13 @@ export function MonthView({
                 <EntryMark s={summaries.get(d)} />
               </div>
               <div className="hidden space-y-0.5 sm:block">
-                {list.slice(0, 3).map((e) => <EventChip key={e.id} event={e} goals={goals} />)}
+                {list.slice(0, 3).map((e) => <EventChip key={e.key} event={e} goals={goals} recurrenceReady={recurrenceReady} />)}
                 {list.length > 3 && <Link href={hrefForDay(d)} className="block px-1 text-[11px] text-muted hover:text-foreground">+{list.length - 3} more</Link>}
               </div>
               {(list.length > 0 || summaries.has(d)) && (
                 <Link href={hrefForDay(d)} className="flex items-center gap-0.5 px-1 sm:hidden" aria-label={`${list.length} ${list.length === 1 ? "event" : "events"}${summaries.has(d) ? ", with entry" : ""}`}>
                   {summaries.has(d) && <BookOpen className="size-3 text-muted" aria-hidden />}
-                  {list.slice(0, 3).map((e) => <span key={e.id} className="size-1.5 rounded-full" style={{ background: CATEGORY_COLORS[e.category] }} />)}
+                  {list.slice(0, 3).map((e) => <span key={e.key} className="size-1.5 rounded-full" style={{ background: CATEGORY_COLORS[e.category] }} />)}
                 </Link>
               )}
             </div>
@@ -78,9 +78,10 @@ export function MonthView({
 }
 
 export function WeekView({
-  days, today, events, summaries, goals, hrefForDay,
+  days, today, events, summaries, goals, hrefForDay, recurrenceReady = true,
 }: {
   days: string[]; today: string; events: CalEvent[]; summaries: Map<string, DaySummary>; goals: GoalOption[]; hrefForDay: (d: string) => string;
+  recurrenceReady?: boolean;
 }) {
   const byDay = groupByDay(events);
   return (
@@ -98,7 +99,7 @@ export function WeekView({
             {list.length === 0 ? (
               <p className="px-1 text-[11px] text-muted">No events</p>
             ) : (
-              <div className="space-y-0.5">{list.map((e) => <EventChip key={e.id} event={e} goals={goals} wrap />)}</div>
+              <div className="space-y-0.5">{list.map((e) => <EventChip key={e.key} event={e} goals={goals} wrap recurrenceReady={recurrenceReady} />)}</div>
             )}
           </div>
         );

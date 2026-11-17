@@ -3,6 +3,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { utcToZoned } from "@/lib/dates";
+import { fetchEvents } from "@/lib/calendar/queries";
 import { habitStats, type Habit, type HabitLog } from "@/lib/goals/habits";
 import { mean, type DayPoint } from "@/lib/mental/stats";
 import type { Bucket } from "./period";
@@ -26,7 +27,7 @@ export async function getRaw(supabase: SupabaseClient, from: string, to: string,
     supabase.from("memories").select("occurred_on, category, importance").gte("occurred_on", from).lte("occurred_on", to),
     supabase.from("journal_entries").select("entry_date").gte("entry_date", from).lte("entry_date", to),
     supabase.from("daily_accomplishments").select("id, daily_entries!inner(entry_date)").gte("daily_entries.entry_date", from).lte("daily_entries.entry_date", to),
-    supabase.from("calendar_events").select("starts_at, category").gte("starts_at", fromTs).lte("starts_at", toTs),
+    fetchEvents(supabase, { start: from, end: to }, timeZone),
     supabase.from("milestones").select("completed_at").gte("completed_at", fromTs).lte("completed_at", toTs),
     // Si aún no existe la tabla de simulacros, simplemente no hay datos de estudio.
     supabase.from("study_exams").select("taken_on, total_questions, correct").gte("taken_on", from).lte("taken_on", to),
@@ -51,7 +52,7 @@ export async function getRaw(supabase: SupabaseClient, from: string, to: string,
     memories: (memories.data ?? []).map((m) => ({ date: m.occurred_on as string, category: m.category as string, importance: m.importance as number | null })),
     journal: (journal.data ?? []).map((j) => ({ date: j.entry_date as string })),
     accomplishments: ((accs.data ?? []) as unknown as { daily_entries: { entry_date: string } | null }[]).map((a) => ({ date: a.daily_entries?.entry_date ?? "" })).filter((a) => a.date),
-    events: (events.data ?? []).map((e) => ({ date: zoned(e.starts_at as string), category: e.category as string })).filter((e) => inRange(e.date, from, to)),
+    events: events.events.map((e) => ({ date: e.date, category: e.category })).filter((e) => inRange(e.date, from, to)),
     exams: (exams.data ?? []).map((e) => ({ date: e.taken_on as string, total: num(e.total_questions), correct: num(e.correct) })),
     milestones: (milestones.data ?? []).map((m) => ({ date: zoned(m.completed_at as string) })).filter((m) => inRange(m.date, from, to)),
   };

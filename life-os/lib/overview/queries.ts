@@ -3,6 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatDay, monthRange, todayISO } from "@/lib/format";
 import type { ActivityItem, CalendarEvent, LifeAssessment } from "@/lib/types";
 import { WORKOUT_TYPES } from "@/lib/types";
+import { addDays } from "@/lib/dates";
+import { fetchEvents } from "@/lib/calendar/queries";
 
 const ACTIVE_STAGES = ["interested", "applied", "recruiter_screen", "technical_interview", "final_interview", "offer"];
 
@@ -25,8 +27,8 @@ export async function getOverview(supabase: SupabaseClient, timeZone: string) {
       .select("id, mood, energy, stress, sleep_hours, daily_accomplishments(content, is_main, created_at)")
       .eq("entry_date", today).maybeSingle(),
     supabase.from("habit_logs").select("id", { count: "exact", head: true }).eq("logged_on", today),
-    supabase.from("calendar_events").select("id, title, category, starts_at, all_day")
-      .gte("starts_at", nowIso).lte("starts_at", weekAhead).order("starts_at").limit(6),
+    // Incluye las repeticiones de los eventos que se repiten.
+    fetchEvents(supabase, { start: today, end: addDays(today, 14) }, timeZone),
     supabase.from("life_assessments")
       .select("id, assessed_on, professional, financial, physical, emotional, social, intellectual, notes")
       .order("assessed_on", { ascending: false }).order("created_at", { ascending: false }).limit(36),
@@ -68,7 +70,10 @@ export async function getOverview(supabase: SupabaseClient, timeZone: string) {
         }
       : null,
     habitsDone: habitsDone.count ?? 0,
-    events: (events.data ?? []) as CalendarEvent[],
+    events: events.events
+      .filter((e) => e.starts_at >= nowIso && e.starts_at <= weekAhead)
+      .slice(0, 6)
+      .map((e) => ({ id: e.id, title: e.title, category: e.category, starts_at: e.starts_at, all_day: e.all_day })) as CalendarEvent[],
     assessments: (assessments.data ?? []) as LifeAssessment[],
     activeGoals: activeGoals.count ?? 0,
     finance: {
