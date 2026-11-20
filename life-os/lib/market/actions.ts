@@ -24,7 +24,7 @@ export async function saveTrip(input: TripInput, id?: string): Promise<Result> {
     p_trip_date: v.trip_date,
     p_store: v.store?.trim() || null,
     p_notes: v.notes?.trim() || null,
-    p_items: v.items.map((i) => ({ name: i.name.trim(), quantity: i.quantity, unit_price: i.unit_price })),
+    p_items: v.items.map((i) => ({ name: i.name.trim(), quantity: i.quantity, unit_price: i.unit_price, tax_code: i.tax_code })),
   });
   if (r.error) return { ok: false, error: isMissing(r.error.code) ? MISSING : "Couldn't save the market." };
   return done();
