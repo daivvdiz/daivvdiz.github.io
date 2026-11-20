@@ -6,25 +6,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input, Select, Textarea } from "@/components/ui/input";
+import { Input, Textarea } from "@/components/ui/input";
 import { Label, FieldError } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MoneyInput } from "@/components/finance/money-input";
 import { useResetOnOpen } from "@/lib/use-reset-on-open";
 import { formatMoney, formatNumber } from "@/lib/format";
 import { saveTrip } from "@/lib/market/actions";
-import { DEFAULT_TAX, TAX_CODES, lineBase, lineTax, nameKey, tripSchema, type ProductStats, type TaxCode, type Trip, type TripInput } from "@/lib/market/schema";
+import { nameKey, tripSchema, type ProductStats, type Trip, type TripInput } from "@/lib/market/schema";
 
-const emptyItem = () => ({ name: "", quantity: 1 as number | null, unit_price: null as number | null, tax_code: DEFAULT_TAX as TaxCode });
-const GRID = "sm:grid-cols-[minmax(0,1fr)_5rem_8rem_7.5rem_7rem_2rem]";
+const emptyItem = () => ({ name: "", quantity: 1 as number | null, unit_price: null as number | null });
 
 export function TripDialog({
   open, onOpenChange, trip, today, products,
 }: { open: boolean; onOpenChange: (o: boolean) => void; trip?: Trip; today: string; products: ProductStats[] }) {
   const defaults: TripInput = trip
-    ? { trip_date: trip.trip_date, store: trip.store ?? "", notes: trip.notes ?? "", items: trip.items.map((i) => ({ name: i.name, quantity: i.quantity, unit_price: i.unit_price, tax_code: i.tax_code })) }
+    ? { trip_date: trip.trip_date, store: trip.store ?? "", notes: trip.notes ?? "", items: trip.items.map((i) => ({ name: i.name, quantity: i.quantity, unit_price: i.unit_price })) }
     : { trip_date: today, store: "", notes: "", items: [emptyItem()] };
-  const { register, handleSubmit, control, formState, reset, setValue, getValues } = useForm<TripInput>({
+  const { register, handleSubmit, control, formState, reset } = useForm<TripInput>({
     resolver: zodResolver(tripSchema) as unknown as Resolver<TripInput>,
     defaultValues: defaults,
   });
@@ -32,10 +31,7 @@ export function TripDialog({
   useResetOnOpen(open, () => reset(defaults));
   const items = useWatch({ control, name: "items" }) ?? [];
   const known = useMemo(() => new Map(products.map((p) => [nameKey(p.name), p])), [products]);
-  const num = (i: (typeof items)[number] | undefined) => ({ quantity: Number(i?.quantity) || 0, unit_price: Number(i?.unit_price) || 0, tax_code: i?.tax_code });
-  const base = items.reduce((a, i) => a + lineBase(num(i)), 0);
-  const tax = items.reduce((a, i) => a + lineTax(num(i)), 0);
-  const total = base + tax;
+  const total = items.reduce((a, i) => a + (Number(i?.quantity) || 0) * (Number(i?.unit_price) || 0), 0);
   const errors = formState.errors;
   const itemErrors = errors.items as unknown as ({ name?: { message?: string }; quantity?: { message?: string }; unit_price?: { message?: string } } | undefined)[] | undefined;
 
@@ -48,11 +44,11 @@ export function TripDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{trip ? "Edit market" : "Log market"}</DialogTitle>
           <DialogDescription>
-            Add each product with the price of one unit before tax, how many you bought and its tax code from the receipt. Products you&apos;ve bought before are recognized by name, even with different capitals or accents.
+            Add each product with the price of one unit and how many you bought. Products you&apos;ve bought before are recognized by name, even with different capitals or accents.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
@@ -72,29 +68,22 @@ export function TripDialog({
           <datalist id="market-products">{products.map((p) => <option key={p.id} value={p.name} />)}</datalist>
           <fieldset className="space-y-2">
             <legend className="mb-2 text-xs font-medium text-muted">Products · {fields.length}</legend>
-            <div className={`hidden gap-2 px-1 text-[11px] text-muted sm:grid ${GRID}`}>
-              <span>Product</span><span>Quantity</span><span>Unit price</span><span>Tax</span><span className="text-right">Subtotal</span><span />
+            <div className="hidden grid-cols-[minmax(0,1fr)_5.5rem_8.5rem_7rem_2rem] gap-2 px-1 text-[11px] text-muted sm:grid">
+              <span>Product</span><span>Quantity</span><span>Unit price</span><span className="text-right">Subtotal</span><span />
             </div>
             <ul className="space-y-2">
               {fields.map((f, i) => {
                 const it = items[i];
                 const e = itemErrors?.[i];
                 const match = it?.name ? known.get(nameKey(it.name)) : undefined;
-                const sub = lineBase(num(it)) + lineTax(num(it));
-                const subTax = lineTax(num(it));
+                const sub = (Number(it?.quantity) || 0) * (Number(it?.unit_price) || 0);
                 const diff = match && it?.unit_price != null ? Number(it.unit_price) - match.lastPrice : null;
                 return (
                   <li key={f.id} className="rounded-md border border-border p-2 sm:border-0 sm:p-0">
-                    <div className={`grid grid-cols-3 gap-2 sm:items-start ${GRID}`}>
+                    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 sm:grid-cols-[minmax(0,1fr)_5.5rem_8.5rem_7rem_2rem] sm:items-start">
                       <div className="col-span-3 sm:col-span-1">
                         <Input aria-label={`Product ${i + 1}`} placeholder="E.g. Avena en hojuelas 500 g" list="market-products" autoComplete="off"
-                          aria-invalid={!!e?.name} {...register(`items.${i}.name`, {
-                            // Al reconocer un producto ya comprado, propone el impuesto de la última vez.
-                            onBlur: (ev) => {
-                              const m = known.get(nameKey(ev.target.value));
-                              if (m && getValues(`items.${i}.tax_code`) === DEFAULT_TAX && m.lastTax !== DEFAULT_TAX) setValue(`items.${i}.tax_code`, m.lastTax);
-                            },
-                          })} />
+                          aria-invalid={!!e?.name} {...register(`items.${i}.name`)} />
                         {match && (
                           <p className="mt-0.5 text-[11px] text-muted">
                             Bought {match.purchases}× · avg {formatMoney(match.avgPrice)} · last {formatMoney(match.lastPrice)}
@@ -121,20 +110,10 @@ export function TripDialog({
                           render={({ field }) => <MoneyInput id={`item-${f.id}-price`} value={field.value as number | null} onChange={field.onChange} invalid={!!e?.unit_price} />} />
                         <FieldError message={e?.unit_price?.message} />
                       </div>
-                      <div>
-                        <span className="mb-0.5 block text-[11px] text-muted sm:hidden">Tax</span>
-                        <Select aria-label={`Tax of product ${i + 1}`} className="px-2 sm:px-3" {...register(`items.${i}.tax_code`)}>
-                          {Object.entries(TAX_CODES).map(([k, t]) => <option key={k} value={k}>{t.label}</option>)}
-                        </Select>
-                      </div>
-                      <p className="col-span-2 self-center text-xs tabular-nums text-muted sm:col-span-1 sm:flex sm:min-h-9 sm:items-center sm:justify-end sm:self-start sm:text-sm sm:text-foreground">
-                        <span className="sm:hidden">Subtotal&nbsp;</span>
-                        <span className="sm:flex sm:flex-col sm:items-end sm:leading-tight">
-                          {formatMoney(sub)}
-                          {subTax > 0 && <span className="text-[11px] text-muted"> incl. {formatMoney(subTax)} tax</span>}
-                        </span>
+                      <p className="col-span-2 self-center text-xs tabular-nums text-muted sm:col-span-1 sm:flex sm:h-9 sm:items-center sm:justify-end sm:self-start sm:text-sm sm:text-foreground">
+                        <span className="sm:hidden">Subtotal&nbsp;</span>{formatMoney(sub)}
                       </p>
-                      <Button type="button" size="icon" variant="ghost" className="size-8 justify-self-end sm:size-9" aria-label={`Remove product ${i + 1}`}
+                      <Button type="button" size="icon" variant="ghost" className="size-8 sm:size-9" aria-label={`Remove product ${i + 1}`}
                         disabled={fields.length === 1} onClick={() => remove(i)}><Trash2 /></Button>
                     </div>
                   </li>
@@ -152,7 +131,6 @@ export function TripDialog({
 
           <DialogFooter className="sm:items-center sm:justify-between">
             <p className="text-sm">
-              {tax > 0 && <span className="text-muted tabular-nums">Before tax {formatMoney(base)} · Tax {formatMoney(tax)} · </span>}
               Total <span className="font-semibold tabular-nums">{formatMoney(total)}</span>
               <span className="text-muted"> · {formatNumber(items.reduce((a, i) => a + (Number(i?.quantity) || 0), 0), 2)} units</span>
             </p>

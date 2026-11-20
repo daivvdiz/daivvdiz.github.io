@@ -19,7 +19,7 @@ En **Supabase → SQL Editor → New query**, ejecuta en orden:
 3. [`supabase/migrations/20261116000100_study_exams.sql`](../supabase/migrations/20261116000100_study_exams.sql): crea la tabla de simulacros de estudio (sección Entrenamiento → Estudio).
 4. [`supabase/migrations/20261117000100_recurring_events.sql`](../supabase/migrations/20261117000100_recurring_events.sql): agrega columnas a `calendar_events` para los eventos que se repiten (diario, semanal, mensual, anual o personalizado). Tus eventos actuales quedan sin repetición.
 5. [`supabase/migrations/20261120000100_market.sql`](../supabase/migrations/20261120000100_market.sql): crea las tablas de **Market** (mercados, productos y precios) y las funciones que guardan un mercado completo y unen productos repetidos.
-6. [`supabase/migrations/20261120000200_market_tax.sql`](../supabase/migrations/20261120000200_market_tax.sql): agrega el impuesto de cada producto en Market (6-Excluido, 5-Exento, C-5 %, A-19 %). Lo ya registrado queda como 6-Excluido.
+6. [`supabase/migrations/20261120000300_market_tax_rollback.sql`](../supabase/migrations/20261120000300_market_tax_rollback.sql): solo si ya habías ejecutado la migración de impuestos de Market (`20261120000200_market_tax.sql`, retirada); la deshace sin borrar mercados ni precios.
 
 Ninguna modifica ni borra `registros`, `ajustes` ni el bucket `documentos`; la 4 solo agrega columnas y la 5 solo agrega tablas nuevas. Se pueden ejecutar más de una vez.
 
