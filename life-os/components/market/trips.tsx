@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useEditor } from "@/components/entity-dialog";
 import { formatDay, formatMoney, formatNumber } from "@/lib/format";
 import { deleteTrip } from "@/lib/market/actions";
-import { lineTotal, productStats, tripTotal, type ProductStats, type Trip } from "@/lib/market/schema";
+import { TAX_CODES, lineBase, lineTax, lineTotal, productStats, tripTax, tripTotal, type ProductStats, type Trip } from "@/lib/market/schema";
 import { cn } from "@/lib/utils";
 import { TripDialog } from "./trip-dialog";
 
@@ -73,13 +73,14 @@ export function TripList({ trips, today, products }: { trips: Trip[]; today: str
                 <div className="border-t border-border bg-surface/50 px-3 py-2">
                   {t.notes && <p className="mb-2 whitespace-pre-line break-words text-xs text-muted">{t.notes}</p>}
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[30rem] text-sm">
+                    <table className="w-full min-w-[36rem] text-sm">
                       <thead>
                         <tr className="text-left text-[11px] text-muted">
                           <th className="py-1 font-normal">Product</th>
                           <th className="py-1 text-right font-normal">Qty</th>
                           <th className="py-1 text-right font-normal">Unit price</th>
                           <th className="py-1 text-right font-normal">vs avg</th>
+                          <th className="py-1 pl-3 text-left font-normal">Tax</th>
                           <th className="py-1 text-right font-normal">Subtotal</th>
                         </tr>
                       </thead>
@@ -95,14 +96,30 @@ export function TripList({ trips, today, products }: { trips: Trip[]; today: str
                               <td className={cn("py-1.5 text-right text-xs", diff == null || Math.round(diff) === 0 ? "text-muted" : diff > 0 ? "text-danger" : "text-success")}>
                                 {diff == null ? "—" : Math.round(diff) === 0 ? "=" : `${diff > 0 ? "+" : "−"}${formatMoney(Math.abs(diff))}`}
                               </td>
+                              <td className="py-1.5 pl-3 text-xs">
+                                {TAX_CODES[i.tax_code].label}
+                                {lineTax(i) > 0 && <span className="block text-[11px] text-muted">{formatMoney(lineTax(i))}</span>}
+                              </td>
                               <td className="py-1.5 text-right">{formatMoney(lineTotal(i))}</td>
                             </tr>
                           );
                         })}
                       </tbody>
                       <tfoot>
+                        {tripTax(t) > 0 && (
+                          <>
+                            <tr className="border-t border-border text-xs text-muted">
+                              <td className="py-1" colSpan={5}>Before tax</td>
+                              <td className="py-1 text-right tabular-nums">{formatMoney(t.items.reduce((a, i) => a + lineBase(i), 0))}</td>
+                            </tr>
+                            <tr className="text-xs text-muted">
+                              <td className="py-1" colSpan={5}>Tax</td>
+                              <td className="py-1 text-right tabular-nums">{formatMoney(tripTax(t))}</td>
+                            </tr>
+                          </>
+                        )}
                         <tr className="border-t border-border font-medium">
-                          <td className="py-1.5" colSpan={4}>Total</td>
+                          <td className="py-1.5" colSpan={5}>Total</td>
                           <td className="py-1.5 text-right tabular-nums">{formatMoney(tripTotal(t))}</td>
                         </tr>
                       </tfoot>

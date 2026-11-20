@@ -72,7 +72,7 @@ export function ProductTable({ products }: { products: ProductStats[] }) {
           </Select>
         </label>
         <p className="w-full text-[11px] text-muted">
-          Average price is the mean of the unit prices you paid, one per market. Change compares the last price with the purchase before it. Select a product to see its history.
+          Prices are per unit, before tax. Average price is the mean of the unit prices you paid, one per market. Change compares the last price with the purchase before it. Select a product to see its history.
         </p>
       </div>
 
@@ -120,7 +120,7 @@ export function ProductTable({ products }: { products: ProductStats[] }) {
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 id="market-product-history" className="text-sm font-medium">{sel.name}</h3>
             <p className="text-xs text-muted tabular-nums">
-              {formatNumber(sel.totalQty, 3)} units in total · {formatMoney(sel.totalSpent)} spent · {formatMoney(sel.avgPerUnit)} per unit on average
+              {formatNumber(sel.totalQty, 3)} units in total · {formatMoney(sel.totalSpent)} spent with tax · {formatMoney(sel.avgPerUnit)} per unit on average before tax
             </p>
           </div>
           <ValueLine
