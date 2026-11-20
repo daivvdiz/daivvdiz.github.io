@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, CalendarDays, Brain, Target, Wallet, Briefcase, Dumbbell, Archive, LineChart, Settings,
+  LayoutDashboard, CalendarDays, Brain, Target, Wallet, ShoppingCart, Briefcase, Dumbbell, Archive, LineChart, Settings,
   type LucideIcon,
 } from "lucide-react";
 
@@ -18,6 +18,7 @@ export const MODULES: ModuleDef[] = [
   { href: "/mental-health", label: "Mental health", icon: Brain, description: "Mood, energy, stress, sleep and strategies that help you." },
   { href: "/goals", label: "Goals & habits", icon: Target, description: "Goals, milestones and habits without streak pressure." },
   { href: "/finances", label: "Finances", icon: Wallet, description: "Transactions, budget, savings and net worth in COP." },
+  { href: "/market", label: "Market", icon: ShoppingCart, description: "Grocery shopping: each market, its products and average prices." },
   { href: "/career", label: "Career", icon: Briefcase, description: "Applications, skills, projects and learning." },
   { href: "/physical", label: "Training", icon: Dumbbell, description: "Physical and study training: sessions, practice exams, progress and measurements." },
   { href: "/archive", label: "Life archive", icon: Archive, description: "Memories, chapters, documents and on this day." },
