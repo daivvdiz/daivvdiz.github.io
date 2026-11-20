@@ -1,22 +1,20 @@
 -- ============================================================
--- LIFE OS · Market: impuesto por producto (migración 6)
+-- LIFE OS · Market: quitar el impuesto por producto (migración 7)
 --
--- Agrega la columna tax_code a market_items y actualiza save_market_trip
--- para guardarla. No borra datos: los productos ya registrados quedan como
--- "6-Excluido" (0 %), así que sus totales no cambian.
--- Se puede ejecutar más de una vez. Requiere la migración 5 (20261120000100_market.sql).
+-- Deshace la migración 20261120000200_market_tax.sql: quita la columna tax_code
+-- de market_items y deja save_market_trip como estaba en la migración 5.
+-- No borra mercados, productos ni precios; solo el código de impuesto de cada línea.
+-- Se puede ejecutar más de una vez, y también si la migración 6 nunca se ejecutó.
 --
 -- Cómo aplicarla: Supabase > SQL Editor > New query > pegar > Run.
 -- ============================================================
 
-alter table public.market_items add column if not exists tax_code text not null default '6';
 alter table public.market_items drop constraint if exists market_items_tax_code;
-alter table public.market_items add constraint market_items_tax_code check (tax_code in ('6', '5', 'C', 'A'));
+alter table public.market_items drop column if exists tax_code;
 
 -- Guarda un mercado completo en una sola transacción: crea o actualiza el mercado,
 -- reemplaza sus productos y reutiliza los productos que ya existían por nombre.
--- p_items: [{"name": "Avena en hojuelas", "quantity": 2, "unit_price": 4500, "tax_code": "6"}, ...]
--- tax_code: 6 = Excluido (0 %), 5 = Exento (0 %), C = 5 %, A = 19 %. Si falta, se usa 6.
+-- p_items: [{"name": "Avena en hojuelas", "quantity": 2, "unit_price": 4500}, ...]
 create or replace function public.save_market_trip(
   p_id uuid, p_trip_date date, p_store text, p_notes text, p_items jsonb
 ) returns uuid
@@ -54,9 +52,8 @@ begin
     insert into market_products (user_id, name) values (v_uid, v_name)
     on conflict (user_id, name_key) do update set name = market_products.name
     returning id into v_product;
-    insert into market_items (user_id, trip_id, product_id, quantity, unit_price, tax_code, position)
-    values (v_uid, v_id, v_product, (v_item->>'quantity')::numeric, (v_item->>'unit_price')::numeric,
-            coalesce(nullif(v_item->>'tax_code', ''), '6'), v_pos);
+    insert into market_items (user_id, trip_id, product_id, quantity, unit_price, position)
+    values (v_uid, v_id, v_product, (v_item->>'quantity')::numeric, (v_item->>'unit_price')::numeric, v_pos);
   end loop;
 
   -- Productos que ya no aparecen en ningún mercado.

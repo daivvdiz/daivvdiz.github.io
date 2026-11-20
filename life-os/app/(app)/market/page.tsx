@@ -37,7 +37,7 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
   const { supabase, user } = await getUser();
   const prefs = await getPrefs(supabase, user!.id);
   const today = todayISO(prefs.timeZone);
-  const { trips, missing, error, taxMissing } = await getMarket(supabase);
+  const { trips, missing, error } = await getMarket(supabase);
   const products = productStats(trips);
   const href = (t: Tab) => (t === "trips" ? "/market" : `/market?tab=${t}`);
 
@@ -59,23 +59,13 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
         </Card>
       )}
 
-      {taxMissing && (
-        <Card className="mb-5 border-warning/40 px-4 py-3 text-sm">
-          <p className="font-medium">One step is missing in Supabase</p>
-          <p className="mt-1 text-muted">
-            To save the tax of each product, run the migration <code className="text-xs">supabase/migrations/20261120000200_market_tax.sql</code> once in
-            Supabase → SQL Editor. Until then, products are saved without tax.
-          </p>
-        </Card>
-      )}
-
       {missing ? (
         <Card>
           <CardContent className="pt-5">
             <div className="rounded-md border border-warning/40 p-4 text-sm">
               <p className="font-medium">One step is missing in Supabase</p>
               <p className="mt-1 text-muted">
-                To save markets, run the migrations <code className="text-xs">supabase/migrations/20261120000100_market.sql</code> and then <code className="text-xs">20261120000200_market_tax.sql</code> once in
+                To save markets, run the migration <code className="text-xs">supabase/migrations/20261120000100_market.sql</code> once in
                 Supabase → SQL Editor. It only creates new tables; it doesn&apos;t change your data.
               </p>
             </div>
