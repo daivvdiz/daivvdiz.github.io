@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { DataTable, ViewToggle, axisTick, tooltipStyle } from "@/components/mental/charts";
-import { formatDay, formatDuration, formatNumber } from "@/lib/format";
+import { formatDay, formatDuration, formatMoney, formatNumber } from "@/lib/format";
 
-export type FormatKind = "count" | "kg0" | "kg1" | "reps" | "time" | "km" | "pct" | "score";
+export type FormatKind = "count" | "kg0" | "kg1" | "reps" | "time" | "km" | "pct" | "score" | "money";
 export const FORMATS: Record<FormatKind, (v: number) => string> = {
   count: (v) => formatNumber(v, 0),
   kg0: (v) => `${formatNumber(v, 0)} kg`,
@@ -15,6 +15,7 @@ export const FORMATS: Record<FormatKind, (v: number) => string> = {
   km: (v) => `${formatNumber(v, 2)} km`,
   pct: (v) => `${formatNumber(v, 0)}%`,
   score: (v) => formatNumber(v, Number.isInteger(v) ? 0 : 2),
+  money: (v) => formatMoney(v),
 };
 const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
 /** Etiquetas cortas del eje (la unidad va en el título, la tabla y el tooltip). */

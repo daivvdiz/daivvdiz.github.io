@@ -9,7 +9,7 @@ const TABLES = [
   "financial_categories", "transactions", "budgets", "savings_goals", "assets", "liabilities",
   "career_positions", "career_applications", "application_interviews", "skills", "skill_levels", "projects",
   "project_skills", "learning_resources", "exercises", "workouts", "workout_exercises", "body_metrics",
-  "nutrition_logs", "calendar_events", "daily_entry_events", "memories", "memory_tags", "memory_people", "attachments",
+  "nutrition_logs", "market_trips", "market_products", "market_items", "calendar_events", "daily_entry_events", "memories", "memory_tags", "memory_people", "attachments",
   // Datos originales de Segundo Cerebro (solo lectura)
   "registros", "ajustes",
 ] as const;

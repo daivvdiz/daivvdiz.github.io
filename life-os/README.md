@@ -18,8 +18,9 @@ En **Supabase → SQL Editor → New query**, ejecuta en orden:
 2. [`supabase/migrations/20261114000200_import_segundo_cerebro.sql`](../supabase/migrations/20261114000200_import_segundo_cerebro.sql): crea el importador y la copia automática del Atajo.
 3. [`supabase/migrations/20261116000100_study_exams.sql`](../supabase/migrations/20261116000100_study_exams.sql): crea la tabla de simulacros de estudio (sección Entrenamiento → Estudio).
 4. [`supabase/migrations/20261117000100_recurring_events.sql`](../supabase/migrations/20261117000100_recurring_events.sql): agrega columnas a `calendar_events` para los eventos que se repiten (diario, semanal, mensual, anual o personalizado). Tus eventos actuales quedan sin repetición.
+5. [`supabase/migrations/20261120000100_market.sql`](../supabase/migrations/20261120000100_market.sql): crea las tablas de **Market** (mercados, productos y precios) y las funciones que guardan un mercado completo y unen productos repetidos.
 
-Ninguna modifica ni borra `registros`, `ajustes` ni el bucket `documentos`; la 4 solo agrega columnas. Se pueden ejecutar más de una vez.
+Ninguna modifica ni borra `registros`, `ajustes` ni el bucket `documentos`; la 4 solo agrega columnas y la 5 solo agrega tablas nuevas. Se pueden ejecutar más de una vez.
 
 ### 2. Vercel
 1. [vercel.com/signup](https://vercel.com/signup) → plan **Hobby** → **Continue with GitHub**.
@@ -78,6 +79,7 @@ middleware.ts           Redirige a /login si no hay sesión
 - [x] Fase 3b: archivo de vida (línea de tiempo con búsqueda, galería, categorías, capítulos, un día como hoy, balance de vida histórico y los Documentos de siempre)
 - [x] Fase 4: metas (hitos, estados, avance, vínculos con diario, logros y eventos) y hábitos (frecuencias, registro semanal, cumplimiento sin rachas)
 - [x] Fase 5a: finanzas (movimientos, categorías, presupuesto mensual, metas de ahorro, activos, deudas con el apartamento importado, patrimonio neto)
+- [x] Market: mercados de la canasta familiar (productos, cantidad, precio unitario) y tabla de precios promedio, último precio y cambio por producto
 - [x] Fase 5b: carrera (cargos y evolución salarial, aplicaciones con entrevistas, skills con historial de nivel, proyectos de portafolio, aprendizaje)
 - [x] Fase 6: entrenamiento físico y de estudio (simulacros con puntaje, nivel, preguntas, correctas, incorrectas y tiempo; entrenamientos con ejercicios, progresión por ejercicio, medidas corporales, nutrición opcional, frecuencia, volumen, tipos de actividad y sueño)
 - [x] Fase 7: analítica de vida (bienestar, físico, hábitos, metas, finanzas, carrera y actividad por periodo; comparaciones entre periodos y correlaciones exploratorias)
